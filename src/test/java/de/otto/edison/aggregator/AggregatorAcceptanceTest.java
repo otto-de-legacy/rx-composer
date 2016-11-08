@@ -3,16 +3,21 @@ package de.otto.edison.aggregator;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.edison.aggregator.http.HttpClient;
 import org.junit.Rule;
+import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static de.otto.edison.aggregator.AggregatorAcceptanceTest.Test.FIRST;
-import static de.otto.edison.aggregator.AggregatorAcceptanceTest.Test.SECOND;
-import static de.otto.edison.aggregator.HttpContentProvider.httpContent;
+import static com.google.common.collect.ImmutableList.of;
+import static de.otto.edison.aggregator.AbcPosition.X;
+import static de.otto.edison.aggregator.AbcPosition.Y;
+import static de.otto.edison.aggregator.ContentProviders.httpContent;
 import static de.otto.edison.aggregator.Parameters.emptyParameters;
 import static de.otto.edison.aggregator.Plan.planIsTo;
 import static de.otto.edison.aggregator.Steps.fetch;
+import static de.otto.edison.aggregator.Steps.fetchQuickest;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -24,17 +29,13 @@ public class AggregatorAcceptanceTest {
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
 
-    enum Test implements Position {FIRST, SECOND}
-
-    @org.junit.Test
+    @Test
     public void shouldCallPlanWithTwoRestResources() throws Exception {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Hello", "text/plain").withStatus(200))
                 .anyTimes();
-
-
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(200))
@@ -43,19 +44,43 @@ public class AggregatorAcceptanceTest {
         try (final HttpClient httpClient = new HttpClient()) {
             final Plan plan = planIsTo(
                     fetch(
-                            FIRST,
+                            X,
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
                     ),
                     fetch(
-                            SECOND,
+                            Y,
                             httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
                     )
             );
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(2));
-            assertThat(result.getContent(FIRST).get().getContent(), is("Hello"));
-            assertThat(result.getContent(SECOND).get().getContent(), is("World"));
+            assertThat(result.getContent(X).get().getContent(), is("Hello"));
+            assertThat(result.getContent(Y).get().getContent(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldSelectQuickest() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").after(1, TimeUnit.SECONDS));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain"));
+
+        try (final HttpClient httpClient = new HttpClient()) {
+            final Plan plan = planIsTo(
+                    fetchQuickest(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).get().getContent(), is("World"));
         }
     }
 
@@ -66,8 +91,6 @@ public class AggregatorAcceptanceTest {
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("", "text/plain")
                         .withStatus(404));
-
-
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"))
@@ -77,11 +100,11 @@ public class AggregatorAcceptanceTest {
         try (final HttpClient httpClient = new HttpClient()) {
             final Plan plan = planIsTo(
                     fetch(
-                            FIRST,
+                            X,
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
                     ),
                     fetch(
-                            SECOND,
+                            Y,
                             httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
                     )
             );
@@ -90,7 +113,7 @@ public class AggregatorAcceptanceTest {
 
             assertThat(result.getContents(), hasSize(1));
             assertThat(result.hasErrors(), is(true));
-            assertThat(result.getErrors(), contains(FIRST));
+            assertThat(result.getErrors(), contains(X));
         }
     }
 

@@ -22,8 +22,8 @@ public class PlanTest {
     @Test
     public void shouldCreatePlanWithSomeSteps() {
         // given
-        final Step doFirst = mock(SingleStep.class);
-        final Step doSecond = mock(SingleStep.class);
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
         when(doFirst.getPosition()).thenReturn(X);
         when(doSecond.getPosition()).thenReturn(Y);
         final Plan plan = planIsTo(
@@ -40,8 +40,8 @@ public class PlanTest {
     @Test
     public void shouldExecuteSteps() {
         // given
-        final Step doFirst = mock(SingleStep.class);
-        final Step doSecond = mock(SingleStep.class);
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
         final Plan plan = planIsTo(
                         doFirst, doSecond
         );
@@ -58,8 +58,8 @@ public class PlanTest {
         final Parameters someParameters = parameters(of(
                 "message", "World"
         ));
-        final Step doFirst = mock(SingleStep.class);
-        final Step doSecond = mock(SingleStep.class);
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
         final Plan plan = planIsTo(
                 doFirst, doSecond
         );

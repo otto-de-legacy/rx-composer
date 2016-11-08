@@ -4,9 +4,9 @@ import de.otto.edison.aggregator.http.HttpClient;
 
 import javax.ws.rs.core.MediaType;
 
-public final class HttpContentProvider {
+public final class ContentProviders {
 
-    private HttpContentProvider() {}
+    private ContentProviders() {}
 
     public static ContentProvider httpContent(final HttpClient httpClient,
                                               final String uri,

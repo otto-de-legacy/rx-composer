@@ -5,8 +5,9 @@ import rx.Observable;
 /**
  * A single fetch in a Plan to retrieve content.
  */
-public class SingleStep implements Step {
-    private ContentProvider contentProvider;
+class SingleStep implements Step {
+
+    private final ContentProvider contentProvider;
 
     private final Position position;
 
