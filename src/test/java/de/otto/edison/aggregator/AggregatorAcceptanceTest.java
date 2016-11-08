@@ -21,65 +21,6 @@ import static org.hamcrest.Matchers.is;
 
 public class AggregatorAcceptanceTest {
 
-    /*
-    @Test
-    public void shouldCreatePlanToFetchOneResource() {
-        // given
-        final Plan plan = planIsTo(
-                fetch(
-                        textResource("Hello")
-                )
-        );
-        // when
-        final ImmutableList<Content> contents = plan.execute();
-        // then
-        assertThat(contents.getContent(0).getContent(), is("Hello"));
-    }
-    */
-
-    /*
-    @Test
-    public void shouldCreatePlanToFetchMultipleResources() {
-        // given
-        final Plan plan = planIsTo(
-                fetch(
-                        textResource("Hello")
-                ),
-                fetch(
-                        textResource("World")
-                )
-        );
-        // when
-        final ImmutableList<String> contents = plan.execute()
-                .stream()
-                .map(Content::getContent)
-                .collect(toImmutableList());
-        // then
-        assertThat(contents, contains("Hello", "World"));
-    }
-    */
-
-    /*
-    @Test
-    public void shouldProvideInputParametersToSteps() {
-        // given
-        final Parameters someParameters = from(ImmutableMap.of(
-                "message", "World"
-        ));
-        final Plan plan = planIsTo(
-                        fetch(paramTextResource("Hello %s")),
-                        fetch(paramTextResource("Hi %s"))
-        );
-        // when
-        final ImmutableList<String> contents = plan.execute(someParameters)
-                .stream()
-                .map(Content::getContent)
-                .collect(toImmutableList());
-        // then
-        assertThat(contents, contains("Hello World", "Hi World"));
-    }
-    */
-
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
 
