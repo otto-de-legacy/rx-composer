@@ -34,10 +34,10 @@ public final class Plan {
         return  Observable.from(getSteps())
                 .flatMap((step) -> step.execute(params))
                 .doOnCompleted(() -> System.out.println("Completed at " + System.currentTimeMillis()))
-                .doOnNext((c) -> System.out.println("Got Content for " + c.getContentPosition()))
+                .doOnNext((c) -> System.out.println("Got Content for " + c.getPosition()))
                 .doOnError(System.out::println)
                 .collect(Contents::new, (contents,content) -> {
-                    System.out.println("Collecting content " + content.getContentPosition());
+                    System.out.println("Collecting content " + content.getPosition());
                     contents.add(content);
                 })
                 .toBlocking()

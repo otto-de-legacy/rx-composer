@@ -8,19 +8,19 @@ import rx.Observable;
 public class Step {
     private ContentProvider contentProvider;
 
-    private final ContentPosition contentPosition;
+    private final Position position;
 
-    private Step(final ContentPosition contentPosition,
+    Step(final Position position,
                  final ContentProvider contentProvider) {
-        this.contentPosition = contentPosition;
+        this.position = position;
         this.contentProvider = contentProvider;
     }
 
     public Observable<? extends Content> execute(final Parameters parameters) {
-        return contentProvider.getContent(contentPosition, parameters);
+        return contentProvider.getContent(position, parameters);
     }
 
-    public static Step fetch(final ContentPosition contentPosition, final ContentProvider contentProvider)   {
-        return new Step(contentPosition, contentProvider);
+    public Position getPosition() {
+        return position;
     }
 }

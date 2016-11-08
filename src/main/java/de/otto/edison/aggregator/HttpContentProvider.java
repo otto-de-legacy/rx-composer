@@ -4,15 +4,16 @@ import de.otto.edison.aggregator.http.HttpClient;
 
 import javax.ws.rs.core.MediaType;
 
-public class HttpContentProvider {
+public final class HttpContentProvider {
+
+    private HttpContentProvider() {}
 
     public static ContentProvider httpContent(final HttpClient httpClient,
                                               final String uri,
                                               final MediaType accept) {
-        return new ContentProvider((slotId) -> httpClient
+        return (position, parameters) -> httpClient
                 .get(uri, accept)
-                .map(response -> new Content(slotId, response))
-        );
+                .map(response -> new Content(position, response));
     }
 
 }

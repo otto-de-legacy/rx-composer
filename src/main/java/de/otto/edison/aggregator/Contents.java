@@ -12,20 +12,20 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 public final class Contents {
 
-    private final ConcurrentMap<ContentPosition, Content> results = new ConcurrentHashMap<>();
-    private final Set<ContentPosition> empty = newConcurrentHashSet();
-    private final Set<ContentPosition> errors = newConcurrentHashSet();
+    private final ConcurrentMap<Position, Content> results = new ConcurrentHashMap<>();
+    private final Set<Position> empty = newConcurrentHashSet();
+    private final Set<Position> errors = newConcurrentHashSet();
 
     public void add(final Content content) {
         switch (content.status()) {
             case OK:
-                results.put(content.getContentPosition(), content);
+                results.put(content.getPosition(), content);
                 break;
             case EMPTY:
-                empty.add(content.getContentPosition());
+                empty.add(content.getPosition());
                 break;
             case ERROR:
-                errors.add(content.getContentPosition());
+                errors.add(content.getPosition());
         }
     }
 
@@ -33,15 +33,15 @@ public final class Contents {
         return ImmutableList.copyOf(results.values());
     }
 
-    public Optional<Content> getContent(final ContentPosition contentPosition) {
-        return Optional.ofNullable(results.get(contentPosition));
+    public Optional<Content> getContent(final Position position) {
+        return Optional.ofNullable(results.get(position));
     }
 
-    public ImmutableSet<ContentPosition> getEmpty() {
+    public ImmutableSet<Position> getEmpty() {
         return ImmutableSet.copyOf(empty);
     }
 
-    public ImmutableSet<ContentPosition> getErrors() {
+    public ImmutableSet<Position> getErrors() {
         return ImmutableSet.copyOf(errors);
     }
 

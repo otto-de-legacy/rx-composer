@@ -1,157 +1,73 @@
 package de.otto.edison.aggregator;
 
-import com.github.restdriver.clientdriver.ClientDriverRule;
-import de.otto.edison.aggregator.http.HttpClient;
-import org.junit.Rule;
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 
-import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
-import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
-import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static de.otto.edison.aggregator.HttpContentProvider.httpContent;
+import static com.google.common.collect.ImmutableMap.of;
+import static de.otto.edison.aggregator.AbcPosition.X;
+import static de.otto.edison.aggregator.AbcPosition.Y;
 import static de.otto.edison.aggregator.Parameters.emptyParameters;
+import static de.otto.edison.aggregator.Parameters.parameters;
 import static de.otto.edison.aggregator.Plan.planIsTo;
-import static de.otto.edison.aggregator.PlanTest.TestContent.FIRST;
-import static de.otto.edison.aggregator.PlanTest.TestContent.SECOND;
-import static de.otto.edison.aggregator.Step.fetch;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PlanTest {
 
-    /*
     @Test
-    public void shouldCreatePlanToFetchOneResource() {
+    public void shouldCreatePlanWithSomeSteps() {
         // given
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
+        when(doFirst.getPosition()).thenReturn(X);
+        when(doSecond.getPosition()).thenReturn(Y);
         final Plan plan = planIsTo(
-                fetch(
-                        textResource("Hello")
-                )
+                doFirst, doSecond
         );
         // when
-        final ImmutableList<Content> contents = plan.execute();
+        final ImmutableList<Step> steps = plan.getSteps();
         // then
-        assertThat(contents.getContent(0).getContent(), is("Hello"));
+        assertThat(steps, hasSize(2));
+        assertThat(steps.get(0).getPosition(), is(X));
+        assertThat(steps.get(1).getPosition(), is(Y));
     }
-    */
 
-    /*
     @Test
-    public void shouldCreatePlanToFetchMultipleResources() {
+    public void shouldExecuteSteps() {
         // given
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
         final Plan plan = planIsTo(
-                fetch(
-                        textResource("Hello")
-                ),
-                fetch(
-                        textResource("World")
-                )
+                        doFirst, doSecond
         );
         // when
-        final ImmutableList<String> contents = plan.execute()
-                .stream()
-                .map(Content::getContent)
-                .collect(toImmutableList());
+        plan.execute(emptyParameters());
         // then
-        assertThat(contents, contains("Hello", "World"));
+        verify(doFirst).execute(any());
+        verify(doSecond).execute(any());
     }
-    */
 
-    /*
     @Test
-    public void shouldProvideInputParametersToSteps() {
+    public void shouldForwardParameters() {
         // given
-        final Parameters someParameters = from(ImmutableMap.of(
+        final Parameters someParameters = parameters(of(
                 "message", "World"
         ));
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
         final Plan plan = planIsTo(
-                        fetch(paramTextResource("Hello %s")),
-                        fetch(paramTextResource("Hi %s"))
+                doFirst, doSecond
         );
         // when
-        final ImmutableList<String> contents = plan.execute(someParameters)
-                .stream()
-                .map(Content::getContent)
-                .collect(toImmutableList());
+        plan.execute(someParameters);
         // then
-        assertThat(contents, contains("Hello World", "Hi World"));
-    }
-    */
-
-    @Rule
-    public ClientDriverRule driver = new ClientDriverRule();
-
-    enum TestContent implements ContentPosition {FIRST, SECOND}
-
-    @Test
-    public void shouldCallPlanWithTwoRestResources() throws Exception {
-        // given
-        driver.addExpectation(
-                onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").withStatus(200))
-                .anyTimes();
-
-
-        driver.addExpectation(
-                onRequestTo("/someOtherContent").withMethod(GET),
-                giveResponse("World", "text/plain").withStatus(200))
-                .anyTimes();
-
-        try (final HttpClient httpClient = new HttpClient()) {
-            final Plan plan = planIsTo(
-                    fetch(
-                            FIRST,
-                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
-                    ),
-                    fetch(
-                            SECOND,
-                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
-                    )
-            );
-
-            final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(2));
-            assertThat(result.getContent(FIRST).get().getContent(), is("Hello"));
-            assertThat(result.getContent(SECOND).get().getContent(), is("World"));
-        }
-    }
-
-    @Test
-    public void shouldIgnoreHttpResponseErrors() throws Exception {
-        // given
-        driver.addExpectation(
-                onRequestTo("/someContent").withMethod(GET),
-                giveResponse("", "text/plain")
-                        .withStatus(404));
-
-
-        driver.addExpectation(
-                onRequestTo("/someOtherContent").withMethod(GET),
-                giveResponse("World", "text/plain"))
-                .anyTimes();
-
-
-        try (final HttpClient httpClient = new HttpClient()) {
-            final Plan plan = planIsTo(
-                    fetch(
-                            FIRST,
-                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
-                    ),
-                    fetch(
-                            SECOND,
-                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
-                    )
-            );
-
-            final Contents result = plan.execute(emptyParameters());
-
-            assertThat(result.getContents(), hasSize(1));
-            assertThat(result.hasErrors(), is(true));
-            assertThat(result.getErrors(), contains(FIRST));
-        }
+        verify(doFirst).execute(someParameters);
+        verify(doSecond).execute(someParameters);
     }
 
 }

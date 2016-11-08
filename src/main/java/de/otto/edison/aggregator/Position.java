@@ -1,6 +1,6 @@
 package de.otto.edison.aggregator;
 
-public interface ContentPosition {
+public interface Position {
 
     public String name();
 
