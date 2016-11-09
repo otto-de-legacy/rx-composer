@@ -20,10 +20,6 @@ public final class Content {
     private final LocalDateTime timestamp = now();
     private final Status status;
 
-    public Content(final Position position, final Response response) {
-        this(position, 0, response);
-    }
-
     public Content(final Position position, final int index, final Response response) {
         this.position = position;
         this.index = index;

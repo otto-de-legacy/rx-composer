@@ -1,8 +1,11 @@
 package de.otto.edison.aggregator.steps;
 
 import com.google.common.collect.ImmutableList;
+import de.otto.edison.aggregator.content.Content;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
+
+import static java.util.Comparator.comparingInt;
 
 public final class Steps {
 
@@ -29,7 +32,7 @@ public final class Steps {
 
     public static Step fetchFirstWithContent(final Position position,
                                              final ImmutableList<ContentProvider> steps) {
-        return new FirstWithContentStep(position, steps);
+        return new FetchOneOfManyStep(position, steps, Content::hasContent, comparingInt(Content::getIndex));
     }
 
 }
