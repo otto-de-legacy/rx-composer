@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import rx.Observable;
 
+import java.time.LocalDateTime;
+
 import static com.google.common.collect.ImmutableList.builder;
 
 /**
@@ -31,17 +33,21 @@ public final class Plan {
     }
 
     public Contents execute(final Parameters params) {
-        return  Observable.from(getSteps())
+        System.out.println("Started: " + LocalDateTime.now());
+        final Contents result = Observable.from(getSteps())
                 .flatMap((step) -> step.execute(params))
                 .doOnCompleted(() -> System.out.println("Completed at " + System.currentTimeMillis()))
                 .doOnNext((c) -> System.out.println("Got Content for " + c.getPosition()))
                 .doOnError(System.out::println)
-                .collect(Contents::new, (contents,content) -> {
+                .collect(Contents::new, (contents, content) -> {
                     System.out.println("Collecting content " + content.getPosition());
                     contents.add(content);
                 })
                 .toBlocking()
                 .single();
+        System.out.println("Finished: " + LocalDateTime.now());
+
+        return result;
     }
 
 }

@@ -17,6 +17,7 @@ import static de.otto.edison.aggregator.ContentProviders.httpContent;
 import static de.otto.edison.aggregator.Parameters.emptyParameters;
 import static de.otto.edison.aggregator.Plan.planIsTo;
 import static de.otto.edison.aggregator.Steps.fetch;
+import static de.otto.edison.aggregator.Steps.fetchFirstWithContent;
 import static de.otto.edison.aggregator.Steps.fetchQuickest;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,6 +62,54 @@ public class AggregatorAcceptanceTest {
     }
 
     @Test
+    public void shouldSelectFirstFromMultipleContents() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").after(100, TimeUnit.MILLISECONDS));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain"));
+
+        try (final HttpClient httpClient = new HttpClient()) {
+            final Plan plan = planIsTo(
+                    fetchFirstWithContent(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).get().getContent(), is("Hello"));
+        }
+    }
+
+    @Test
+    public void shouldSelectFirstHavingContent() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").withStatus(404));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain"));
+
+        try (final HttpClient httpClient = new HttpClient()) {
+            final Plan plan = planIsTo(
+                    fetchFirstWithContent(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).get().getContent(), is("World"));
+        }
+    }
+
+    @Test
     public void shouldSelectQuickest() throws Exception {
         // given
         driver.addExpectation(
@@ -81,6 +130,29 @@ public class AggregatorAcceptanceTest {
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
             assertThat(result.getContent(X).get().getContent(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldNotWaitForQuickestIfAllAreFailing() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").withStatus(404));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain").withStatus(404));
+
+        try (final HttpClient httpClient = new HttpClient()) {
+            final Plan plan = planIsTo(
+                    fetchQuickest(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(0));
         }
     }
 

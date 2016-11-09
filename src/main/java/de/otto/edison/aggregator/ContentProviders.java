@@ -11,9 +11,12 @@ public final class ContentProviders {
     public static ContentProvider httpContent(final HttpClient httpClient,
                                               final String uri,
                                               final MediaType accept) {
-        return (position, parameters) -> httpClient
+        return (position, index, parameters) -> httpClient
                 .get(uri, accept)
-                .map(response -> new Content(position, response));
+                .doOnUnsubscribe(() -> {
+                    System.out.println("Unsubscribed request to " + uri);
+                })
+                .map(response -> new Content(position, index, response));
     }
 
 }

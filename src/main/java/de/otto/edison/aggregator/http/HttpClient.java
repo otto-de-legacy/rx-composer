@@ -49,7 +49,7 @@ public class HttpClient implements AutoCloseable {
      * to not have the {@code close} method throw {@link
      * InterruptedException}.</em>
      * <p>
-     * This exception interacts with a thread's interrupted status,
+     * This exception interacts with a thread's interrupted getStatus,
      * and runtime misbehavior is likely to occur if an {@code
      * InterruptedException} is {@linkplain Throwable#addSuppressed
      * suppressed}.
