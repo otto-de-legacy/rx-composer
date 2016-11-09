@@ -2,6 +2,9 @@ package de.otto.edison.aggregator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import de.otto.edison.aggregator.content.Contents;
+import de.otto.edison.aggregator.content.Parameters;
+import de.otto.edison.aggregator.steps.Step;
 import rx.Observable;
 
 import java.time.LocalDateTime;
@@ -28,10 +31,6 @@ public final class Plan {
         return new Plan(steps.build());
     }
 
-    public ImmutableList<Step> getSteps() {
-        return steps;
-    }
-
     public Contents execute(final Parameters params) {
         System.out.println("Started: " + LocalDateTime.now());
         final Contents result = Observable.from(getSteps())
@@ -48,6 +47,10 @@ public final class Plan {
         System.out.println("Finished: " + LocalDateTime.now());
 
         return result;
+    }
+
+    ImmutableList<Step> getSteps() {
+        return steps;
     }
 
 }

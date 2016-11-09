@@ -1,14 +1,16 @@
 package de.otto.edison.aggregator;
 
 import com.google.common.collect.ImmutableList;
+import de.otto.edison.aggregator.content.Parameters;
+import de.otto.edison.aggregator.steps.Step;
 import org.junit.Test;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static de.otto.edison.aggregator.AbcPosition.X;
-import static de.otto.edison.aggregator.AbcPosition.Y;
-import static de.otto.edison.aggregator.Parameters.emptyParameters;
-import static de.otto.edison.aggregator.Parameters.parameters;
 import static de.otto.edison.aggregator.Plan.planIsTo;
+import static de.otto.edison.aggregator.content.AbcPosition.X;
+import static de.otto.edison.aggregator.content.AbcPosition.Y;
+import static de.otto.edison.aggregator.content.Parameters.emptyParameters;
+import static de.otto.edison.aggregator.content.Parameters.parameters;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

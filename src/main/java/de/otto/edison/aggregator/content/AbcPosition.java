@@ -1,4 +1,4 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.content;
 
 /**
  * More an example than something you would like to actually use - but go ahead :-)

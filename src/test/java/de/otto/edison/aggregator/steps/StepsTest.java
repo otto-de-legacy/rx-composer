@@ -1,9 +1,10 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.steps;
 
+import de.otto.edison.aggregator.providers.ContentProvider;
 import org.junit.Test;
 
-import static de.otto.edison.aggregator.AbcPosition.X;
-import static de.otto.edison.aggregator.Steps.fetch;
+import static de.otto.edison.aggregator.content.AbcPosition.X;
+import static de.otto.edison.aggregator.steps.Steps.fetch;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;

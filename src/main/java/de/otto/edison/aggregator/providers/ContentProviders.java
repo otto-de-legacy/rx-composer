@@ -1,5 +1,6 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.providers;
 
+import de.otto.edison.aggregator.content.Content;
 import de.otto.edison.aggregator.http.HttpClient;
 
 import javax.ws.rs.core.MediaType;

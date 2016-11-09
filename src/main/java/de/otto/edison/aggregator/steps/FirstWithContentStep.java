@@ -1,6 +1,10 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.steps;
 
 import com.google.common.collect.ImmutableList;
+import de.otto.edison.aggregator.content.Content;
+import de.otto.edison.aggregator.content.Parameters;
+import de.otto.edison.aggregator.content.Position;
+import de.otto.edison.aggregator.providers.ContentProvider;
 import rx.Observable;
 
 import java.util.concurrent.atomic.AtomicInteger;

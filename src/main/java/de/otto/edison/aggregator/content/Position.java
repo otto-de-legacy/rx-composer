@@ -1,4 +1,4 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.content;
 
 public interface Position {
 
