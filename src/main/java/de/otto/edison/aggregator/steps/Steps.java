@@ -30,9 +30,9 @@ public final class Steps {
         return new QuickestWithContentStep(position, contentProviders);
     }
 
-    public static Step fetchFirstWithContent(final Position position,
-                                             final ImmutableList<ContentProvider> steps) {
-        return new FetchOneOfManyStep(position, steps, Content::hasContent, comparingInt(Content::getIndex));
+    public static Step fetchFirst(final Position position,
+                                  final ImmutableList<ContentProvider> contentProviders) {
+        return new FetchOneOfManyStep(position, contentProviders, Content::hasContent, comparingInt(Content::getIndex));
     }
 
 }

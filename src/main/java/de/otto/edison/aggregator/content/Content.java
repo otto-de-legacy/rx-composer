@@ -1,92 +1,87 @@
 package de.otto.edison.aggregator.content;
 
-import javax.ws.rs.core.Response;
+import com.google.common.collect.ImmutableMultimap;
+
 import java.time.LocalDateTime;
 
-import static de.otto.edison.aggregator.content.Content.Status.OK;
-import static java.time.LocalDateTime.now;
+/**
+ * Possible Content fragment for a {@link Position} on a page.
+ * <p>
+ *     If multiple content items are available for a position, the {@link de.otto.edison.aggregator.steps.Step}
+ *     that is fetching the content will decide, which content is selected for the position. In this case,
+ *     the {@link #getIndex() index} of the content is used to distinguish between the different contents for a
+ *     position.
+ * </p>
+ * <p>
+ *     Content is retrieved using {@link de.otto.edison.aggregator.providers.ContentProvider}s.
+ * </p>
+ *
+ */
+public interface Content {
 
-public final class Content {
-
-    public enum Status {
-        OK,
+    /**
+     * Content availability
+     */
+    public enum Availability {
+        /** Content is available and not empty. */
+        AVAILABLE,
+        /** Content is empty, but no error occured. */
         EMPTY,
+        /** An error occured. The content {@link #getBody() body} may contain an error response. */
         ERROR
     }
 
-    private final Position position;
-    private final int index;
-    private final String content;
-    private final LocalDateTime timestamp = now();
-    private final Status status;
+    /**
+     * The content position inside of the {@link de.otto.edison.aggregator.Plan}
+     *
+     * @return Position
+     */
+    Position getPosition();
 
-    public Content(final Position position, final int index, final Response response) {
-        this.position = position;
-        this.index = index;
-        this.content = response.readEntity(String.class);
-        status = response.getStatus() > 399
-                ? Status.ERROR
-                : content == null || content.isEmpty() ? Status.EMPTY : OK;
-        System.out.println("Created (" + position + "): " + timestamp.toString());
-    }
+    /**
+     * The index of the content, if multiple contents are applicable to the same position.
+     *
+     * @return index
+     */
+    int getIndex();
 
-    public Position getPosition() {
-        return position;
-    }
+    /**
+     *
+     * @return true, if content is available and not-empty, false otherwise.
+     */
+    boolean hasContent();
 
-    public int getIndex() {
-        return index;
-    }
+    /**
+     * The body of the content element, as returned from the {@link de.otto.edison.aggregator.providers.ContentProvider}
+     *
+     * @return body or empty String
+     */
+    String getBody();
 
-    public boolean hasContent() {
-        return status == OK;
-    }
+    /**
+     * Return meta-information about the content.
+     * <p>
+     *     For HttpContent, the headers are the HTTP response headers returned from the called service.
+     * </p>
+     *
+     * @return response headers.
+     */
+    ImmutableMultimap<String, Object> getHeaders();
 
-    public String getContent() {
-        return content;
-    }
+    /**
+     * The creation time stamp of the content element.
+     * <p>
+     *     Primarily used for logging purposes.
+     * </p>
+     *
+     * @return created ts
+     */
+    LocalDateTime getCreated();
 
-    public LocalDateTime getCreated() {
-        return timestamp;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Content content1 = (Content) o;
-
-        if (index != content1.index) return false;
-        if (position != null ? !position.equals(content1.position) : content1.position != null) return false;
-        if (content != null ? !content.equals(content1.content) : content1.content != null) return false;
-        if (timestamp != null ? !timestamp.equals(content1.timestamp) : content1.timestamp != null) return false;
-        return status == content1.status;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = position != null ? position.hashCode() : 0;
-        result = 31 * result + index;
-        result = 31 * result + (content != null ? content.hashCode() : 0);
-        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Content{" +
-                "position=" + position +
-                ", index=" + index +
-                ", content='" + content + '\'' +
-                ", timestamp=" + timestamp +
-                ", getStatus=" + status +
-                '}';
-    }
-
-    public Status getStatus() {
-        return this.status;
-    }
+    /**
+     * The availability of the content.
+     *
+     * @return availability
+     */
+    Availability getAvailability();
 }

@@ -1,6 +1,6 @@
 package de.otto.edison.aggregator.providers;
 
-import de.otto.edison.aggregator.content.Content;
+import de.otto.edison.aggregator.content.HttpContent;
 import de.otto.edison.aggregator.http.HttpClient;
 
 import javax.ws.rs.core.MediaType;
@@ -17,7 +17,7 @@ public final class ContentProviders {
                 .doOnUnsubscribe(() -> {
                     System.out.println("Unsubscribed request to " + uri);
                 })
-                .map(response -> new Content(position, index, response));
+                .map(response -> new HttpContent(position, index, response));
     }
 
 }

@@ -33,7 +33,7 @@ class QuickestWithContentStep implements Step {
                 .stream()
                 .map((cp) -> cp.getContent(position, index.getAndIncrement(), parameters))
                 .collect(toList()))
-                .takeFirst((c) -> c.getStatus().equals(Content.Status.OK));
+                .takeFirst((c) -> c.getAvailability().equals(Content.Availability.AVAILABLE));
     }
 
     @Override

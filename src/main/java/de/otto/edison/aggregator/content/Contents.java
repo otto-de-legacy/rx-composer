@@ -17,8 +17,8 @@ public final class Contents {
     private final Set<Position> errors = newConcurrentHashSet();
 
     public void add(final Content content) {
-        switch (content.getStatus()) {
-            case OK:
+        switch (content.getAvailability()) {
+            case AVAILABLE:
                 results.put(content.getPosition(), content);
                 break;
             case EMPTY:

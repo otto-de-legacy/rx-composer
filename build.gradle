@@ -64,7 +64,7 @@ task askForVersionNumber << {
         }
         bumpVersionInGradleFile(version)
     } else {
-        logger.error "Cannot getContent console."
+        logger.error "Cannot get console."
     }
 }
 
