@@ -1,7 +1,8 @@
-package de.otto.edison.aggregator;
+package de.otto.edison.aggregator.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import com.google.common.collect.ImmutableMap;
+import de.otto.edison.aggregator.Plan;
 import de.otto.edison.aggregator.content.Contents;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.http.HttpClient;
@@ -14,8 +15,8 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static com.google.common.collect.ImmutableList.of;
-import static de.otto.edison.aggregator.AggregatorAcceptanceTest.ShowCaseContent.*;
 import static de.otto.edison.aggregator.Plan.planIsTo;
+import static de.otto.edison.aggregator.acceptance.AggregatorAcceptanceTest.ShowCaseContent.*;
 import static de.otto.edison.aggregator.content.AbcPosition.X;
 import static de.otto.edison.aggregator.content.AbcPosition.Y;
 import static de.otto.edison.aggregator.content.Parameters.emptyParameters;
