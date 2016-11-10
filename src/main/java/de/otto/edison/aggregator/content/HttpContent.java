@@ -1,11 +1,11 @@
 package de.otto.edison.aggregator.content;
 
-import com.google.common.collect.ImmutableMultimap;
-
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 
 import static de.otto.edison.aggregator.content.Content.Availability.AVAILABLE;
+import static de.otto.edison.aggregator.content.Content.Availability.EMPTY;
+import static de.otto.edison.aggregator.content.Content.Availability.ERROR;
 import static java.time.LocalDateTime.now;
 
 public final class HttpContent implements Content {
@@ -14,7 +14,7 @@ public final class HttpContent implements Content {
     private final int index;
     private final String body;
     private final Availability availability;
-    private final ImmutableMultimap<String,Object> headers;
+    private final Headers headers;
     private final LocalDateTime created = now();
 
     /**
@@ -31,11 +31,9 @@ public final class HttpContent implements Content {
         this.index = index;
         this.body = response.readEntity(String.class);
         this.availability = response.getStatus() > 399
-                ? Availability.ERROR
-                : body == null || body.isEmpty() ? Availability.EMPTY : AVAILABLE;
-        this.headers =  ImmutableMultimap.<String,Object>builder()
-                .putAll(response.getHeaders().entrySet())
-                .build();
+                ? ERROR
+                : body == null || body.isEmpty() ? EMPTY : AVAILABLE;
+        this.headers = new Headers(response.getHeaders());
         System.out.println("Created (" + position + "): " + created.toString());
     }
 
@@ -87,7 +85,7 @@ public final class HttpContent implements Content {
      * @return response headers.
      */
     @Override
-    public ImmutableMultimap<String, Object> getHeaders() {
+    public Headers getHeaders() {
         return headers;
     }
 

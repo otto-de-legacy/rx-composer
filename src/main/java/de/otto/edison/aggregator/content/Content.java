@@ -1,7 +1,5 @@
 package de.otto.edison.aggregator.content;
 
-import com.google.common.collect.ImmutableMultimap;
-
 import java.time.LocalDateTime;
 
 /**
@@ -59,14 +57,14 @@ public interface Content {
     String getBody();
 
     /**
-     * Return meta-information about the content.
+     * Return meta-information about the content returned from a {@link de.otto.edison.aggregator.providers.ContentProvider}.
      * <p>
      *     For HttpContent, the headers are the HTTP response headers returned from the called service.
      * </p>
      *
      * @return response headers.
      */
-    ImmutableMultimap<String, Object> getHeaders();
+    Headers getHeaders();
 
     /**
      * The creation time stamp of the content element.
