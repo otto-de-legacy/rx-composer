@@ -20,7 +20,7 @@ public final class Headers {
     private final ImmutableMap<String,List<Object>> headers;
 
     public Headers(final Map<String, List<Object>> headers) {
-        this.headers = lowerCaseKeysOf(headers);
+        this.headers = headers != null ? lowerCaseKeysOf(headers) : ImmutableMap.of();
     }
 
     public <T> Optional<T> getValue(final String key, final Class<T> asType) {
