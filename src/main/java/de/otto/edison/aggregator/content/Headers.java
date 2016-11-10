@@ -47,4 +47,27 @@ public final class Headers {
         });
         return builder.build();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Headers headers1 = (Headers) o;
+
+        return headers != null ? headers.equals(headers1.headers) : headers1.headers == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return headers != null ? headers.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Headers{" +
+                "headers=" + headers +
+                '}';
+    }
 }
