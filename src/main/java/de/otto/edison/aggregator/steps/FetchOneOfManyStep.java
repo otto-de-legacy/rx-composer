@@ -2,6 +2,7 @@ package de.otto.edison.aggregator.steps;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.edison.aggregator.content.Content;
+import de.otto.edison.aggregator.content.ErrorContent;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
@@ -45,11 +46,18 @@ class FetchOneOfManyStep implements Step {
     }
 
     @Override
-    public Observable<? extends Content> execute(final Parameters parameters) {
+    public Observable<Content> execute(final Parameters parameters) {
         final AtomicInteger index = new AtomicInteger();
-        final Observable<? extends Content> mergedContent = merge(contentProviders
+        final Observable<Content> mergedContent = merge(contentProviders
                 .stream()
-                .map(contentProvider -> contentProvider.getContent(position, index.getAndIncrement(), parameters))
+                .map(contentProvider -> {
+                    final int pos = index.getAndIncrement();
+                    try {
+                        return contentProvider.getContent(position, pos, parameters);
+                    } catch (final Exception e) {
+                        return just(new ErrorContent(position, pos, e));
+                    }
+                })
                 .collect(Collectors.toList()));
         return mergedContent
                 .filter(selector::test)

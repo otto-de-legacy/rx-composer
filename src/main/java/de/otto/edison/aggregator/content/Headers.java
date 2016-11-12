@@ -24,8 +24,16 @@ public final class Headers {
      *
      * @param headers Map of headers.
      */
-    public Headers(final Map<String, List<Object>> headers) {
+    private Headers(final Map<String, List<Object>> headers) {
         this.headers = headers != null ? lowerCaseKeysOf(headers) : ImmutableMap.of();
+    }
+
+    public static Headers emptyHeaders() {
+        return new Headers(null);
+    }
+
+    public static Headers of(final Map<String, List<Object>> headers) {
+        return new Headers(headers);
     }
 
     /**

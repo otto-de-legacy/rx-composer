@@ -84,7 +84,7 @@ public class ContentsTest {
 
             @Override
             public Headers getHeaders() {
-                return new Headers(null);
+                return Headers.of(null);
             }
 
             @Override

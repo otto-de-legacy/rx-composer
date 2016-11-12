@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +53,22 @@ public class PlanTest {
         // then
         verify(doFirst).execute(any());
         verify(doSecond).execute(any());
+    }
+
+    @Test
+    public void shouldExecutePlanMultipleTimes() {
+        // given
+        final Step doFirst = mock(Step.class);
+        final Step doSecond = mock(Step.class);
+        final Plan plan = planIsTo(
+                        doFirst, doSecond
+        );
+        // when
+        plan.execute(emptyParameters());
+        plan.execute(emptyParameters());
+        // then
+        verify(doFirst, times(2)).execute(any());
+        verify(doSecond, times(2)).execute(any());
     }
 
     @Test

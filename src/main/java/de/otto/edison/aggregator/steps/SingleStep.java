@@ -22,7 +22,7 @@ class SingleStep implements Step {
     }
 
     @Override
-    public Observable<? extends Content> execute(final Parameters parameters) {
+    public Observable<Content> execute(final Parameters parameters) {
         return contentProvider.getContent(position, parameters);
     }
 

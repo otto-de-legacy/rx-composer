@@ -7,6 +7,7 @@ import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
 import rx.Observable;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
@@ -27,17 +28,27 @@ class QuickestWithContentStep implements Step {
     }
 
     @Override
-    public Observable<? extends Content> execute(final Parameters parameters) {
+    public Observable<Content> execute(final Parameters parameters) {
         final AtomicInteger index = new AtomicInteger();
         return amb(contentProviders
                 .stream()
-                .map((cp) -> cp.getContent(position, index.getAndIncrement(), parameters))
+                .map((contentProvider) -> {
+                    final int pos = index.getAndIncrement();
+                    try {
+                        return contentProvider.getContent(position, pos, parameters);
+                    } catch (final Exception e) {
+                        System.out.println(e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .collect(toList()))
-                .takeFirst((c) -> c.getAvailability().equals(Content.Availability.AVAILABLE));
+                .takeFirst(Content::hasContent);
     }
 
     @Override
     public Position getPosition() {
         return position;
     }
+
 }

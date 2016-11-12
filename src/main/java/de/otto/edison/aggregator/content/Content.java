@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
  */
 public interface Content {
 
+
+
     /**
      * Content availability
      */
@@ -26,9 +28,8 @@ public interface Content {
         /** Content is empty, but no error occured. */
         EMPTY,
         /** An error occured. The content {@link #getBody() body} may contain an error response. */
-        ERROR
+        ERROR;
     }
-
     /**
      * The content position inside of the {@link de.otto.edison.aggregator.Plan}
      *
@@ -45,7 +46,7 @@ public interface Content {
 
     /**
      *
-     * @return true, if content is available and not-empty, false otherwise.
+     * @return true, if content is available and not empty, false otherwise.
      */
     boolean hasContent();
 

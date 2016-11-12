@@ -33,7 +33,7 @@ public final class HttpContent implements Content {
         this.availability = response.getStatus() > 399
                 ? ERROR
                 : body == null || body.isEmpty() ? EMPTY : AVAILABLE;
-        this.headers = new Headers(response.getHeaders());
+        this.headers = Headers.of(response.getHeaders());
         System.out.println("Created (" + position + "): " + created.toString());
     }
 
@@ -59,11 +59,11 @@ public final class HttpContent implements Content {
 
     /**
      *
-     * @return true, if content is available and not-empty, false otherwise.
+     * @return true, if content is available and not empty, false otherwise.
      */
     @Override
     public boolean hasContent() {
-        return availability == AVAILABLE;
+        return availability == AVAILABLE && !getBody().isEmpty();
     }
 
     /**
