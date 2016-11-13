@@ -1,5 +1,8 @@
 package de.otto.edison.aggregator.content;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 
@@ -9,6 +12,8 @@ import static de.otto.edison.aggregator.content.Content.Availability.ERROR;
 import static java.time.LocalDateTime.now;
 
 public final class HttpContent implements Content {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HttpContent.class);
 
     private final Position position;
     private final int index;
@@ -34,7 +39,7 @@ public final class HttpContent implements Content {
                 ? ERROR
                 : body == null || body.isEmpty() ? EMPTY : AVAILABLE;
         this.headers = Headers.of(response.getHeaders());
-        System.out.println("Created (" + position + "): " + created.toString());
+        LOG.info("Created (" + position + "): " + created.toString());
     }
 
     /**

@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList.Builder;
 import de.otto.edison.aggregator.content.Contents;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.steps.Step;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.time.LocalDateTime;
@@ -15,6 +17,8 @@ import static com.google.common.collect.ImmutableList.builder;
  * A plan containing the steps to retrieve content from one or more microservices.
  */
 public final class Plan {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Plan.class);
 
     private final ImmutableList<Step> steps;
 
@@ -32,19 +36,19 @@ public final class Plan {
     }
 
     public Contents execute(final Parameters params) {
-        System.out.println("Started: " + LocalDateTime.now());
+        LOG.info("Started: " + LocalDateTime.now());
         final Contents result = Observable.from(getSteps())
                 .flatMap((step) -> step.execute(params))
-                .doOnCompleted(() -> System.out.println("Completed at " + System.currentTimeMillis()))
-                .doOnNext((c) -> System.out.println("Got Content for " + c.getPosition()))
-                .doOnError(System.out::println)
+                .doOnCompleted(() -> LOG.info("Completed at " + System.currentTimeMillis()))
+                .doOnNext((c) -> LOG.info("Got Content for " + c.getPosition()))
+                .doOnError((t) -> LOG.info(t.getMessage(), t))
                 .collect(Contents::new, (contents, content) -> {
-                    System.out.println("Collecting content " + content.getPosition());
+                    LOG.info("Collecting content " + content.getPosition());
                     contents.add(content);
                 })
                 .toBlocking()
                 .single();
-        System.out.println("Finished: " + LocalDateTime.now());
+        LOG.info("Finished: " + LocalDateTime.now());
 
         return result;
     }

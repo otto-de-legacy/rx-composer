@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    compile libraries.logging
     compile libraries.guava
     compile libraries.uritemplates
     compile libraries.rx
