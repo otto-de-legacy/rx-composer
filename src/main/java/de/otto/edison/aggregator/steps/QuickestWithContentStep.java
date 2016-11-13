@@ -2,19 +2,21 @@ package de.otto.edison.aggregator.steps;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.edison.aggregator.content.Content;
+import de.otto.edison.aggregator.content.ErrorContent;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
 import rx.Observable;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-import static rx.Observable.amb;
+import static rx.Observable.just;
+import static rx.Observable.merge;
 
 /**
- * A single fetch in a Plan to retrieve content.
+ * Fetches the {@link Content} of the quickest responding {@link ContentProvider} that is available and does
+ * not fail with an exception.
  */
 class QuickestWithContentStep implements Step {
 
@@ -30,20 +32,21 @@ class QuickestWithContentStep implements Step {
     @Override
     public Observable<Content> execute(final Parameters parameters) {
         final AtomicInteger index = new AtomicInteger();
-        return amb(contentProviders
+        return merge(contentProviders
                 .stream()
-                .map((contentProvider) -> {
+                .map(contentProvider -> {
                     final int pos = index.getAndIncrement();
                     try {
-                        return contentProvider.getContent(position, pos, parameters);
+                        return contentProvider
+                                .getContent(position, pos, parameters)
+                                .onErrorReturn((e) -> new ErrorContent(position, pos, e));
                     } catch (final Exception e) {
-                        System.out.println(e.getMessage());
-                        return null;
+                        return just(new ErrorContent(position, pos, e));
                     }
                 })
-                .filter(Objects::nonNull)
-                .collect(toList()))
-                .takeFirst(Content::hasContent);
+                .collect(Collectors.toList()))
+                .takeUntil(c -> c != null && c.hasContent())
+                .last();
     }
 
     @Override

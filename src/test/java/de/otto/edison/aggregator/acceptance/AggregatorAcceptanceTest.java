@@ -9,8 +9,6 @@ import de.otto.edison.aggregator.http.HttpClient;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
@@ -25,6 +23,7 @@ import static de.otto.edison.aggregator.providers.ContentProviders.httpContent;
 import static de.otto.edison.aggregator.steps.Steps.fetch;
 import static de.otto.edison.aggregator.steps.Steps.fetchFirst;
 import static de.otto.edison.aggregator.steps.Steps.fetchQuickest;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,7 +47,7 @@ public class AggregatorAcceptanceTest {
 
     //@Test
     public void showcase() {
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             // The Plan used to fetch and select contents from different services.
             final Plan plan = planIsTo(
                     fetchFirst(
@@ -108,7 +107,7 @@ public class AggregatorAcceptanceTest {
                 giveResponse("World", "text/plain").withStatus(200))
                 .anyTimes();
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetch(
                             X,
@@ -132,12 +131,12 @@ public class AggregatorAcceptanceTest {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").after(100, TimeUnit.MILLISECONDS));
+                giveResponse("Hello", "text/plain").after(50, MILLISECONDS));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"));
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetchFirst(X, of(
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
@@ -152,6 +151,28 @@ public class AggregatorAcceptanceTest {
     }
 
     @Test
+    public void shouldHandleTimeouts() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").after(300, MILLISECONDS));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain"));
+        try (final HttpClient httpClient = new HttpClient(1000, 200)) {
+            final Plan plan = planIsTo(
+                    fetchFirst(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
     public void shouldSelectFirstHavingContent() throws Exception {
         // given
         driver.addExpectation(
@@ -161,7 +182,7 @@ public class AggregatorAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"));
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetchFirst(X, of(
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
@@ -180,12 +201,36 @@ public class AggregatorAcceptanceTest {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").after(1, TimeUnit.SECONDS));
+                giveResponse("Hello", "text/plain").after(50, MILLISECONDS));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"));
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+            final Plan plan = planIsTo(
+                    fetchQuickest(X, of(
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldSelectQuickestWithContent() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("", "text/plain"));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain").after(50, MILLISECONDS));
+
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetchQuickest(X, of(
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
@@ -209,7 +254,7 @@ public class AggregatorAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(404));
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetchQuickest(X, of(
                             httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
@@ -235,7 +280,7 @@ public class AggregatorAcceptanceTest {
                 .anyTimes();
 
 
-        try (final HttpClient httpClient = new HttpClient()) {
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
                     fetch(
                             X,

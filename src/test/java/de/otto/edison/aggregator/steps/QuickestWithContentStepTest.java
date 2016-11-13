@@ -21,6 +21,22 @@ import static rx.Observable.just;
 public class QuickestWithContentStepTest {
 
     @Test
+    public void shouldReturnOnlyNonEmptyContent() {
+        // given
+        final Step step = fetchQuickest(X, ImmutableList.of(
+                (position, index, parameters) -> just(new TestContent(X, "")),
+                (position, index, parameters) -> just(new TestContent(X, "Yeah!"))
+        ));
+        // when
+        final Observable<Content> result = step
+                .execute(emptyParameters())
+                .onErrorReturn(throwable -> new ErrorContent(X, 0, throwable));
+        // then
+        final Content content = result.toBlocking().single();
+        assertThat(content.getBody(), is("Yeah!"));
+    }
+
+    @Test
     public void shouldHandleExceptions() {
         // given
         final Step step = fetchQuickest(X, ImmutableList.of(
@@ -28,9 +44,7 @@ public class QuickestWithContentStepTest {
                 (position, index, parameters) -> just(new TestContent(X, "Yeah!"))
         ));
         // when
-        final Observable<Content> result = step
-                .execute(emptyParameters())
-                .onErrorReturn(throwable -> new ErrorContent(X, 0, throwable));
+        final Observable<Content> result = step.execute(emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));

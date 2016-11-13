@@ -16,4 +16,5 @@ public class StepsTest {
         final Step step = fetch(X, mock(ContentProvider.class));
         assertThat(step.getPosition(), is(X));
     }
+
 }

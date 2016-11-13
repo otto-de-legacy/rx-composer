@@ -1,7 +1,10 @@
 package de.otto.edison.aggregator.steps;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.edison.aggregator.content.*;
+import de.otto.edison.aggregator.content.AbcPosition;
+import de.otto.edison.aggregator.content.Content;
+import de.otto.edison.aggregator.content.Headers;
+import de.otto.edison.aggregator.content.Position;
 import org.junit.Test;
 import rx.Observable;
 
@@ -63,6 +66,21 @@ public class FetchOneOfManyStepTest {
     }
 
     @Test
+    public void shouldSelectFirstNotEmpty() {
+        // given
+        final Step step = fetchFirst(X, ImmutableList.of(
+                (position, index, parameters) -> just(new TestContent(X, "")),
+                (position, index, parameters) -> just(new TestContent(X, "Hello World"))
+        ));
+        // when
+        final Observable<Content> result = step.execute(emptyParameters());
+        // then
+        final Iterator<Content> content = result.toBlocking().toIterable().iterator();
+        assertThat(content.next().getBody(), is("Hello World"));
+        assertThat(content.hasNext(), is(false));
+    }
+
+    @Test
     public void shouldHandleEmptyContents() {
         // given
         final Step step = fetchFirst(X, ImmutableList.of(
@@ -84,9 +102,7 @@ public class FetchOneOfManyStepTest {
                 (position, index, parameters) -> just(new TestContent(X, "Yeah!"))
         ));
         // when
-        final Observable<Content> result = step
-                .execute(emptyParameters())
-                .onErrorReturn(throwable -> new ErrorContent(X, 0, throwable));
+        final Observable<Content> result = step.execute(emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));

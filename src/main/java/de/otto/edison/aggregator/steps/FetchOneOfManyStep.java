@@ -53,7 +53,9 @@ class FetchOneOfManyStep implements Step {
                 .map(contentProvider -> {
                     final int pos = index.getAndIncrement();
                     try {
-                        return contentProvider.getContent(position, pos, parameters);
+                        return contentProvider
+                                .getContent(position, pos, parameters)
+                                .onErrorReturn((e) -> new ErrorContent(position, pos, e));
                     } catch (final Exception e) {
                         return just(new ErrorContent(position, pos, e));
                     }

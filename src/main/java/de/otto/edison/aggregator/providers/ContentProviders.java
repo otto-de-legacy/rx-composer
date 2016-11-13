@@ -14,6 +14,7 @@ public final class ContentProviders {
                                               final MediaType accept) {
         return (position, index, parameters) -> httpClient
                 .get(uri, accept)
+                .doOnNext((c) -> System.out.println("Next: " + uri))
                 .doOnUnsubscribe(() -> {
                     System.out.println("Unsubscribed request to " + uri);
                 })
