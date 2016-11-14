@@ -41,7 +41,7 @@ public final class Plan {
                 .flatMap((step) -> step.execute(params))
                 .doOnCompleted(() -> LOG.info("Completed at " + System.currentTimeMillis()))
                 .doOnNext((c) -> LOG.info("Got Content for " + c.getPosition()))
-                .doOnError((t) -> LOG.info(t.getMessage(), t))
+                .doOnError((t) -> LOG.error(t.getMessage(), t))
                 .collect(Contents::new, (contents, content) -> {
                     LOG.info("Collecting content " + content.getPosition());
                     contents.add(content);

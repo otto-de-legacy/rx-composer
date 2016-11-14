@@ -6,6 +6,8 @@ import de.otto.edison.aggregator.content.ErrorContent;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,6 +21,8 @@ import static rx.Observable.merge;
  * not fail with an exception.
  */
 class QuickestWithContentStep implements Step {
+
+    private static final Logger LOG = LoggerFactory.getLogger(QuickestWithContentStep.class);
 
     private final ImmutableList<ContentProvider> contentProviders;
     private final Position position;
@@ -39,6 +43,7 @@ class QuickestWithContentStep implements Step {
                     try {
                         return contentProvider
                                 .getContent(position, pos, parameters)
+                                .doOnError((t) -> LOG.error(t.getMessage(), t))
                                 .onErrorReturn((e) -> new ErrorContent(position, pos, e));
                     } catch (final Exception e) {
                         return just(new ErrorContent(position, pos, e));
@@ -46,6 +51,7 @@ class QuickestWithContentStep implements Step {
                 })
                 .collect(Collectors.toList()))
                 .takeUntil(c -> c != null && c.hasContent())
+                .doOnError((t) -> LOG.error(t.getMessage(), t))
                 .last();
     }
 

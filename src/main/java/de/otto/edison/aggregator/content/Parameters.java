@@ -1,6 +1,7 @@
 package de.otto.edison.aggregator.content;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public final class Parameters {
 
@@ -24,8 +25,22 @@ public final class Parameters {
         return new Parameters(params);
     }
 
+    public Parameters with(final Parameters moreParams) {
+        return new Parameters(ImmutableMap.<String,Object>builder()
+                .putAll(params)
+                .putAll(moreParams.params)
+                .build());
+    }
+
     public String getString(final String key) {
         return params.containsKey(key) ? params.get(key).toString() : null;
     }
 
+    public ImmutableSet<String> getKeys(final String key) {
+        return params.keySet();
+    }
+
+    public ImmutableMap<String, Object> asImmutableMap() {
+        return params;
+    }
 }

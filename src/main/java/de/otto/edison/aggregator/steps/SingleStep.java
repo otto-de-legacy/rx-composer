@@ -5,6 +5,8 @@ import de.otto.edison.aggregator.content.ErrorContent;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import static rx.Observable.just;
@@ -13,6 +15,8 @@ import static rx.Observable.just;
  * A single fetch in a Plan to retrieve content.
  */
 class SingleStep implements Step {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SingleStep.class);
 
     private final ContentProvider contentProvider;
 
@@ -29,6 +33,7 @@ class SingleStep implements Step {
         try {
             return contentProvider
                     .getContent(position, 0, parameters)
+                    .doOnError((t) -> LOG.error(t.getMessage(), t))
                     .onErrorReturn((e) -> new ErrorContent(position, 0, e));
         } catch (final Exception e) {
             return just(new ErrorContent(position, 0, e));

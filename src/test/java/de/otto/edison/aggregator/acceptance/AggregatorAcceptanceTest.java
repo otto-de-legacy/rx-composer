@@ -3,12 +3,15 @@ package de.otto.edison.aggregator.acceptance;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import com.google.common.collect.ImmutableMap;
 import de.otto.edison.aggregator.Plan;
+import de.otto.edison.aggregator.content.Content;
 import de.otto.edison.aggregator.content.Contents;
+import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.http.HttpClient;
 import org.junit.Rule;
 import org.junit.Test;
 
+import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
@@ -17,12 +20,14 @@ import static de.otto.edison.aggregator.Plan.planIsTo;
 import static de.otto.edison.aggregator.acceptance.AggregatorAcceptanceTest.ShowCaseContent.*;
 import static de.otto.edison.aggregator.content.AbcPosition.X;
 import static de.otto.edison.aggregator.content.AbcPosition.Y;
+import static de.otto.edison.aggregator.content.AbcPosition.Z;
 import static de.otto.edison.aggregator.content.Parameters.emptyParameters;
 import static de.otto.edison.aggregator.content.Parameters.parameters;
 import static de.otto.edison.aggregator.providers.ContentProviders.httpContent;
 import static de.otto.edison.aggregator.steps.Steps.fetch;
 import static de.otto.edison.aggregator.steps.Steps.fetchFirst;
 import static de.otto.edison.aggregator.steps.Steps.fetchQuickest;
+import static de.otto.edison.aggregator.steps.Steps.then;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
@@ -123,6 +128,46 @@ public class AggregatorAcceptanceTest {
             assertThat(result.getContents(), hasSize(2));
             assertThat(result.getContent(X).get().getBody(), is("Hello"));
             assertThat(result.getContent(Y).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldHandleNestedSteps() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Hello", "text/plain").withStatus(200));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withParam("param", "Hello").withMethod(GET),
+                giveResponse("World", "text/plain").withStatus(200));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("Edison", "text/plain").withStatus(200));
+
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+            final Plan plan = planIsTo(
+                    fetch(
+                            X,
+                            httpContent(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            then(
+                                    (final Content content) -> Parameters.from(ImmutableMap.of("param", content.getBody())),
+                                    fetch(
+                                            Y,
+                                            httpContent(httpClient, fromTemplate(driver.getBaseUrl() + "/someOtherContent{?param}"), TEXT_PLAIN_TYPE)
+                                    ),
+                                    fetch(
+                                            Z,
+                                            httpContent(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                                    )
+                            )
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(3));
+            assertThat(result.getContent(X).get().getBody(), is("Hello"));
+            assertThat(result.getContent(Y).get().getBody(), is("World"));
+            assertThat(result.getContent(Z).get().getBody(), is("Edison"));
         }
     }
 

@@ -6,6 +6,8 @@ import de.otto.edison.aggregator.content.ErrorContent;
 import de.otto.edison.aggregator.content.Parameters;
 import de.otto.edison.aggregator.content.Position;
 import de.otto.edison.aggregator.providers.ContentProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.util.Comparator;
@@ -21,6 +23,7 @@ import static rx.Observable.merge;
  * Selects the most appropriate Content returned from one or more ContentProviders.
  */
 class FetchOneOfManyStep implements Step {
+    private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyStep.class);
 
     private final ImmutableList<ContentProvider> contentProviders;
     private final Predicate<Content> selector;
@@ -55,6 +58,7 @@ class FetchOneOfManyStep implements Step {
                     try {
                         return contentProvider
                                 .getContent(position, pos, parameters)
+                                .doOnError((t) -> LOG.error(t.getMessage(), t))
                                 .onErrorReturn((e) -> new ErrorContent(position, pos, e));
                     } catch (final Exception e) {
                         return just(new ErrorContent(position, pos, e));
@@ -66,7 +70,8 @@ class FetchOneOfManyStep implements Step {
                 .toSortedList(comparator::compare)
                 .flatMap(list -> list.isEmpty()
                         ? empty()
-                        : just(list.get(0)));
+                        : just(list.get(0)))
+                .doOnError((t) -> LOG.error(t.getMessage(), t));
     }
 
     @Override
