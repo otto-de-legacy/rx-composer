@@ -16,7 +16,6 @@ public final class HttpContent implements Content {
     private static final Logger LOG = LoggerFactory.getLogger(HttpContent.class);
 
     private final Position position;
-    private final int index;
     private final String body;
     private final Availability availability;
     private final Headers headers;
@@ -26,14 +25,11 @@ public final class HttpContent implements Content {
      * Create a HttpContent element, representing {@link Content} retrieved from a (micro)service.
      *
      * @param position The content position inside of the {@link de.otto.edison.aggregator.Plan}.
-     * @param index The index of the content, if multiple contents are applicable to the same position.
      * @param response The HTTP response returned from a different (micro)service.
      */
     public HttpContent(final Position position,
-                       final int index,
                        final Response response) {
         this.position = position;
-        this.index = index;
         this.body = response.readEntity(String.class);
         this.availability = response.getStatus() > 399
                 ? ERROR
@@ -50,16 +46,6 @@ public final class HttpContent implements Content {
     @Override
     public Position getPosition() {
         return position;
-    }
-
-    /**
-     * The index of the content, if multiple contents are applicable to the same position.
-     *
-     * @return index
-     */
-    @Override
-    public int getIndex() {
-        return index;
     }
 
     /**
@@ -123,7 +109,6 @@ public final class HttpContent implements Content {
 
         HttpContent that = (HttpContent) o;
 
-        if (index != that.index) return false;
         if (position != null ? !position.equals(that.position) : that.position != null) return false;
         if (body != null ? !body.equals(that.body) : that.body != null) return false;
         if (availability != that.availability) return false;
@@ -135,7 +120,6 @@ public final class HttpContent implements Content {
     @Override
     public int hashCode() {
         int result = position != null ? position.hashCode() : 0;
-        result = 31 * result + index;
         result = 31 * result + (body != null ? body.hashCode() : 0);
         result = 31 * result + (availability != null ? availability.hashCode() : 0);
         result = 31 * result + (headers != null ? headers.hashCode() : 0);
@@ -147,7 +131,6 @@ public final class HttpContent implements Content {
     public String toString() {
         return "HttpContent{" +
                 "position=" + position +
-                ", index=" + index +
                 ", body='" + body + '\'' +
                 ", status=" + availability +
                 ", headers=" + headers +

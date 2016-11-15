@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 public interface Content {
 
 
-
     /**
      * Content availability
      */
@@ -29,20 +28,15 @@ public interface Content {
         EMPTY,
         /** An error occured. The content {@link #getBody() body} may contain an error response. */
         ERROR;
+
     }
+
     /**
      * The content position inside of the {@link de.otto.edison.aggregator.Plan}
      *
      * @return Position
      */
     Position getPosition();
-
-    /**
-     * The index of the content, if multiple contents are applicable to the same position.
-     *
-     * @return index
-     */
-    int getIndex();
 
     /**
      *

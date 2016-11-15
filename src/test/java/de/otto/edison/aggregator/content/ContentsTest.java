@@ -68,11 +68,6 @@ public class ContentsTest {
             }
 
             @Override
-            public int getIndex() {
-                return 0;
-            }
-
-            @Override
             public boolean hasContent() {
                 return !body.isEmpty();
             }

@@ -22,7 +22,7 @@ public class SingleStepTest {
     @Test
     public void shouldFetchContent() {
         // given
-        final Step step = fetch(X, (position, index, parameters) -> just(someContent("Yeah!")));
+        final Step step = fetch(X, (position, parameters) -> just(someContent("Yeah!")));
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -34,7 +34,7 @@ public class SingleStepTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Step step = fetch(X, (position, index, parameters) -> {throw new IllegalStateException("Bumm!!!");});
+        final Step step = fetch(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -48,11 +48,6 @@ public class SingleStepTest {
             @Override
             public Position getPosition() {
                 return X;
-            }
-
-            @Override
-            public int getIndex() {
-                return 0;
             }
 
             @Override

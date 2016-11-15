@@ -1,11 +1,7 @@
-package de.otto.edison.aggregator.steps;
+package de.otto.edison.aggregator.providers;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.edison.aggregator.content.Content;
-import de.otto.edison.aggregator.content.ErrorContent;
-import de.otto.edison.aggregator.content.Parameters;
-import de.otto.edison.aggregator.content.Position;
-import de.otto.edison.aggregator.providers.ContentProvider;
+import de.otto.edison.aggregator.content.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -22,46 +18,44 @@ import static rx.Observable.merge;
 /**
  * Selects the most appropriate Content returned from one or more ContentProviders.
  */
-class FetchOneOfManyStep implements Step {
-    private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyStep.class);
+class FetchOneOfManyContentProvider implements ContentProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyContentProvider.class);
 
     private final ImmutableList<ContentProvider> contentProviders;
     private final Predicate<Content> selector;
-    private final Position position;
-    private final Comparator<Content> comparator;
+    private final Comparator<IndexedContent> comparator;
 
     /**
      * Selects the most appropriate Content returned from one or more ContentProviders and returns the highest ranked Content.
      *
-     * @param position the position of the returned content.
      * @param contentProviders the ContentProviders used to fetch contents
      * @param selector the Predicate used to select the possible content
      * @param comparator the Comparator used to order the possible contents.
      */
-    FetchOneOfManyStep(final Position position,
-                       final ImmutableList<ContentProvider> contentProviders,
-                       final Predicate<Content> selector,
-                       final Comparator<Content> comparator) {
-        this.position = position;
+    FetchOneOfManyContentProvider(final ImmutableList<ContentProvider> contentProviders,
+                                  final Predicate<Content> selector,
+                                  final Comparator<IndexedContent> comparator) {
         this.selector = selector;
         this.contentProviders = contentProviders;
         this.comparator = comparator;
     }
 
     @Override
-    public Observable<Content> execute(final Parameters parameters) {
-        final AtomicInteger index = new AtomicInteger();
-        final Observable<Content> mergedContent = merge(contentProviders
+    public Observable<Content> getContent(final Position position,
+                                          final Parameters parameters) {
+        final AtomicInteger subIndex = new AtomicInteger();
+        final Observable<IndexedContent> mergedContent = merge(contentProviders
                 .stream()
                 .map(contentProvider -> {
-                    final int pos = index.getAndIncrement();
+                    final int pos = subIndex.getAndIncrement();
                     try {
                         return contentProvider
-                                .getContent(position, pos, parameters)
-                                .doOnError((t) -> LOG.error(t.getMessage(), t))
-                                .onErrorReturn((e) -> new ErrorContent(position, pos, e));
+                                .getContent(position, parameters)
+                                .map(content ->  new IndexedContent(content, pos))
+                                .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
+                                .onErrorReturn(throwable -> new IndexedContent(new ErrorContent(position, throwable), pos));
                     } catch (final Exception e) {
-                        return just(new ErrorContent(position, pos, e));
+                        return just(new IndexedContent(new ErrorContent(position, e), pos));
                     }
                 })
                 .collect(Collectors.toList()));
@@ -70,12 +64,8 @@ class FetchOneOfManyStep implements Step {
                 .toSortedList(comparator::compare)
                 .flatMap(list -> list.isEmpty()
                         ? empty()
-                        : just(list.get(0)))
+                        : just(list.get(0).getContent()))
                 .doOnError((t) -> LOG.error(t.getMessage(), t));
     }
 
-    @Override
-    public Position getPosition() {
-        return position;
-    }
 }

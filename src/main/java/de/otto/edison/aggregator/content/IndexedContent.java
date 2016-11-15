@@ -5,18 +5,17 @@ import de.otto.edison.aggregator.providers.ContentProvider;
 
 import java.time.LocalDateTime;
 
-import static de.otto.edison.aggregator.content.Content.Availability.ERROR;
-import static de.otto.edison.aggregator.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
+public final class IndexedContent implements Content {
+    private final Content content;
+    private final int index;
 
-public final class ErrorContent implements Content {
-    private final Position position;
-    private final Throwable e;
-    private LocalDateTime created = now();
+    public IndexedContent(final Content content, final int index) {
+        this.content = content;
+        this.index = index;
+    }
 
-    public ErrorContent(final Position position, final Throwable e) {
-        this.position = position;
-        this.e = e;
+    public Content getContent() {
+        return content;
     }
 
     /**
@@ -26,7 +25,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public Position getPosition() {
-        return position;
+        return content.getPosition();
     }
 
     /**
@@ -34,7 +33,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public boolean hasContent() {
-        return false;
+        return content.hasContent();
     }
 
     /**
@@ -44,7 +43,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public String getBody() {
-        return e.getMessage();
+        return content.getBody();
     }
 
     /**
@@ -57,7 +56,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public Headers getHeaders() {
-        return emptyHeaders();
+        return content.getHeaders();
     }
 
     /**
@@ -70,7 +69,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public LocalDateTime getCreated() {
-        return created;
+        return content.getCreated();
     }
 
     /**
@@ -80,6 +79,37 @@ public final class ErrorContent implements Content {
      */
     @Override
     public Availability getAvailability() {
-        return ERROR;
+        return content.getAvailability();
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IndexedContent that = (IndexedContent) o;
+
+        if (index != that.index) return false;
+        return content != null ? content.equals(that.content) : that.content == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = content != null ? content.hashCode() : 0;
+        result = 31 * result + index;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "IndexedContent{" +
+                "content=" + content +
+                ", index=" + index +
+                '}';
     }
 }

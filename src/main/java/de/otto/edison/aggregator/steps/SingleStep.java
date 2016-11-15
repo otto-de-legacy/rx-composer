@@ -32,11 +32,12 @@ class SingleStep implements Step {
     public Observable<Content> execute(final Parameters parameters) {
         try {
             return contentProvider
-                    .getContent(position, 0, parameters)
+                    .getContent(position, parameters)
                     .doOnError((t) -> LOG.error(t.getMessage(), t))
-                    .onErrorReturn((e) -> new ErrorContent(position, 0, e));
+                    .onErrorReturn((e) -> new ErrorContent(position, e));
         } catch (final Exception e) {
-            return just(new ErrorContent(position, 0, e));
+            LOG.error(e.getMessage(), e);
+            return just(new ErrorContent(position, e));
         }
     }
 

@@ -1,10 +1,11 @@
-package de.otto.edison.aggregator.steps;
+package de.otto.edison.aggregator.providers;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.edison.aggregator.content.AbcPosition;
 import de.otto.edison.aggregator.content.Content;
 import de.otto.edison.aggregator.content.Headers;
 import de.otto.edison.aggregator.content.Position;
+import de.otto.edison.aggregator.steps.Step;
 import org.junit.Test;
 import rx.Observable;
 
@@ -16,21 +17,22 @@ import static de.otto.edison.aggregator.content.Content.Availability.AVAILABLE;
 import static de.otto.edison.aggregator.content.Content.Availability.EMPTY;
 import static de.otto.edison.aggregator.content.Headers.emptyHeaders;
 import static de.otto.edison.aggregator.content.Parameters.emptyParameters;
-import static de.otto.edison.aggregator.steps.Steps.fetchFirst;
+import static de.otto.edison.aggregator.providers.ContentProviders.fetchFirst;
+import static de.otto.edison.aggregator.steps.Steps.forPos;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static rx.Observable.just;
 
-public class FetchOneOfManyStepTest {
+public class FetchOneOfManyContentProviderTest {
 
     @Test
     public void shouldSetPosition() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> just(new TestContent(X, "Foo")),
-                (position, index, parameters) -> just(new TestContent(X, "Bar"))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> just(new TestContent(X, "Foo")),
+                (position, parameters) -> just(new TestContent(X, "Bar"))
+        )));
         // then
         assertThat(step.getPosition(), is(X));
     }
@@ -38,12 +40,12 @@ public class FetchOneOfManyStepTest {
     @Test
     public void shouldExecuteStep() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> just(new TestContent(X, "Foo")),
-                (position, index, parameters) -> just(new TestContent(X, "Bar"))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> just(new TestContent(X, "Foo")),
+                (position, parameters) -> just(new TestContent(X, "Bar"))
+        )));
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
+        final Observable<Content> result =  step.execute(emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
@@ -52,10 +54,10 @@ public class FetchOneOfManyStepTest {
     @Test
     public void shouldExecuteStepMultipleTimes() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> just(new TestContent(X, "Foo")),
-                (position, index, parameters) -> just(new TestContent(X, "Bar"))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> just(new TestContent(X, "Foo")),
+                (position, parameters) -> just(new TestContent(X, "Bar"))
+        )));
         // when
         step.execute(emptyParameters());
         step.execute(emptyParameters());
@@ -68,10 +70,10 @@ public class FetchOneOfManyStepTest {
     @Test
     public void shouldSelectFirstNotEmpty() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> just(new TestContent(X, "")),
-                (position, index, parameters) -> just(new TestContent(X, "Hello World"))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> just(new TestContent(X, "")),
+                (position, parameters) -> just(new TestContent(X, "Hello World"))
+        )));
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -83,10 +85,10 @@ public class FetchOneOfManyStepTest {
     @Test
     public void shouldHandleEmptyContents() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> just(new TestContent(X, "")),
-                (position, index, parameters) -> just(new TestContent(X, ""))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> just(new TestContent(X, "")),
+                (position, parameters) -> just(new TestContent(X, ""))
+        )));
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -97,10 +99,10 @@ public class FetchOneOfManyStepTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Step step = fetchFirst(X, ImmutableList.of(
-                (position, index, parameters) -> {throw new IllegalStateException("Bumm!!!");},
-                (position, index, parameters) -> just(new TestContent(X, "Yeah!"))
-        ));
+        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+                (position, parameters) -> {throw new IllegalStateException("Bumm!!!");},
+                (position, parameters) -> just(new TestContent(X, "Yeah!"))
+        )));
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -112,8 +114,8 @@ public class FetchOneOfManyStepTest {
         private final String text;
         private AbcPosition position;
 
-        public TestContent(final AbcPosition position,
-                           final String text) {
+        TestContent(final AbcPosition position,
+                    final String text) {
             this.position = position;
             this.text = text;
         }
@@ -121,11 +123,6 @@ public class FetchOneOfManyStepTest {
         @Override
         public Position getPosition() {
             return position;
-        }
-
-        @Override
-        public int getIndex() {
-            return 0;
         }
 
         @Override
