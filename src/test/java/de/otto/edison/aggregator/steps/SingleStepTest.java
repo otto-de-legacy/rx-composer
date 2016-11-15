@@ -12,7 +12,7 @@ import static de.otto.edison.aggregator.content.AbcPosition.X;
 import static de.otto.edison.aggregator.content.Content.Availability.AVAILABLE;
 import static de.otto.edison.aggregator.content.Content.Availability.ERROR;
 import static de.otto.edison.aggregator.content.Parameters.emptyParameters;
-import static de.otto.edison.aggregator.steps.Steps.fetch;
+import static de.otto.edison.aggregator.steps.Steps.forPos;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static rx.Observable.just;
@@ -22,7 +22,7 @@ public class SingleStepTest {
     @Test
     public void shouldFetchContent() {
         // given
-        final Step step = fetch(X, (position, parameters) -> just(someContent("Yeah!")));
+        final Step step = forPos(X, (position, parameters) -> just(someContent("Yeah!")));
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then
@@ -34,7 +34,7 @@ public class SingleStepTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Step step = fetch(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
+        final Step step = forPos(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
         final Observable<Content> result = step.execute(emptyParameters());
         // then

@@ -26,19 +26,7 @@ public final class Steps {
         if (then.nested.isEmpty()) {
             return new SingleStep(position, contentProvider);
         } else {
-            return new CompositeStep(fetch(position, contentProvider), then);
-        }
-    }
-
-    public static Step fetch(final Position position, final ContentProvider contentProvider)   {
-        return new SingleStep(position, contentProvider);
-    }
-
-    public static Step fetch(final Position position, final ContentProvider contentProvider, final StepContinuation then)   {
-        if (then.nested.isEmpty()) {
-            return new SingleStep(position, contentProvider);
-        } else {
-            return new CompositeStep(fetch(position, contentProvider), then);
+            return new CompositeStep(forPos(position, contentProvider), then);
         }
     }
 

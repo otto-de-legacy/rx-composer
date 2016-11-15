@@ -26,7 +26,6 @@ import static de.otto.edison.aggregator.content.Parameters.parameters;
 import static de.otto.edison.aggregator.providers.ContentProviders.fetchFirst;
 import static de.otto.edison.aggregator.providers.ContentProviders.fetchQuickest;
 import static de.otto.edison.aggregator.providers.ContentProviders.fetchViaHttpGet;
-import static de.otto.edison.aggregator.steps.Steps.fetch;
 import static de.otto.edison.aggregator.steps.Steps.forPos;
 import static de.otto.edison.aggregator.steps.Steps.then;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -61,11 +60,11 @@ public class AggregatorAcceptanceTest {
                                     fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/campaign", TEXT_HTML_TYPE)
                             )
                     )),
-                    fetch(
+                    forPos(
                             SLIDESHOW_TEASER,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/slideshowteaser", TEXT_HTML_TYPE)
                     ),
-                    fetch(
+                    forPos(
                             SHOPTEASER,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/shopteaser", TEXT_PLAIN_TYPE)
                     ),
@@ -75,11 +74,11 @@ public class AggregatorAcceptanceTest {
                                 fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/topseller", TEXT_PLAIN_TYPE)
                             )
                     )),
-                    fetch(
+                    forPos(
                             SERVICE_PROMOTIONS,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/servicepromos", TEXT_PLAIN_TYPE)
                     ),
-                    fetch(
+                    forPos(
                             BRAND_CINEMA,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/brandcinema", TEXT_PLAIN_TYPE)
                     )
@@ -326,11 +325,11 @@ public class AggregatorAcceptanceTest {
 
         try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
-                    fetch(
+                    forPos(
                             X,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
                     ),
-                    fetch(
+                    forPos(
                             Y,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
                     )
