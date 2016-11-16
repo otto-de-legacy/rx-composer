@@ -16,7 +16,19 @@ import static rx.Observable.just;
 import static rx.Observable.merge;
 
 /**
- * A single fetch in a Plan to retrieve content.
+ * {@inheritDoc}
+ *
+ * <p>
+ *     A Step that consists of single delegate Step and a list of nested Steps that are used to continue
+ *     retrieving content based on the results of the initial Step.
+ * </p>
+ * <p>
+ *     Example:
+ * </p>
+ * <p>
+ *     First fetch {@link Content} from System X. Extract {@link Parameters} from this Content and proceed
+ *     with these Parameters by calling the nested Steps.
+ * </p>
  */
 class CompositeStep implements Step {
 
@@ -33,11 +45,16 @@ class CompositeStep implements Step {
         }
     }
 
-
+    /** The initial Step. */
     private final Step first;
-
+    /** The StepContinuation that is executed using the results from the first Step. */
     private final StepContinuation continuation;
 
+    /**
+     * Creates a CompositeStep from a first Step and a StepContinuation.
+     * @param first the fist / initial Step to execute
+     * @param continuation Function to extract Parameters from the first Step plus list of nested Steps.
+     */
     CompositeStep(final Step first,
                   final StepContinuation continuation) {
         this.first = first;

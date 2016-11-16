@@ -5,6 +5,16 @@ import de.otto.edison.aggregator.providers.ContentProvider;
 
 import java.time.LocalDateTime;
 
+/**
+ * IndexedContent is {@link Content} with an additional index or position in
+ * a list of contents. It is used by ContentProviders like
+ * {@link de.otto.edison.aggregator.providers.FetchOneOfManyContentProvider}
+ * in order to preserve an ordering of several possible contents from
+ * a list of possible {@link ContentProvider}s.
+ * <p>
+ *     IndexedContent is a delegate to a Content item.
+ * </p>
+ */
 public final class IndexedContent implements Content {
     private final Content content;
     private final int index;

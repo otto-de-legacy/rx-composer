@@ -12,22 +12,39 @@ import rx.Observable;
 import static rx.Observable.just;
 
 /**
- * A single fetch in a Plan to retrieve content.
+ * A single Step in a Plan to retrieve content using a {@link ContentProvider}.
  */
 class SingleStep implements Step {
 
     private static final Logger LOG = LoggerFactory.getLogger(SingleStep.class);
 
+    /**
+     * The {@link ContentProvider} is responsible for getting Observable {@link Content}.
+     */
     private final ContentProvider contentProvider;
-
+    /**
+     * The Step's Position in the Plan.
+     */
     private final Position position;
 
+    /**
+     * Create a SingleStep instance for a Position using a ContentProvider.
+     * @param position the resulting Content's Position.
+     * @param contentProvider the ContentProvider used to actually fetch the Content.
+     */
     SingleStep(final Position position,
                final ContentProvider contentProvider) {
         this.position = position;
         this.contentProvider = contentProvider;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     *     This implementation is forwarding the Parameters to the ContentProvider.
+     *     Exceptions are logged and returned as an {@link ErrorContent}.
+     * </p>
+     */
     @Override
     public Observable<Content> execute(final Parameters parameters) {
         try {
@@ -41,6 +58,9 @@ class SingleStep implements Step {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Position getPosition() {
         return position;

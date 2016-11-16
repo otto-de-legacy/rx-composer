@@ -17,6 +17,9 @@ import static rx.Observable.merge;
 
 /**
  * Selects the most appropriate Content returned from one or more ContentProviders.
+ * <p>
+ *     The content is selected by a Predicate&lt;Content&gt; and ordered by a Comparator&lt;IndexedContent&gt;.
+ * </p>
  */
 class FetchOneOfManyContentProvider implements ContentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyContentProvider.class);
@@ -26,7 +29,8 @@ class FetchOneOfManyContentProvider implements ContentProvider {
     private final Comparator<IndexedContent> comparator;
 
     /**
-     * Selects the most appropriate Content returned from one or more ContentProviders and returns the highest ranked Content.
+     * Selects the most appropriate Content returned from one or more ContentProviders and returns the
+     * highest ranked Content.
      *
      * @param contentProviders the ContentProviders used to fetch contents
      * @param selector the Predicate used to select the possible content
