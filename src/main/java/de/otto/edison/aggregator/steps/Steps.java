@@ -39,8 +39,8 @@ public final class Steps {
     public static Step forPos(final Position position,
                               final ContentProvider contentProvider,
                               final StepContinuation then)   {
-        if (then.nested.isEmpty()) {
-            return new SingleStep(position, contentProvider);
+        if (then == null || then.nested.isEmpty()) {
+            throw new IllegalArgumentException("StepContinuation provided by param 'then' must not be null or empty.");
         } else {
             return new CompositeStep(forPos(position, contentProvider), then);
         }
