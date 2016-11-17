@@ -2,6 +2,8 @@ package de.otto.edison.aggregator.content;
 
 import de.otto.edison.aggregator.Plan;
 import de.otto.edison.aggregator.providers.ContentProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +12,8 @@ import static de.otto.edison.aggregator.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 
 public final class ErrorContent implements Content {
+    private static final Logger LOG = LoggerFactory.getLogger(ErrorContent.class);
+
     private final Position position;
     private final Throwable e;
     private LocalDateTime created = now();
@@ -17,6 +21,7 @@ public final class ErrorContent implements Content {
     public ErrorContent(final Position position, final Throwable e) {
         this.position = position;
         this.e = e;
+        LOG.error("Created ErrorContent for position " + position + ": " + e.getMessage());
     }
 
     /**
