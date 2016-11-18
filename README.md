@@ -15,9 +15,45 @@ questions is how to integrate microservices in the frontend. The following optio
 * A page is rendered by some microservices: one service is rendering the initial HTML, others are integrated using Edge-Side includes (or Server-Side Indludes) using reverse-proxies.
 * Services are calling other services in order to get data or HTML fragments for different parts of the page. The Frontend-Service is integrating the results from the different services into a single HTML page.
 
-Rx-Composer is meant to solve some problems of the latter solution: 
+The latter solution requires a frontend microservice to gather content from multiple backend microservices. The more fine-grained you are cutting your microservices, the more important it gets to use asynchronous communication and retrieve content in parallel, whenever possible. Especially in Java, implementing this in a tradition way is a non-trivial task.
+
+In addition to this, you would have to deal with unavailable backend services, slow service, and so on: you have to implement resiliency against failures into your frontend service(s). This is also a non-trivial task...
+
+Rx-Composer is meant to solve such kind of problems. It provides you with an easy to read DSL to describe, what content to fetch from which microservices. It is handling failures when retrieving content, and it retrieves content in a reactive way, using RxJava in the implementation.
+
+## Examples
+
+### Fetching to contents for a single page in parallel:
+       
+            // Specify what to fetch:
+            final Plan plan = planIsTo(
+                    forPos(
+                            X,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
+                    ),
+                    forPos(
+                            Y,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                    )
+            );
+            // Execute the Plan and get the contents:
+            final Contents result = plan.execute(emptyParameters());
+
+### Fetching the first content that is not empty:
+
+            // Specify what to fetch:
+            final Plan plan = planIsTo(
+                    forPos(X, fetchFirst(of(
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                    )
+            ));
+            // Execute the Plan and get the contents:
+            final Contents result = plan.execute(emptyParameters());
 
 ## Features
+
+Pending...
 
 ## Building RX-Composer
 
