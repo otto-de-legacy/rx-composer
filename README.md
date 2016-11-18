@@ -58,10 +58,10 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
                             X,
                             // first fetch content:
                             fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+                            // then fetch more contents:
                             then(
-                                    // extract parameteres for the following calls using a function:
+                                    // extract parameters for the following calls using this function:
                                     (final Content content) -> Parameters.from(ImmutableMap.of("param", content.getBody())),
-                                    // now fetch more content using these parameters:
                                     forPos(
                                             Y,
                                             fetchViaHttpGet(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN_TYPE)
