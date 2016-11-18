@@ -1,2 +1,2 @@
 include 'example-content'
-rootProject.name = 'edison-aggregator'
+rootProject.name = 'rx-composer'

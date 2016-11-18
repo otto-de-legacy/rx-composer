@@ -5,7 +5,7 @@ apply plugin: 'maven'
 apply from: 'dependencies.gradle'
 
 version='0.1.0-SNAPSHOT'
-group='de.otto.edison'
+group='de.otto'
 
 repositories {
     mavenCentral()
@@ -128,15 +128,15 @@ uploadArchives {
             }
 
             pom.project {
-                name 'edison-aggregator'
+                name 'rx-composer'
                 packaging 'jar'
                 description 'A library to aggregate content from several microservices based on content configurations.'
-                url 'https://github.com/otto-de/edison-aggregator'
+                url 'https://github.com/otto-de/rx-composer'
 
                 scm {
-                    url 'scm:git@github.com:otto-de/edison-aggregator.git'
-                    connection 'scm:git@github.com:otto-de/edison-aggregator.git'
-                    developerConnection 'scm:git@github.com:otto-de/edison-aggregator.git'
+                    url 'scm:git@github.com:otto-de/rx-composer.git'
+                    connection 'scm:git@github.com:otto-de/rx-composer.git'
+                    developerConnection 'scm:git@github.com:otto-de/rx-compose.git'
                 }
 
                 licenses {

@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="de.otto.edison.aggregator" level="TRACE"/>
+    <logger name="de.otto.rx.composer" level="TRACE"/>
     <logger name="com.github" level="WARN"/>
     <logger name="org.eclipse.jetty" level="WARN"/>
 
