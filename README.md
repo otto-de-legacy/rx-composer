@@ -1,5 +1,7 @@
 # RX-Composer
 
+A DSL for reactive composition of content from different microservices using RxJava.
+
 ## Status
 
 BETA - work in progress.
