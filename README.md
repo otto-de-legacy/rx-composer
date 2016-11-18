@@ -29,11 +29,11 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
             final Plan plan = planIsTo(
                     forPos(
                             X,
-                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
+                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE)
                     ),
                     forPos(
                             Y,
-                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                            fetchViaHttpGet(httpClient, "http://example.com/someOtherContent", TEXT_PLAIN_TYPE)
                     )
             );
             // Execute the Plan and get the contents:
@@ -44,13 +44,36 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
             // Specify what to fetch:
             final Plan plan = planIsTo(
                     forPos(X, fetchFirst(of(
-                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
-                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE))
+                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+                            fetchViaHttpGet(httpClient, "http://example.com/someOtherContent", TEXT_PLAIN_TYPE))
                     )
             ));
             // Execute the Plan and get the contents:
             final Contents result = plan.execute(emptyParameters());
 
+### Fetch contents using the results of an initial call to a microservice:
+
+            final Plan plan = planIsTo(
+                    forPos(
+                            X,
+                            // first fetch content:
+                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+                            then(
+                                    // extract parameteres for the following calls using a function:
+                                    (final Content content) -> Parameters.from(ImmutableMap.of("param", content.getBody())),
+                                    // now fetch more content using these parameters:
+                                    forPos(
+                                            Y,
+                                            fetchViaHttpGet(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN_TYPE)
+                                    ),
+                                    forPos(
+                                            Z,
+                                            fetchViaHttpGet(httpClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN_TYPE)
+                                    )
+                            )
+                    )
+            );
+            
 ## Features
 
 Pending...
