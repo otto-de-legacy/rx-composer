@@ -4,11 +4,18 @@ A DSL for reactive composition of content from different microservices using RxJ
 
 ## Status
 
-BETA - work in progress.
+Far from beeing stable. More of an early proof of concept.
 
 ## About
 
-TODO
+Microservice architectures for web applications are currently at the top of the hype cycle. One of the most interesting (and complicated)
+questions is how to integrate microservices in the frontend. The following options are already well understood:
+* Different pages are rendered by different microservices (or self-contained systems). Hyperlinks are used to "integrate" the different pages.
+* A page is rendered by some microservices: one service is rendering the initial HTML, others are integrated using AJAX and similar techniques.
+* A page is rendered by some microservices: one service is rendering the initial HTML, others are integrated using Edge-Side includes (or Server-Side Indludes) using reverse-proxies.
+* Services are calling other services in order to get data or HTML fragments for different parts of the page. The Frontend-Service is integrating the results from the different services into a single HTML page.
+
+Rx-Composer is meant to solve some problems of the latter solution: 
 
 ## Features
 
