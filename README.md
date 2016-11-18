@@ -23,7 +23,7 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
 
 ## Examples
 
-### Fetching to contents for a single page in parallel:
+### Fetching two contents for a single page in parallel:
        
             // Specify what to fetch:
             final Plan plan = planIsTo(
