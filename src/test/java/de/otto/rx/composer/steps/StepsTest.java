@@ -3,7 +3,6 @@ package de.otto.rx.composer.steps;
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.providers.ContentProvider;
-import de.otto.rx.composer.providers.FetchOneOfManyContentProviderTest;
 import org.junit.Test;
 import rx.Observable;
 
@@ -11,7 +10,6 @@ import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
 import static de.otto.rx.composer.steps.Steps.forPos;
 import static de.otto.rx.composer.steps.Steps.then;
 import static org.hamcrest.MatcherAssert.assertThat;

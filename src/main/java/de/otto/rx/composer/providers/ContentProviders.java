@@ -56,7 +56,7 @@ public final class ContentProviders {
     }
 
     public static ContentProvider fetchFirst(final ImmutableList<ContentProvider> contentProviders) {
-        return new FetchOneOfManyContentProvider(
+        return new OneOfManyContentProvider(
                 contentProviders,
                 contentMatcher(Content::hasContent, "Not content available"),
                 comparingInt(IndexedContent::getIndex));

@@ -20,8 +20,8 @@ import static rx.Observable.merge;
  *     The content is selected by a Predicate&lt;Content&gt; and ordered by a Comparator&lt;IndexedContent&gt;.
  * </p>
  */
-class FetchOneOfManyContentProvider implements ContentProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyContentProvider.class);
+class OneOfManyContentProvider implements ContentProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(OneOfManyContentProvider.class);
 
     private final ImmutableList<ContentProvider> contentProviders;
     private final ContentMatcher contentMatcher;
@@ -35,9 +35,9 @@ class FetchOneOfManyContentProvider implements ContentProvider {
      * @param contentMatcher the Matcher used to select the possible content
      * @param comparator the Comparator used to order the possible contents.
      */
-    FetchOneOfManyContentProvider(final ImmutableList<ContentProvider> contentProviders,
-                                  final ContentMatcher contentMatcher,
-                                  final Comparator<IndexedContent> comparator) {
+    OneOfManyContentProvider(final ImmutableList<ContentProvider> contentProviders,
+                             final ContentMatcher contentMatcher,
+                             final Comparator<IndexedContent> comparator) {
         this.contentMatcher = contentMatcher;
         this.contentProviders = contentProviders;
         this.comparator = comparator;

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static rx.Observable.just;
 
-public class FetchOneOfManyContentProviderTest {
+public class OneOfManyContentProviderTest {
 
     @Test
     public void shouldFetchFirstWithContent() {
