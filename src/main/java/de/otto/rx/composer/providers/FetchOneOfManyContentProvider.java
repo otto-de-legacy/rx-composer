@@ -8,7 +8,6 @@ import rx.Observable;
 
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static rx.Observable.empty;
@@ -25,7 +24,7 @@ class FetchOneOfManyContentProvider implements ContentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FetchOneOfManyContentProvider.class);
 
     private final ImmutableList<ContentProvider> contentProviders;
-    private final Predicate<Content> selector;
+    private final ContentMatcher contentMatcher;
     private final Comparator<IndexedContent> comparator;
 
     /**
@@ -33,13 +32,13 @@ class FetchOneOfManyContentProvider implements ContentProvider {
      * highest ranked Content.
      *
      * @param contentProviders the ContentProviders used to fetch contents
-     * @param selector the Predicate used to select the possible content
+     * @param contentMatcher the Matcher used to select the possible content
      * @param comparator the Comparator used to order the possible contents.
      */
     FetchOneOfManyContentProvider(final ImmutableList<ContentProvider> contentProviders,
-                                  final Predicate<Content> selector,
+                                  final ContentMatcher contentMatcher,
                                   final Comparator<IndexedContent> comparator) {
-        this.selector = selector;
+        this.contentMatcher = contentMatcher;
         this.contentProviders = contentProviders;
         this.comparator = comparator;
     }
@@ -64,12 +63,22 @@ class FetchOneOfManyContentProvider implements ContentProvider {
                 })
                 .collect(Collectors.toList()));
         return mergedContent
-                .filter(selector::test)
+                .filter(contentMatcher::test)
                 .toSortedList(comparator::compare)
                 .flatMap(list -> list.isEmpty()
-                        ? empty()
-                        : just(list.get(0).getContent()))
+                        ? noMatchesFor(position)
+                        : just(select(list.get(0).getContent())))
                 .doOnError((t) -> LOG.error(t.getMessage(), t));
+    }
+
+    private Observable<Content> noMatchesFor(final Position position) {
+        LOG.trace("No matches: nothing selected for {}", position.name());
+        return empty();
+    }
+
+    private Content select(final Content content) {
+        LOG.trace("Selected first match: {}", content.getSource());
+        return content;
     }
 
 }

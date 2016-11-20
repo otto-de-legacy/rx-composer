@@ -15,6 +15,7 @@ public final class HttpContent implements Content {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpContent.class);
 
+    private final String source;
     private final Position position;
     private final String body;
     private final Availability availability;
@@ -24,18 +25,35 @@ public final class HttpContent implements Content {
     /**
      * Create a HttpContent element, representing {@link Content} retrieved from a (micro)service.
      *
+     * @param source The URI of the requested service
      * @param position The content position inside of the {@link de.otto.rx.composer.Plan}.
      * @param response The HTTP response returned from a different (micro)service.
      */
-    public HttpContent(final Position position,
+    public HttpContent(final String source,
+                       final Position position,
                        final Response response) {
+        this.source = source;
         this.position = position;
         this.body = response.readEntity(String.class);
         this.availability = response.getStatus() > 399
                 ? ERROR
                 : body == null || body.isEmpty() ? EMPTY : AVAILABLE;
         this.headers = Headers.of(response.getHeaders());
-        LOG.info("Created (" + position + "): " + created.toString());
+        LOG.trace("{} content pos={} status={} source={}", availability, position, response.getStatus(), source);
+    }
+
+    /**
+     * Returns the source of the Content.
+     * <p>
+     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * as this method is used to track the behaviour during execution.
+     * </p>
+     *
+     * @return source identifier
+     */
+    @Override
+    public String getSource() {
+        return source;
     }
 
     /**

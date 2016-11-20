@@ -29,6 +29,20 @@ public final class IndexedContent implements Content {
     }
 
     /**
+     * Returns the source of the Content.
+     * <p>
+     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * as this method is used to track the behaviour during execution.
+     * </p>
+     *
+     * @return source identifier
+     */
+    @Override
+    public String getSource() {
+        return "'" + index + ":" + content.getSource() + "'";
+    }
+
+    /**
      * The content position inside of the {@link Plan}
      *
      * @return Position

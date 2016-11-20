@@ -58,6 +58,11 @@ public class CompositeStepTest {
     private Content someContent(final Position position) {
         return new Content() {
             @Override
+            public String getSource() {
+                return position.name();
+            }
+
+            @Override
             public Position getPosition() {
                 return position;
             }

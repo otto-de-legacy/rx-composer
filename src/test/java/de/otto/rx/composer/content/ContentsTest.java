@@ -63,6 +63,11 @@ public class ContentsTest {
     private Content someContent(final String body, final Availability availability) {
         return new Content() {
             @Override
+            public String getSource() {
+                return body;
+            }
+
+            @Override
             public Position getPosition() {
                 return A;
             }

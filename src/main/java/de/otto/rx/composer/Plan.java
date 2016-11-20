@@ -12,6 +12,7 @@ import rx.Observable;
 import java.time.LocalDateTime;
 
 import static com.google.common.collect.ImmutableList.builder;
+import static rx.Observable.from;
 
 /**
  * A plan containing the steps to retrieve content from one or more microservices.
@@ -36,21 +37,15 @@ public final class Plan {
     }
 
     public Contents execute(final Parameters params) {
-        LOG.info("Started: " + LocalDateTime.now());
-        final Contents result = Observable.from(getSteps())
+        LOG.trace("Started execution");
+        return from(getSteps())
                 .flatMap((step) -> step.execute(params))
-                .doOnCompleted(() -> LOG.info("Completed at " + System.currentTimeMillis()))
-                .doOnNext((c) -> LOG.info("Got Content for " + c.getPosition()))
+                .doOnCompleted(() -> LOG.trace("Completed execution"))
+                .doOnNext((c) -> LOG.trace("Got Content for {}", c.getPosition()))
                 .doOnError((t) -> LOG.error(t.getMessage(), t))
-                .collect(Contents::new, (contents, content) -> {
-                    LOG.info("Collecting content " + content.getPosition());
-                    contents.add(content);
-                })
+                .collect(Contents::new, Contents::add)
                 .toBlocking()
                 .single();
-        LOG.info("Finished: " + LocalDateTime.now());
-
-        return result;
     }
 
     ImmutableList<Step> getSteps() {

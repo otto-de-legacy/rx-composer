@@ -3,6 +3,7 @@ package de.otto.rx.composer.steps;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 import rx.Observable;
 
@@ -14,10 +15,18 @@ import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.steps.Steps.forPos;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static rx.Observable.just;
 
 public class SingleStepTest {
+
+    @Test
+    public void shouldBuildSingleStepUsingForPos() {
+        final Step step = forPos(X, mock(ContentProvider.class));
+        assertThat(step, is(instanceOf(SingleStep.class)));
+    }
 
     @Test
     public void shouldFetchContent() {
@@ -45,6 +54,11 @@ public class SingleStepTest {
 
     private Content someContent(final String body) {
         return  new Content() {
+            @Override
+            public String getSource() {
+                return body;
+            }
+
             @Override
             public Position getPosition() {
                 return X;

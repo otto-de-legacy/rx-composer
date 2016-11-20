@@ -2,10 +2,7 @@ package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.HttpContent;
-import de.otto.rx.composer.content.IndexedContent;
-import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
+import static de.otto.rx.composer.content.ContentMatcher.contentMatcher;
 import static java.util.Comparator.comparingInt;
 
 public final class ContentProviders {
@@ -52,13 +50,15 @@ public final class ContentProviders {
      * @return Step
      */
     public static ContentProvider fetchQuickest(final ImmutableList<ContentProvider> contentProviders) {
-        return new QuickestWinsContentProvider(contentProviders);
+        return new QuickestWinsContentProvider(
+                contentProviders,
+                contentMatcher(Content::hasContent, "Not content available"));
     }
 
     public static ContentProvider fetchFirst(final ImmutableList<ContentProvider> contentProviders) {
         return new FetchOneOfManyContentProvider(
                 contentProviders,
-                Content::hasContent,
+                contentMatcher(Content::hasContent, "Not content available"),
                 comparingInt(IndexedContent::getIndex));
     }
 
@@ -68,12 +68,9 @@ public final class ContentProviders {
                                            final Position position) {
         return httpClient
                 .get(uri, accept)
-                .doOnNext(c -> LOG.info("Next: " + uri))
+                .doOnNext(c -> LOG.trace("Got next content for position {} from {}", position, uri))
                 .doOnError(t -> LOG.error(t.getMessage()))
-                .doOnUnsubscribe(() -> {
-                    LOG.info("Unsubscribed request to " + uri);
-                })
-                .map(response -> new HttpContent(position, response));
+                .map(response -> new HttpContent(uri, position, response));
     }
 
 }

@@ -32,6 +32,16 @@ public interface Content {
     }
 
     /**
+     * Returns the source of the Content.
+     * <p>
+     *     For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     *     as this method is used to track the behaviour during execution.
+     * </p>
+     * @return source identifier
+     */
+    String getSource();
+
+    /**
      * The content position inside of the {@link de.otto.rx.composer.Plan}
      *
      * @return Position

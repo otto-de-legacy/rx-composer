@@ -5,7 +5,6 @@ import de.otto.rx.composer.content.AbcPosition;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.steps.Step;
 import org.junit.Test;
 import rx.Observable;
 
@@ -18,50 +17,26 @@ import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
-import static de.otto.rx.composer.steps.Steps.forPos;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static rx.Observable.just;
 
 public class FetchOneOfManyContentProviderTest {
 
     @Test
-    public void shouldSetPosition() {
+    public void shouldFetchFirstWithContent() {
         // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+        final ContentProvider contentProvider = fetchFirst(ImmutableList.of(
                 (position, parameters) -> just(new TestContent(X, "Foo")),
                 (position, parameters) -> just(new TestContent(X, "Bar"))
-        )));
-        // then
-        assertThat(step.getPosition(), is(X));
-    }
-
-    @Test
-    public void shouldExecuteStep() {
-        // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
-                (position, parameters) -> just(new TestContent(X, "Foo")),
-                (position, parameters) -> just(new TestContent(X, "Bar"))
-        )));
+        ));
         // when
-        final Observable<Content> result =  step.execute(emptyParameters());
-        // then
-        final Content content = result.toBlocking().single();
-        assertThat(content.getBody(), is("Foo"));
-    }
-
-    @Test
-    public void shouldExecuteStepMultipleTimes() {
-        // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
-                (position, parameters) -> just(new TestContent(X, "Foo")),
-                (position, parameters) -> just(new TestContent(X, "Bar"))
-        )));
-        // when
-        step.execute(emptyParameters());
-        step.execute(emptyParameters());
-        final Observable<Content> result = step.execute(emptyParameters());
+        final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
@@ -70,12 +45,12 @@ public class FetchOneOfManyContentProviderTest {
     @Test
     public void shouldSelectFirstNotEmpty() {
         // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+        final ContentProvider contentProvider = fetchFirst(ImmutableList.of(
                 (position, parameters) -> just(new TestContent(X, "")),
                 (position, parameters) -> just(new TestContent(X, "Hello World"))
-        )));
+        ));
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
         // then
         final Iterator<Content> content = result.toBlocking().toIterable().iterator();
         assertThat(content.next().getBody(), is("Hello World"));
@@ -85,12 +60,12 @@ public class FetchOneOfManyContentProviderTest {
     @Test
     public void shouldHandleEmptyContents() {
         // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
+        final ContentProvider contentProvider = fetchFirst(ImmutableList.of(
                 (position, parameters) -> just(new TestContent(X, "")),
                 (position, parameters) -> just(new TestContent(X, ""))
-        )));
+        ));
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
         // then
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
@@ -99,15 +74,36 @@ public class FetchOneOfManyContentProviderTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Step step = forPos(X, fetchFirst(ImmutableList.of(
-                (position, parameters) -> {throw new IllegalStateException("Bumm!!!");},
+        final ContentProvider contentProvider = fetchFirst(ImmutableList.of(
+                (position, parameters) -> {
+                    throw new IllegalStateException("Bumm!!!");
+                },
                 (position, parameters) -> just(new TestContent(X, "Yeah!"))
-        )));
+        ));
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
+    }
+
+    @Test
+    public void shouldExecuteStepMultipleTimes() {
+        // given
+        final ContentProvider nestedProvider = mock(ContentProvider.class);
+        when(nestedProvider.getContent(X, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
+        // and
+        final ContentProvider fetchFirstProvider = fetchFirst(ImmutableList.of(
+                nestedProvider,
+                (position, parameters) -> just(new TestContent(X, "Bar"))
+        ));
+        // when
+        fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
+        fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
+        final Content content = fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
+        // then
+        assertThat(content.getBody(), is("Foo"));
+        verify(nestedProvider, times(3)).getContent(X, emptyParameters());
     }
 
     private static final class TestContent implements Content {
@@ -118,6 +114,11 @@ public class FetchOneOfManyContentProviderTest {
                     final String text) {
             this.position = position;
             this.text = text;
+        }
+
+        @Override
+        public String getSource() {
+            return text;
         }
 
         @Override

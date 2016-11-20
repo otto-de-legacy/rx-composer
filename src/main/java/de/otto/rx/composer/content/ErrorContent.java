@@ -25,6 +25,22 @@ public final class ErrorContent implements Content {
     }
 
     /**
+     * Returns the source of the Content.
+     * <p>
+     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * as this method is used to track the behaviour during execution.
+     * </p>
+     * <p>
+     *     ErrorContent does not know about the 'real' source, position.name() is used instead.
+     * </p>
+     * @return source identifier
+     */
+    @Override
+    public String getSource() {
+        return position.name();
+    }
+
+    /**
      * The content position inside of the {@link Plan}
      *
      * @return Position

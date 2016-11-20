@@ -27,7 +27,7 @@ public class HttpContentTest {
             put("X-SomeHeader", singletonList("somevalue"));
         }});
         // when
-        final HttpContent content = new HttpContent(A, mockResponse);
+        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
         assertThat(content.getHeaders().getValue("x-someheader", String.class).get(), is("somevalue"));
     }
@@ -41,7 +41,7 @@ public class HttpContentTest {
             put("x-otherheader", asList("foo", "bar"));
         }});
         // when
-        final HttpContent content = new HttpContent(A, mockResponse);
+        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
         assertThat(content.getHeaders().getValues("x-otherheader", String.class), contains("foo", "bar"));
     }
@@ -52,7 +52,7 @@ public class HttpContentTest {
         final Response mockResponse = mock(Response.class);
         when(mockResponse.readEntity(String.class)).thenReturn("Hello Test");
         // when
-        final HttpContent content = new HttpContent(A, mockResponse);
+        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
         assertThat(content.getBody(), is("Hello Test"));
         assertThat(content.getAvailability(), is(AVAILABLE));
@@ -65,7 +65,7 @@ public class HttpContentTest {
         when(mockResponse.readEntity(String.class)).thenReturn("");
         when(mockResponse.getStatus()).thenReturn(200);
         // when
-        final HttpContent content = new HttpContent(A, mockResponse);
+        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
         assertThat(content.getBody(), is(""));
         assertThat(content.getAvailability(), is(EMPTY));
@@ -77,7 +77,7 @@ public class HttpContentTest {
         final Response mockResponse = mock(Response.class);
         when(mockResponse.getStatus()).thenReturn(404);
         // when
-        final HttpContent content = new HttpContent(A, mockResponse);
+        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
         assertThat(content.getBody(), is(""));
         assertThat(content.getAvailability(), is(ERROR));
