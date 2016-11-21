@@ -1,17 +1,25 @@
 package de.otto.rx.composer;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.steps.Step;
 import org.junit.Test;
+import rx.Observable;
+
+import java.time.LocalDateTime;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.Plan.planIsTo;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
+import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
+import static de.otto.rx.composer.content.Content.Availability.EMPTY;
+import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
+import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -56,6 +64,38 @@ public class PlanTest {
     }
 
     @Test
+    public void shouldReturnContents() {
+        // given
+        final Step doFirst = mock(Step.class);
+        when(doFirst.getPosition()).thenReturn(X);
+        when(doFirst.execute(emptyParameters())).thenReturn(Observable.just(someContent("test", X, "Foo")));
+        // and
+        final Plan plan = planIsTo(
+                doFirst
+        );
+        // when
+        final Contents contents = plan.execute(emptyParameters());
+        // then
+        assertThat(contents.getContent(X).get().getBody(), is("Foo"));
+    }
+
+    @Test
+    public void shouldIgnoreStepsWithEmptyResults() {
+        // given
+        final Step doFirst = mock(Step.class);
+        when(doFirst.getPosition()).thenReturn(X);
+        when(doFirst.execute(emptyParameters())).thenReturn(Observable.empty());
+        // and
+        final Plan plan = planIsTo(
+                doFirst
+        );
+        // when
+        final Contents contents = plan.execute(emptyParameters());
+        // then
+        assertThat(contents.getContent(X).isPresent(), is(false));
+    }
+
+    @Test
     public void shouldExecutePlanMultipleTimes() {
         // given
         final Step doFirst = mock(Step.class);
@@ -89,4 +129,56 @@ public class PlanTest {
         verify(doSecond).execute(someParameters);
     }
 
+    private Content someContent(final String source, final Position position, final String text) {
+        return new TestContent(source, position, text);
+    }
+
+    private static final class TestContent implements Content {
+        private final String source;
+        private final String text;
+        private final Position position;
+
+        TestContent(final String source,
+                    final Position position,
+                    final String text) {
+            this.source = source;
+            this.position = position;
+            this.text = text;
+        }
+
+        @Override
+        public String getSource() {
+            return source;
+        }
+
+        @Override
+        public Position getPosition() {
+            return position;
+        }
+
+        @Override
+        public boolean hasContent() {
+            return !text.isEmpty();
+        }
+
+        @Override
+        public String getBody() {
+            return text;
+        }
+
+        @Override
+        public Headers getHeaders() {
+            return emptyHeaders();
+        }
+
+        @Override
+        public LocalDateTime getCreated() {
+            return now();
+        }
+
+        @Override
+        public Availability getAvailability() {
+            return hasContent() ? AVAILABLE : EMPTY;
+        }
+    }
 }

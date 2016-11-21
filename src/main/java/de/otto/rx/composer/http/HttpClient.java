@@ -2,6 +2,7 @@ package de.otto.rx.composer.http;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.rx.rxjava.RxObservable;
+import org.slf4j.Logger;
 import rx.Observable;
 
 import javax.ws.rs.client.Client;
@@ -13,8 +14,11 @@ import java.io.Closeable;
 import static javax.ws.rs.client.ClientBuilder.newClient;
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class HttpClient implements AutoCloseable {
+
+    private static final Logger LOG = getLogger(HttpClient.class);
 
     private final Client client;
 

@@ -20,7 +20,7 @@ import static rx.Observable.merge;
  *     The content is selected by a Predicate&lt;Content&gt; and ordered by a Comparator&lt;IndexedContent&gt;.
  * </p>
  */
-class OneOfManyContentProvider implements ContentProvider {
+final class OneOfManyContentProvider implements ContentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OneOfManyContentProvider.class);
 
     private final ImmutableList<ContentProvider> contentProviders;

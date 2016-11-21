@@ -5,13 +5,11 @@ import java.time.LocalDateTime;
 /**
  * Possible Content fragment for a {@link Position} on a page.
  * <p>
- *     If multiple content items are available for a position, the {@link de.otto.rx.composer.steps.Step}
- *     that is fetching the content will decide, which content is selected for the position. In this case,
- *     the {@link #getIndex() index} of the content is used to distinguish between the different contents for a
- *     position.
+ *     Content is retrieved using {@link de.otto.rx.composer.providers.ContentProvider}s.
  * </p>
  * <p>
- *     Content is retrieved using {@link de.otto.rx.composer.providers.ContentProvider}s.
+ *     If multiple content items are available for a position, the {@link de.otto.rx.composer.providers.ContentProvider}
+ *     that is fetching the content will decide, which content is selected for the position.
  * </p>
  *
  */

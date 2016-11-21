@@ -19,6 +19,7 @@ import static de.otto.rx.composer.Plan.planIsTo;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.AbcPosition.Z;
+import static de.otto.rx.composer.content.Parameters.*;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
 import static de.otto.rx.composer.providers.ContentProviders.fetchQuickest;
@@ -87,7 +88,7 @@ public class AggregatorAcceptanceTest {
                             X,
                             fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE),
                             then(
-                                    (final Content content) -> Parameters.from(ImmutableMap.of("param", content.getBody())),
+                                    (final Content content) -> parameters(ImmutableMap.of("param", content.getBody())),
                                     forPos(
                                             Y,
                                             fetchViaHttpGet(httpClient, fromTemplate(driver.getBaseUrl() + "/someOtherContent{?param}"), TEXT_PLAIN_TYPE)
@@ -277,8 +278,6 @@ public class AggregatorAcceptanceTest {
             final Contents result = plan.execute(emptyParameters());
 
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.hasErrors(), is(true));
-            assertThat(result.getErrors(), contains(X));
         }
     }
 

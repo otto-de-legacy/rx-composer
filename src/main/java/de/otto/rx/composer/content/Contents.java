@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -21,24 +22,15 @@ import static java.util.Optional.ofNullable;
 public final class Contents {
 
     private final ConcurrentMap<Position, Content> results = new ConcurrentHashMap<>();
-    private final Set<Position> empty = newConcurrentHashSet();
-    private final Set<Position> errors = newConcurrentHashSet();
 
     /**
-     * Add a content item to the collection of contents.
+     * Add a content item to the collection of contents if content is available.
      *
      * @param content the added content item.
      */
     public void add(final Content content) {
-        switch (content.getAvailability()) {
-            case AVAILABLE:
+        if(content.getAvailability().equals(AVAILABLE)) {
                 results.put(content.getPosition(), content);
-                break;
-            case EMPTY:
-                empty.add(content.getPosition());
-                break;
-            case ERROR:
-                errors.add(content.getPosition());
         }
     }
 
@@ -60,47 +52,6 @@ public final class Contents {
      */
     public Optional<Content> getContent(final Position position) {
         return ofNullable(results.get(position));
-    }
-
-    /**
-     * Returns the set of positions having empty content. This typically means, that the requested service was
-     * unable to select relevant content for the specified position.
-     * <p>
-     *     Depending on the executed {@link de.otto.rx.composer.Plan} it might happen that there are
-     *     empty positions contained in the returned set, while other content for the position is returned
-     *     by {@link #getContent(Position)}. This could be an indicator that the usage of Position items inside
-     *     the Plan is not perfect (multiple {@link de.otto.rx.composer.providers.ContentProvider}s for
-     *     the same Position).
-     * </p>
-     * @return immutable set of positions without content
-     */
-    public ImmutableSet<Position> getEmpty() {
-        return copyOf(empty);
-    }
-
-    /**
-     * Returns the set of positions having error content. This typically means, that the requested service was
-     * unable to select relevant content because of client- or server-errors.
-     * <p>
-     *     Depending on the executed {@link de.otto.rx.composer.Plan} it might happen that there are
-     *     empty positions contained in the returned set, while other content for the position is returned
-     *     by {@link #getContent(Position)}. This could be an indicator that the usage of Position items inside
-     *     the Plan is not perfect (multiple {@link de.otto.rx.composer.providers.ContentProvider}s for
-     *     the same Position).
-     * </p>
-     * @return immutable set of positions having error contents.
-     */
-    public ImmutableSet<Position> getErrors() {
-        return copyOf(errors);
-    }
-
-    /**
-     * Returns true if at least one of the requested services returned with an error response.
-     *
-     * @return boolean
-     */
-    public boolean hasErrors() {
-        return !errors.isEmpty();
     }
 
 }

@@ -16,7 +16,7 @@ import static rx.Observable.merge;
  * Fetches the {@link Content} of the quickest responding {@link ContentProvider} that is available and does
  * not fail with an exception.
  */
-class QuickestWinsContentProvider implements ContentProvider {
+final class QuickestWinsContentProvider implements ContentProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(QuickestWinsContentProvider.class);
 

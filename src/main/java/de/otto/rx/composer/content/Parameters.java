@@ -17,10 +17,6 @@ public final class Parameters {
         return EMPTY_PARAMETERS;
     }
 
-    public static Parameters from(final ImmutableMap<String, Object> params) {
-        return parameters(params);
-    }
-
     public static Parameters parameters(final ImmutableMap<String, Object> params) {
         return new Parameters(params);
     }

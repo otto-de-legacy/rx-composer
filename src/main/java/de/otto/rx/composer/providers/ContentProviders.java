@@ -2,16 +2,14 @@ package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.content.IndexedContent;
 import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
 
-import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static de.otto.rx.composer.content.ContentMatcher.contentMatcher;
 import static java.util.Comparator.comparingInt;
 
@@ -22,22 +20,15 @@ public final class ContentProviders {
     private ContentProviders() {}
 
     public static ContentProvider fetchViaHttpGet(final HttpClient httpClient,
-                                                  final String uri,
+                                                  final String url,
                                                   final MediaType accept) {
-        return (position, parameters) -> get(httpClient, uri, accept, position);
+        return new HttpGetContentProvider(httpClient, url, accept);
     }
 
     public static ContentProvider fetchViaHttpGet(final HttpClient httpClient,
                                                   final UriTemplate uriTemplate,
                                                   final MediaType accept) {
-        return (position, parameters) -> {
-            final String uri = uriTemplate.expand(parameters.asImmutableMap());
-            final String[] missingTemplateVariables = fromTemplate(uri).getVariables();
-            if (missingTemplateVariables != null && missingTemplateVariables.length > 0) {
-                throw new IllegalArgumentException("Missing URI template variables in parameters. Unable to resolve " + Arrays.toString(missingTemplateVariables));
-            }
-            return get(httpClient, uri, accept, position);
-        };
+        return new HttpGetContentProvider(httpClient, uriTemplate, accept);
     }
 
     /**
@@ -62,15 +53,5 @@ public final class ContentProviders {
                 comparingInt(IndexedContent::getIndex));
     }
 
-    private static Observable<Content> get(final HttpClient httpClient,
-                                           final String uri,
-                                           final MediaType accept,
-                                           final Position position) {
-        return httpClient
-                .get(uri, accept)
-                .doOnNext(c -> LOG.trace("Got next content for position {} from {}", position, uri))
-                .doOnError(t -> LOG.error(t.getMessage()))
-                .map(response -> new HttpContent(uri, position, response));
-    }
 
 }
