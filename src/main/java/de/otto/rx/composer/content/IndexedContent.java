@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * IndexedContent is {@link Content} with an additional index or position in
  * a list of contents. It is used by ContentProviders like
- * {@link de.otto.rx.composer.providers.FetchOneOfManyContentProvider}
+ * {@link de.otto.rx.composer.providers.OneOfManyContentProvider}
  * in order to preserve an ordering of several possible contents from
  * a list of possible {@link ContentProvider}s.
  * <p>
