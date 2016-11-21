@@ -39,16 +39,14 @@ public class AggregatorAcceptanceTest {
     public ClientDriverRule driver = new ClientDriverRule();
 
     @Test
-    public void shouldCallPlanWithTwoRestResources() throws Exception {
+    public void shouldExecutePlanWithTwoRestResources() throws Exception {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").withStatus(200))
-                .anyTimes();
+                giveResponse("Hello", "text/plain").withStatus(200));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
-                giveResponse("World", "text/plain").withStatus(200))
-                .anyTimes();
+                giveResponse("World", "text/plain").withStatus(200));
 
         try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
             final Plan plan = planIsTo(
@@ -65,6 +63,90 @@ public class AggregatorAcceptanceTest {
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(2));
             assertThat(result.getContent(X).get().getBody(), is("Hello"));
+            assertThat(result.getContent(Y).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldExecutePlanWithEmptyContent() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("", "text/plain").withStatus(200));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain").withStatus(200));
+
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+            final Plan plan = planIsTo(
+                    forPos(
+                            X,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE)
+                    ),
+                    forPos(
+                            Y,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).isPresent(), is(false));
+            assertThat(result.getContent(Y).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldExecutePlanWithHttpErrors() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someErrorContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain").withStatus(500));
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain").withStatus(200));
+
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+            final Plan plan = planIsTo(
+                    forPos(
+                            X,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN_TYPE)
+                    ),
+                    forPos(
+                            Y,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).isPresent(), is(false));
+            assertThat(result.getContent(Y).get().getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldExecutePlanWithExceptionsErrors() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someOtherContent").withMethod(GET),
+                giveResponse("World", "text/plain").withStatus(200));
+
+        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+            final Plan plan = planIsTo(
+                    forPos(
+                            X,
+                            fetchViaHttpGet(httpClient, "INVALID_URL", TEXT_PLAIN_TYPE)
+                    ),
+                    forPos(
+                            Y,
+                            fetchViaHttpGet(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN_TYPE)
+                    )
+            );
+
+            final Contents result = plan.execute(emptyParameters());
+            assertThat(result.getContents(), hasSize(1));
+            assertThat(result.getContent(X).isPresent(), is(false));
             assertThat(result.getContent(Y).get().getBody(), is("World"));
         }
     }
@@ -250,7 +332,7 @@ public class AggregatorAcceptanceTest {
         }
     }
 
-    @org.junit.Test
+    @Test
     public void shouldIgnoreHttpResponseErrors() throws Exception {
         // given
         driver.addExpectation(
@@ -259,8 +341,7 @@ public class AggregatorAcceptanceTest {
                         .withStatus(404));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
-                giveResponse("World", "text/plain"))
-                .anyTimes();
+                giveResponse("World", "text/plain"));
 
 
         try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
