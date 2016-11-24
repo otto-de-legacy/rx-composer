@@ -49,7 +49,7 @@ public final class Steps {
     /**
      * Create a StepContinuation that is used to specify the followup Steps for a CompositeStep.
      * <p>
-     *     This method can be used to create the StepContinuation for {@link #forPos(Position, ContentProvider, StepContinuation)}
+     *     This method can be used to create the StepContinuation for {@link Steps#forPos(Position, ContentProvider, StepContinuation)}
      * </p>
      * @param parameterExtractor a Function used to extract additional Parameters from a Content item.
      * @param first the first Step of the Continuation.
