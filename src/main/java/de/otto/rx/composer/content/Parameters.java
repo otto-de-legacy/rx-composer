@@ -32,6 +32,10 @@ public final class Parameters {
         return params.containsKey(key) ? params.get(key).toString() : null;
     }
 
+    public String getString(final String key, final String defaultValue) {
+        return params.containsKey(key) ? params.get(key).toString() : defaultValue;
+    }
+
     public ImmutableSet<String> getKeys(final String key) {
         return params.keySet();
     }
