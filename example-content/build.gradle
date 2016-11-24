@@ -1,18 +1,18 @@
 buildscript {
     ext {
-        springBootVersion = '1.3.6.RELEASE'
+        springBootVersion = '1.4.2.RELEASE'
     }
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE")
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'spring-boot' 
+apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'example-aggregator'
@@ -28,7 +28,7 @@ repositories {
 dependencies {
     //compile rootProject
     compile rootProject
-    compile('org.springframework.boot:spring-boot-starter')
-    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter:1.4.2.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE')
     compile('org.jsoup:jsoup:1.8.3')
 }

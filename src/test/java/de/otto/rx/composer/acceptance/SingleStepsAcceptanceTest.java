@@ -60,8 +60,8 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(2));
-            assertThat(result.getContent(X).get().getBody(), is("Hello"));
-            assertThat(result.getContent(Y).get().getBody(), is("World"));
+            assertThat(result.getContent(X).getBody(), is("Hello"));
+            assertThat(result.getContent(Y).getBody(), is("World"));
         }
     }
 
@@ -89,8 +89,8 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).isPresent(), is(false));
-            assertThat(result.getContent(Y).get().getBody(), is("World"));
+            assertThat(result.getContent(X).hasContent(), is(false));
+            assertThat(result.getContent(Y).getBody(), is("World"));
         }
     }
 
@@ -118,8 +118,8 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).isPresent(), is(false));
-            assertThat(result.getContent(Y).get().getBody(), is("World"));
+            assertThat(result.getContent(X).hasContent(), is(false));
+            assertThat(result.getContent(Y).getBody(), is("World"));
         }
     }
 
@@ -144,8 +144,8 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).isPresent(), is(false));
-            assertThat(result.getContent(Y).get().getBody(), is("World"));
+            assertThat(result.getContent(X).hasContent(), is(false));
+            assertThat(result.getContent(Y).getBody(), is("World"));
         }
     }
 

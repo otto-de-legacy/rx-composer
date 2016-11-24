@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static de.otto.rx.composer.content.ErrorContent.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -60,7 +61,7 @@ final class HttpGetContentProvider implements ContentProvider {
                 .doOnNext(c -> LOG.trace("Got next content for position {} from {}", position, url))
                 .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
                 .map(response -> (Content) new HttpContent(url, position, response))
-                .onErrorReturn(e -> new ErrorContent(position, e))
+                .onErrorReturn(e -> errorContent(position, e))
                 .filter(Content::hasContent);
     }
 

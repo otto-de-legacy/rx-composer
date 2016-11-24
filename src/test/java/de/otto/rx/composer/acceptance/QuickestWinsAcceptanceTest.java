@@ -58,7 +58,7 @@ public class QuickestWinsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).get().getBody(), is("World"));
+            assertThat(result.getContent(X).getBody(), is("World"));
         }
     }
 
@@ -82,7 +82,7 @@ public class QuickestWinsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).get().getBody(), is("World"));
+            assertThat(result.getContent(X).getBody(), is("World"));
         }
     }
 

@@ -8,7 +8,7 @@ import rx.Observable;
 
 import java.util.stream.Collectors;
 
-import static rx.Observable.empty;
+import static de.otto.rx.composer.content.ErrorContent.*;
 import static rx.Observable.just;
 import static rx.Observable.merge;
 
@@ -39,9 +39,9 @@ final class QuickestWinsContentProvider implements ContentProvider {
                         return contentProvider
                                 .getContent(position, parameters)
                                 .doOnError(this::traceError)
-                                .onErrorReturn((e) -> new ErrorContent(position, e));
+                                .onErrorReturn((e) -> errorContent(position, e));
                     } catch (final Exception e) {
-                        return just(new ErrorContent(position, e));
+                        return just(errorContent(position, e));
                     }
                 })
                 .collect(Collectors.toList()));

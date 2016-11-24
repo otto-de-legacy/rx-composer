@@ -7,25 +7,25 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
+import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 
-public final class ErrorContent implements Content {
-    private static final Logger LOG = LoggerFactory.getLogger(ErrorContent.class);
+public final class EmptyContent implements Content {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EmptyContent.class);
 
     private final Position position;
-    private final Throwable e;
     private LocalDateTime created = now();
 
-    private ErrorContent(final Position position, final Throwable e) {
+    private EmptyContent(final Position position) {
         this.position = position;
-        this.e = e;
-        LOG.error("Created ErrorContent for position " + position + ": " + e.getMessage());
+        LOG.info("Created EmptyContent for position {}", position);
     }
 
-    public static ErrorContent errorContent(final Position position, final Throwable e) {
-        return new ErrorContent(position, e);
+    public static EmptyContent emptyContent(final Position position) {
+        return new EmptyContent(position);
     }
 
     /**
@@ -69,7 +69,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public String getBody() {
-        return e.getMessage();
+        return "";
     }
 
     /**
@@ -105,6 +105,6 @@ public final class ErrorContent implements Content {
      */
     @Override
     public Availability getAvailability() {
-        return ERROR;
+        return EMPTY;
     }
 }

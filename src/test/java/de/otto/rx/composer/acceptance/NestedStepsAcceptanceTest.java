@@ -70,9 +70,9 @@ public class NestedStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getContents(), hasSize(3));
-            assertThat(result.getContent(X).get().getBody(), is("Hello"));
-            assertThat(result.getContent(Y).get().getBody(), is("World"));
-            assertThat(result.getContent(Z).get().getBody(), is("Otto"));
+            assertThat(result.getContent(X).getBody(), is("Hello"));
+            assertThat(result.getContent(Y).getBody(), is("World"));
+            assertThat(result.getContent(Z).getBody(), is("Otto"));
         }
     }
 

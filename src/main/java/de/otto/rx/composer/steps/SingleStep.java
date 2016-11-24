@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 
+import static de.otto.rx.composer.content.ErrorContent.*;
 import static rx.Observable.just;
 
 /**
@@ -51,10 +52,10 @@ class SingleStep implements Step {
             return contentProvider
                     .getContent(position, parameters)
                     .doOnError((t) -> LOG.error(t.getMessage(), t))
-                    .onErrorReturn((e) -> new ErrorContent(position, e));
+                    .onErrorReturn((e) -> errorContent(position, e));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-            return just(new ErrorContent(position, e));
+            return just(errorContent(position, e));
         }
     }
 

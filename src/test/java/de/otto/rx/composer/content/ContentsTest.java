@@ -25,7 +25,7 @@ public class ContentsTest {
         contents.add(someContent("some content", AVAILABLE));
         // then
         assertThat(contents.getContents(), hasSize(1));
-        assertThat(contents.getContent(A).isPresent(), is(true));
+        assertThat(contents.getContent(A).hasContent(), is(true));
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ContentsTest {
         contents.add(someContent("", EMPTY));
         // then
         assertThat(contents.getContents(), is(empty()));
-        assertThat(contents.getContent(A).isPresent(), is(false));
+        assertThat(contents.getContent(A).hasContent(), is(false));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class ContentsTest {
         contents.add(someContent("", ERROR));
         // then
         assertThat(contents.getContents(), is(empty()));
-        assertThat(contents.getContent(A).isPresent(), is(false));
+        assertThat(contents.getContent(A).hasContent(), is(false));
     }
 
     private Content someContent(final String body, final Availability availability) {

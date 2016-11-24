@@ -18,9 +18,13 @@ public final class IndexedContent implements Content {
     private final Content content;
     private final int index;
 
-    public IndexedContent(final Content content, final int index) {
+    private IndexedContent(final Content content, final int index) {
         this.content = content;
         this.index = index;
+    }
+
+    public static IndexedContent indexed(final Content content, final int index) {
+        return new IndexedContent(content, index);
     }
 
     public Content getContent() {

@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
+import static de.otto.rx.composer.content.EmptyContent.emptyContent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -45,13 +46,15 @@ public final class Contents {
     }
 
     /**
-     * Returns the optionally available {@link Content} for the specified {@link Position}.
+     * Returns the {@link Content} for the specified {@link Position}, or {@link EmptyContent empty content}
+     * if nothing is available.
      *
      * @param position the content position
-     * @return optional content
+     * @return possibly empty content
      */
-    public Optional<Content> getContent(final Position position) {
-        return ofNullable(results.get(position));
+    public Content getContent(final Position position) {
+        final Content content = results.get(position);
+        return content != null ? content : emptyContent(position);
     }
 
 }

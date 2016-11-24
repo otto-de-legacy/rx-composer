@@ -10,6 +10,8 @@ import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static de.otto.rx.composer.content.ErrorContent.*;
+import static de.otto.rx.composer.content.IndexedContent.*;
 import static rx.Observable.empty;
 import static rx.Observable.just;
 import static rx.Observable.merge;
@@ -54,11 +56,11 @@ final class OneOfManyContentProvider implements ContentProvider {
                     try {
                         return contentProvider
                                 .getContent(position, parameters)
-                                .map(content ->  new IndexedContent(content, pos))
+                                .map(content -> indexed(content, pos))
                                 .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
-                                .onErrorReturn(throwable -> new IndexedContent(new ErrorContent(position, throwable), pos));
+                                .onErrorReturn(throwable -> indexed(errorContent(position, throwable), pos));
                     } catch (final Exception e) {
-                        return just(new IndexedContent(new ErrorContent(position, e), pos));
+                        return just(indexed(errorContent(position, e), pos));
                     }
                 })
                 .collect(Collectors.toList()));
