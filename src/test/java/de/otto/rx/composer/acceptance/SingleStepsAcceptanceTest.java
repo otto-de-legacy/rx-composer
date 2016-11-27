@@ -1,9 +1,7 @@
 package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
-import com.google.common.collect.ImmutableMap;
 import de.otto.rx.composer.Plan;
-import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.http.HttpClient;
 import org.junit.Rule;
@@ -17,15 +15,9 @@ import static com.google.common.collect.ImmutableList.of;
 import static de.otto.rx.composer.Plan.planIsTo;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
-import static de.otto.rx.composer.content.AbcPosition.Z;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.content.Parameters.parameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
-import static de.otto.rx.composer.providers.ContentProviders.fetchQuickest;
 import static de.otto.rx.composer.providers.ContentProviders.fetchViaHttpGet;
 import static de.otto.rx.composer.steps.Steps.forPos;
-import static de.otto.rx.composer.steps.Steps.then;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -59,9 +51,9 @@ public class SingleStepsAcceptanceTest {
             );
 
             final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(2));
-            assertThat(result.getContent(X).getBody(), is("Hello"));
-            assertThat(result.getContent(Y).getBody(), is("World"));
+            assertThat(result.getAll(), hasSize(2));
+            assertThat(result.get(X).getBody(), is("Hello"));
+            assertThat(result.get(Y).getBody(), is("World"));
         }
     }
 
@@ -88,9 +80,9 @@ public class SingleStepsAcceptanceTest {
             );
 
             final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).hasContent(), is(false));
-            assertThat(result.getContent(Y).getBody(), is("World"));
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(Y).getBody(), is("World"));
         }
     }
 
@@ -117,9 +109,9 @@ public class SingleStepsAcceptanceTest {
             );
 
             final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).hasContent(), is(false));
-            assertThat(result.getContent(Y).getBody(), is("World"));
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(Y).getBody(), is("World"));
         }
     }
 
@@ -143,9 +135,9 @@ public class SingleStepsAcceptanceTest {
             );
 
             final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(1));
-            assertThat(result.getContent(X).hasContent(), is(false));
-            assertThat(result.getContent(Y).getBody(), is("World"));
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(Y).getBody(), is("World"));
         }
     }
 

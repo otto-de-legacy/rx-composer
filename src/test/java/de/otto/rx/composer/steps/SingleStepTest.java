@@ -49,7 +49,7 @@ public class SingleStepTest {
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getAvailability(), is(ERROR));
-        assertThat(content.getBody(), is("Bumm!!!"));
+        assertThat(content.getBody(), is(""));
     }
 
     private Content someContent(final String body) {

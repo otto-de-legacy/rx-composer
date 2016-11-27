@@ -69,7 +69,7 @@ public final class ErrorContent implements Content {
      */
     @Override
     public String getBody() {
-        return e.getMessage();
+        return "";
     }
 
     /**

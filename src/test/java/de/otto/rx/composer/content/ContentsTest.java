@@ -10,6 +10,7 @@ import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Content.Availability.ERROR;
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -24,8 +25,8 @@ public class ContentsTest {
         // when
         contents.add(someContent("some content", AVAILABLE));
         // then
-        assertThat(contents.getContents(), hasSize(1));
-        assertThat(contents.getContent(A).hasContent(), is(true));
+        assertThat(contents.getAll(), hasSize(1));
+        assertThat(contents.get(A).hasContent(), is(true));
     }
 
     @Test
@@ -35,8 +36,32 @@ public class ContentsTest {
         // when
         contents.add(someContent("", EMPTY));
         // then
-        assertThat(contents.getContents(), is(empty()));
-        assertThat(contents.getContent(A).hasContent(), is(false));
+        assertThat(contents.getAll(), is(empty()));
+        assertThat(contents.get(A).hasContent(), is(false));
+    }
+
+    @Test
+    public void shouldGetEmptyContentAsFallback() {
+        // given
+        final Contents contents = new Contents();
+        // when
+        final Content content = contents.get(A);
+        // then
+        assertThat(content.hasContent(), is(false));
+        assertThat(content.getBody(), is(""));
+    }
+
+    @Test
+    public void shouldGetEmptyContentOnError() {
+        // given
+        final Contents contents = new Contents();
+        contents.add(errorContent(A, new IllegalStateException("test")));
+        // when
+        final Content content = contents.get(A);
+        // then
+        assertThat(content.hasContent(), is(false));
+        assertThat(content.getBody(), is(""));
+
     }
 
     @Test
@@ -46,8 +71,8 @@ public class ContentsTest {
         // when
         contents.add(someContent("", ERROR));
         // then
-        assertThat(contents.getContents(), is(empty()));
-        assertThat(contents.getContent(A).hasContent(), is(false));
+        assertThat(contents.getAll(), is(empty()));
+        assertThat(contents.get(A).hasContent(), is(false));
     }
 
     private Content someContent(final String body, final Availability availability) {

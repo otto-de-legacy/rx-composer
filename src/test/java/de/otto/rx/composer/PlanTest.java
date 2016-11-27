@@ -76,7 +76,7 @@ public class PlanTest {
         // when
         final Contents contents = plan.execute(emptyParameters());
         // then
-        assertThat(contents.getContent(X).getBody(), is("Foo"));
+        assertThat(contents.getBody(X), is("Foo"));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class PlanTest {
         // when
         final Contents contents = plan.execute(emptyParameters());
         // then
-        assertThat(contents.getContent(X).hasContent(), is(false));
+        assertThat(contents.get(X).hasContent(), is(false));
     }
 
     @Test

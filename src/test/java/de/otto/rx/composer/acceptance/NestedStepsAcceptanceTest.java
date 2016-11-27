@@ -20,12 +20,9 @@ import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.AbcPosition.Z;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
-import static de.otto.rx.composer.providers.ContentProviders.fetchQuickest;
 import static de.otto.rx.composer.providers.ContentProviders.fetchViaHttpGet;
 import static de.otto.rx.composer.steps.Steps.forPos;
 import static de.otto.rx.composer.steps.Steps.then;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -69,10 +66,10 @@ public class NestedStepsAcceptanceTest {
             );
 
             final Contents result = plan.execute(emptyParameters());
-            assertThat(result.getContents(), hasSize(3));
-            assertThat(result.getContent(X).getBody(), is("Hello"));
-            assertThat(result.getContent(Y).getBody(), is("World"));
-            assertThat(result.getContent(Z).getBody(), is("Otto"));
+            assertThat(result.getAll(), hasSize(3));
+            assertThat(result.get(X).getBody(), is("Hello"));
+            assertThat(result.get(Y).getBody(), is("World"));
+            assertThat(result.get(Z).getBody(), is("Otto"));
         }
     }
 

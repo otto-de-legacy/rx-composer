@@ -39,8 +39,8 @@ public class ContentController {
         final Contents contents = plan.execute(parameters);
         return "<html>"
                 + "<body>"
-                + "<div id=A>" + contents.getContent(A).getBody() + "</div>"
-                + "<div id=B>" + contents.getContent(B).getBody() + "</div>"
+                + "<div id=A>" + contents.getBody(A) + "</div>"
+                + "<div id=B>" + contents.getBody(B) + "</div>"
                 + "</body></html>";
     }
 

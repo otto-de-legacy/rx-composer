@@ -1,18 +1,13 @@
 package de.otto.rx.composer.content;
 
-import com.google.common.collect.ImmutableSet;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableCollection;
 
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static com.google.common.collect.ImmutableList.copyOf;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.EmptyContent.emptyContent;
-import static java.util.Optional.ofNullable;
 
 /**
  * Threadsafe container used to gather {@link Content}s when executing a {@link de.otto.rx.composer.Plan}.
@@ -36,25 +31,36 @@ public final class Contents {
     }
 
     /**
-     * Returns the list of {@link de.otto.rx.composer.content.Content.Availability#AVAILABLE available}
+     * Returns the collection of {@link de.otto.rx.composer.content.Content.Availability#AVAILABLE available}
      * {@link Content} items. Only one content per Position is returned.
      *
-     * @return Immutable list of available contents.
+     * @return Immutable collection of available contents.
      */
-    public ImmutableList<Content> getContents() {
-        return ImmutableList.copyOf(results.values());
+    public ImmutableCollection<Content> getAll() {
+        return copyOf(results.values());
     }
 
     /**
-     * Returns the {@link Content} for the specified {@link Position}, or {@link EmptyContent empty content}
-     * if nothing is available.
+     * Returns the {@link Content} for the specified {@link Position} if it {@link Content#hasContent() has content},
+     * or {@link EmptyContent empty content} if nothing is available.
      *
      * @param position the content position
      * @return possibly empty content
      */
-    public Content getContent(final Position position) {
+    public Content get(final Position position) {
         final Content content = results.get(position);
         return content != null ? content : emptyContent(position);
+    }
+
+    /**
+     * Returns the body of the {@link Content} for the specified {@link Position} if it {@link Content#hasContent() has content},
+     * or {@link EmptyContent empty content} if nothing is available.
+     *
+     * @param position the content position
+     * @return body or empty string
+     */
+    public String getBody(final Position position) {
+        return get(position).getBody();
     }
 
 }
