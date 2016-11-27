@@ -2,6 +2,8 @@ package de.otto.rx.composer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.Futures;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.steps.Step;
@@ -10,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static com.google.common.collect.ImmutableList.builder;
 import static rx.Observable.from;
@@ -38,14 +43,32 @@ public final class Plan {
 
     public Contents execute(final Parameters params) {
         LOG.trace("Started execution");
-        return from(getSteps())
+        // use a latch to await execution of all steps:
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Contents contents = new Contents();
+        from(getSteps())
                 .flatMap((step) -> step.execute(params))
-                .doOnCompleted(() -> LOG.trace("Completed execution"))
-                .doOnNext((c) -> LOG.trace("Got Content for {}", c.getPosition()))
-                .doOnError((t) -> LOG.error(t.getMessage(), t))
-                .collect(Contents::new, Contents::add)
-                .toBlocking()
-                .single();
+                .subscribe(
+                        (c) -> {
+                            LOG.trace("Got Content for {}", c.getPosition());
+                            contents.add(c);
+                        },
+                        (t) -> {
+                            LOG.error(t.getMessage(), t);
+                        },
+                        () -> {
+                            LOG.trace("Completed execution");
+                            // doOnComplete: all contents are collected - we can proceed now.
+                            latch.countDown();
+                        }
+                );
+        try {
+            // wait for completion of the plan execution:
+            latch.await();
+        } catch (final InterruptedException e) {
+            LOG.error("Interrupted waiting for Contents: {}", e.getMessage());
+        }
+        return contents;
     }
 
     ImmutableList<Step> getSteps() {
