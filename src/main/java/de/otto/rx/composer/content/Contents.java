@@ -1,11 +1,13 @@
 package de.otto.rx.composer.content;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMap;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
+import static com.google.common.collect.Maps.uniqueIndex;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.EmptyContent.emptyContent;
 
@@ -17,17 +19,37 @@ import static de.otto.rx.composer.content.EmptyContent.emptyContent;
  */
 public final class Contents {
 
-    private final ConcurrentMap<Position, Content> results = new ConcurrentHashMap<>();
+    public static class Builder {
 
-    /**
-     * Add a content item to the collection of contents if content is available.
-     *
-     * @param content the added content item.
-     */
-    public void add(final Content content) {
-        if(content.getAvailability().equals(AVAILABLE)) {
-                results.put(content.getPosition(), content);
+        private final Queue<Content> results = new ConcurrentLinkedQueue<>();
+
+        /**
+         * Add a content item to the collection of contents if content is available.
+         *
+         * @param content the added content item.
+         */
+        public Builder add(final Content content) {
+            if (content.getAvailability().equals(AVAILABLE)) {
+                results.add(content);
+            }
+            return this;
         }
+
+        public Contents build() {
+            return new Contents(
+                uniqueIndex(results, Content::getPosition)
+            );
+        }
+    }
+
+    private final ImmutableMap<Position, Content> results;
+
+    private Contents(final ImmutableMap<Position, Content> results) {
+        this.results = results;
+    }
+
+    public static Contents.Builder contentsBuilder() {
+        return new Builder();
     }
 
     /**

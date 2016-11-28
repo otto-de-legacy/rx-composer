@@ -2,21 +2,16 @@ package de.otto.rx.composer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.Futures;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.steps.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static com.google.common.collect.ImmutableList.builder;
+import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static rx.Observable.from;
 
 /**
@@ -45,7 +40,7 @@ public final class Plan {
         LOG.trace("Started execution");
         // use a latch to await execution of all steps:
         final CountDownLatch latch = new CountDownLatch(1);
-        final Contents contents = new Contents();
+        final Contents.Builder contents = contentsBuilder();
         from(getSteps())
                 .flatMap((step) -> step.execute(params))
                 .subscribe(
@@ -68,7 +63,7 @@ public final class Plan {
         } catch (final InterruptedException e) {
             LOG.error("Interrupted waiting for Contents: {}", e.getMessage());
         }
-        return contents;
+        return contents.build();
     }
 
     ImmutableList<Step> getSteps() {

@@ -10,6 +10,7 @@ import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Content.Availability.ERROR;
+import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -21,9 +22,9 @@ public class ContentsTest {
     @Test
     public void shouldAddAvailableContent() {
         // given
-        final Contents contents = new Contents();
+        final Contents.Builder builder = contentsBuilder();
         // when
-        contents.add(someContent("some content", AVAILABLE));
+        final Contents contents = builder.add(someContent("some content", AVAILABLE)).build();
         // then
         assertThat(contents.getAll(), hasSize(1));
         assertThat(contents.get(A).hasContent(), is(true));
@@ -32,9 +33,9 @@ public class ContentsTest {
     @Test
     public void shouldAddEmptyContent() {
         // given
-        final Contents contents = new Contents();
+        final Contents.Builder builder = contentsBuilder();
         // when
-        contents.add(someContent("", EMPTY));
+        final Contents contents = builder.add(someContent("", EMPTY)).build();
         // then
         assertThat(contents.getAll(), is(empty()));
         assertThat(contents.get(A).hasContent(), is(false));
@@ -43,9 +44,9 @@ public class ContentsTest {
     @Test
     public void shouldGetEmptyContentAsFallback() {
         // given
-        final Contents contents = new Contents();
+        final Contents.Builder builder = contentsBuilder();
         // when
-        final Content content = contents.get(A);
+        final Content content = builder.build().get(A);
         // then
         assertThat(content.hasContent(), is(false));
         assertThat(content.getBody(), is(""));
@@ -54,10 +55,10 @@ public class ContentsTest {
     @Test
     public void shouldGetEmptyContentOnError() {
         // given
-        final Contents contents = new Contents();
-        contents.add(errorContent(A, new IllegalStateException("test")));
+        final Contents.Builder builder = contentsBuilder();
+        builder.add(errorContent(A, new IllegalStateException("test")));
         // when
-        final Content content = contents.get(A);
+        final Content content = builder.build().get(A);
         // then
         assertThat(content.hasContent(), is(false));
         assertThat(content.getBody(), is(""));
@@ -67,9 +68,9 @@ public class ContentsTest {
     @Test
     public void shouldAddErrorContent() {
         // given
-        final Contents contents = new Contents();
+        final Contents.Builder builder = contentsBuilder();
         // when
-        contents.add(someContent("", ERROR));
+        final Contents contents = builder.add(someContent("", ERROR)).build();
         // then
         assertThat(contents.getAll(), is(empty()));
         assertThat(contents.get(A).hasContent(), is(false));
