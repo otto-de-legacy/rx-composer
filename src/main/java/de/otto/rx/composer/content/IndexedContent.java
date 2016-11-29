@@ -59,8 +59,8 @@ public final class IndexedContent implements Content {
      * @return true, if content is available and not empty, false otherwise.
      */
     @Override
-    public boolean hasContent() {
-        return content.hasContent();
+    public boolean isAvailable() {
+        return content.isAvailable();
     }
 
     /**
@@ -100,13 +100,23 @@ public final class IndexedContent implements Content {
     }
 
     /**
-     * The availability of the content.
+     * Returns whether or not this instance is a composite, consisting of more than one valid contents.
      *
-     * @return availability
+     * @return
      */
     @Override
-    public Availability getAvailability() {
-        return content.getAvailability();
+    public boolean isComposite() {
+        return content.isComposite();
+    }
+
+    @Override
+    public CompositeContent asComposite() {
+        return content.asComposite();
+    }
+
+    @Override
+    public SingleContent asSingle() {
+        return content.asSingle();
     }
 
     public int getIndex() {

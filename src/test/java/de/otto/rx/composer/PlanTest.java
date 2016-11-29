@@ -12,14 +12,11 @@ import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.Plan.planIsTo;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -92,7 +89,7 @@ public class PlanTest {
         // when
         final Contents contents = plan.execute(emptyParameters());
         // then
-        assertThat(contents.get(X).hasContent(), is(false));
+        assertThat(contents.get(X).isAvailable(), is(false));
     }
 
     @Test
@@ -133,7 +130,7 @@ public class PlanTest {
         return new TestContent(source, position, text);
     }
 
-    private static final class TestContent implements Content {
+    private static final class TestContent extends SingleContent {
         private final String source;
         private final String text;
         private final Position position;
@@ -157,7 +154,7 @@ public class PlanTest {
         }
 
         @Override
-        public boolean hasContent() {
+        public boolean isAvailable() {
             return !text.isEmpty();
         }
 
@@ -176,9 +173,5 @@ public class PlanTest {
             return now();
         }
 
-        @Override
-        public Availability getAvailability() {
-            return hasContent() ? AVAILABLE : EMPTY;
-        }
     }
 }

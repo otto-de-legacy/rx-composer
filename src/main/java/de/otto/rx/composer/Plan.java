@@ -2,6 +2,7 @@ package de.otto.rx.composer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.steps.Step;
@@ -15,7 +16,43 @@ import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static rx.Observable.from;
 
 /**
- * A plan containing the steps to retrieve content from one or more microservices.
+ * A plan describes how to gather {@link de.otto.rx.composer.content.Content} from one or more
+ * {@link de.otto.rx.composer.providers.ContentProvider}s.
+ * <p>
+ *     The plan consists of several {@link Step steps} that describe how to get content for the different
+ *     {@link de.otto.rx.composer.content.Position positions} of the Plan.
+ * </p>
+ * <p>
+ *     Example:
+ *     <pre><code>
+ *         final Plan plan = planIsTo(
+ *              forPos(
+ *                  X,
+ *                  fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+ *                  then(
+ *                      (final Content content) -> parameters(ImmutableMap.of("param", content.getBody()),
+ *                      forPos(
+ *                          Y,
+ *                          fetchViaHttpGet(httpClient, "http://example.com/otherContent{?param}"), TEXT_HTML_TYPE)),
+ *                      forPos(
+ *                          Z,
+ *                          fetchViaHttpGet(httpClient, "http://example.com/moreContent{?param}", TEXT_HTML_TYPE))
+ *                  )
+ *              )
+ *         );
+ *
+ *         final Contents contents = plan.execute(emptyParameters());
+ *     </code></pre>
+ * </p>
+ * <p>
+ *     During execution, content is retrieved asynchronously, whenever possible. In the example above, the first step
+ *     is to fetch plain text content for position X. The returned text is then provided as a {@link Parameters parameter}
+ *     to fetch content for Y and Z.
+ * </p>
+ * <p>
+ *     The ContentProviders for Y and Z are executed concurrently.
+ * </p>
+ *
  */
 public final class Plan {
 
@@ -23,10 +60,23 @@ public final class Plan {
 
     private final ImmutableList<Step> steps;
 
-    private Plan(ImmutableList<Step> steps) {
+    private Plan(final ImmutableList<Step> steps) {
         this.steps = steps;
     }
 
+    /**
+     * Create a Plan using one ore more {@link Step}s.
+     * <p>
+     *     Steps can be created using the factory methods of {@link de.otto.rx.composer.steps.Steps}.
+     * </p>
+     * <p>
+     *     The returned Plan <em>MUST NOT</em> not be executed concurrently. You should build a new Plan for every request,
+     *     otherwise you will see unpredictable results.
+     * </p>
+     * @param firstStep the first step to execute
+     * @param moreSteps optionally more steps
+     * @return execution Plan
+     */
     public static Plan planIsTo(final Step firstStep, final Step... moreSteps) {
         final Builder<Step> steps = builder();
         steps.add(firstStep);
@@ -36,12 +86,17 @@ public final class Plan {
         return new Plan(steps.build());
     }
 
+    /**
+     * Executes the steps of the plan concurrently and returns the {@link Content#isAvailable() available} {@link Contents}.
+     * @param params Parameters used to fetch the content
+     * @return available Contents
+     */
     public Contents execute(final Parameters params) {
         LOG.trace("Started execution");
         // use a latch to await execution of all steps:
         final CountDownLatch latch = new CountDownLatch(1);
         final Contents.Builder contents = contentsBuilder();
-        from(getSteps())
+        from(steps)
                 .flatMap((step) -> step.execute(params))
                 .subscribe(
                         (c) -> {

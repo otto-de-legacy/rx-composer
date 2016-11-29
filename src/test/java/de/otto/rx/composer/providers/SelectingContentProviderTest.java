@@ -1,10 +1,7 @@
 package de.otto.rx.composer.providers;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.AbcPosition;
-import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.Headers;
-import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.content.*;
 import org.junit.Test;
 import rx.Observable;
 
@@ -12,8 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
@@ -26,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static rx.Observable.just;
 
-public class OneOfManyContentProviderTest {
+public class SelectingContentProviderTest {
 
     @Test
     public void shouldFetchFirstWithContent() {
@@ -106,7 +101,7 @@ public class OneOfManyContentProviderTest {
         verify(nestedProvider, times(3)).getContent(X, emptyParameters());
     }
 
-    private static final class TestContent implements Content {
+    private static final class TestContent extends SingleContent {
         private final String text;
         private AbcPosition position;
 
@@ -127,7 +122,7 @@ public class OneOfManyContentProviderTest {
         }
 
         @Override
-        public boolean hasContent() {
+        public boolean isAvailable() {
             return !text.isEmpty();
         }
 
@@ -146,9 +141,5 @@ public class OneOfManyContentProviderTest {
             return now();
         }
 
-        @Override
-        public Availability getAvailability() {
-            return hasContent() ? AVAILABLE : EMPTY;
-        }
     }
 }

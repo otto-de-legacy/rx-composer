@@ -1,15 +1,11 @@
 package de.otto.rx.composer.content;
 
 
-import de.otto.rx.composer.content.Content.Availability;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,10 +20,10 @@ public class ContentsTest {
         // given
         final Contents.Builder builder = contentsBuilder();
         // when
-        final Contents contents = builder.add(someContent("some content", AVAILABLE)).build();
+        final Contents contents = builder.add(someContent("some content")).build();
         // then
         assertThat(contents.getAll(), hasSize(1));
-        assertThat(contents.get(A).hasContent(), is(true));
+        assertThat(contents.get(A).isAvailable(), is(true));
     }
 
     @Test
@@ -35,10 +31,10 @@ public class ContentsTest {
         // given
         final Contents.Builder builder = contentsBuilder();
         // when
-        final Contents contents = builder.add(someContent("", EMPTY)).build();
+        final Contents contents = builder.add(someContent("")).build();
         // then
         assertThat(contents.getAll(), is(empty()));
-        assertThat(contents.get(A).hasContent(), is(false));
+        assertThat(contents.get(A).isAvailable(), is(false));
     }
 
     @Test
@@ -48,7 +44,7 @@ public class ContentsTest {
         // when
         final Content content = builder.build().get(A);
         // then
-        assertThat(content.hasContent(), is(false));
+        assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
     }
 
@@ -60,24 +56,13 @@ public class ContentsTest {
         // when
         final Content content = builder.build().get(A);
         // then
-        assertThat(content.hasContent(), is(false));
+        assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
 
     }
 
-    @Test
-    public void shouldAddErrorContent() {
-        // given
-        final Contents.Builder builder = contentsBuilder();
-        // when
-        final Contents contents = builder.add(someContent("", ERROR)).build();
-        // then
-        assertThat(contents.getAll(), is(empty()));
-        assertThat(contents.get(A).hasContent(), is(false));
-    }
-
-    private Content someContent(final String body, final Availability availability) {
-        return new Content() {
+    private Content someContent(final String body) {
+        return new SingleContent() {
             @Override
             public String getSource() {
                 return body;
@@ -89,7 +74,7 @@ public class ContentsTest {
             }
 
             @Override
-            public boolean hasContent() {
+            public boolean isAvailable() {
                 return !body.isEmpty();
             }
 
@@ -108,10 +93,6 @@ public class ContentsTest {
                 return LocalDateTime.now();
             }
 
-            @Override
-            public Availability getAvailability() {
-                return availability;
-            }
         };
     }
 }

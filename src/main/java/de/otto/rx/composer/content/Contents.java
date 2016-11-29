@@ -8,14 +8,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Maps.uniqueIndex;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.EmptyContent.emptyContent;
 
 /**
  * Threadsafe container used to gather {@link Content}s when executing a {@link de.otto.rx.composer.Plan}.
- * <p>
- *     Contents are separated by {@link de.otto.rx.composer.content.Content.Availability}.
- * </p>
  */
 public final class Contents {
 
@@ -29,7 +25,7 @@ public final class Contents {
          * @param content the added content item.
          */
         public Builder add(final Content content) {
-            if (content.getAvailability().equals(AVAILABLE)) {
+            if (content.isAvailable()) {
                 results.add(content);
             }
             return this;
@@ -53,7 +49,7 @@ public final class Contents {
     }
 
     /**
-     * Returns the collection of {@link de.otto.rx.composer.content.Content.Availability#AVAILABLE available}
+     * Returns the collection of {@link Content#isAvailable() available}
      * {@link Content} items. Only one content per Position is returned.
      *
      * @return Immutable collection of available contents.
@@ -63,7 +59,7 @@ public final class Contents {
     }
 
     /**
-     * Returns the {@link Content} for the specified {@link Position} if it {@link Content#hasContent() has content},
+     * Returns the {@link Content} for the specified {@link Position} if it {@link Content#isAvailable() has content},
      * or {@link EmptyContent empty content} if nothing is available.
      *
      * @param position the content position
@@ -75,7 +71,7 @@ public final class Contents {
     }
 
     /**
-     * Returns the body of the {@link Content} for the specified {@link Position} if it {@link Content#hasContent() has content},
+     * Returns the body of the {@link Content} for the specified {@link Position} if it {@link Content#isAvailable() has content},
      * or {@link EmptyContent empty content} if nothing is available.
      *
      * @param position the content position

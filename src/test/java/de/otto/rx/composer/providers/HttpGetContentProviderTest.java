@@ -1,30 +1,25 @@
 package de.otto.rx.composer.providers;
 
-import com.damnhandy.uri.template.UriTemplate;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.http.HttpClient;
 import org.junit.Test;
 
 import javax.ws.rs.core.Response;
-
 import java.util.Iterator;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
-import static de.otto.rx.composer.content.Content.Availability.*;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
 import static de.otto.rx.composer.providers.ContentProviders.fetchViaHttpGet;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static rx.Observable.*;
+import static rx.Observable.just;
 
 public class HttpGetContentProviderTest {
 
@@ -38,7 +33,7 @@ public class HttpGetContentProviderTest {
         final Content content = contentProvider.getContent(X, emptyParameters()).toBlocking().single();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
-        assertThat(content.getAvailability(), is(AVAILABLE));
+        assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Foo"));
     }
 
@@ -52,7 +47,7 @@ public class HttpGetContentProviderTest {
         final Content content = contentProvider.getContent(X, parameters(of("foo", "bar"))).toBlocking().single();
         // then
         verify(mockClient).get("/test?foo=bar", TEXT_PLAIN_TYPE);
-        assertThat(content.getAvailability(), is(AVAILABLE));
+        assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("FooBar"));
     }
 

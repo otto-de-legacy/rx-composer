@@ -7,11 +7,9 @@ import de.otto.rx.composer.http.HttpClient;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static com.google.common.collect.ImmutableList.of;
 import static de.otto.rx.composer.Plan.planIsTo;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
@@ -81,7 +79,7 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getAll(), hasSize(1));
-            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
         }
     }
@@ -110,7 +108,7 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getAll(), hasSize(1));
-            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
         }
     }
@@ -136,7 +134,7 @@ public class SingleStepsAcceptanceTest {
 
             final Contents result = plan.execute(emptyParameters());
             assertThat(result.getAll(), hasSize(1));
-            assertThat(result.get(X).hasContent(), is(false));
+            assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
         }
     }

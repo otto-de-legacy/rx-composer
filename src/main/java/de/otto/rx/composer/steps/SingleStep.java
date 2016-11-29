@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 
-import static de.otto.rx.composer.content.ErrorContent.*;
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static rx.Observable.just;
 
 /**
@@ -30,6 +30,7 @@ class SingleStep implements Step {
 
     /**
      * Create a SingleStep instance for a Position using a ContentProvider.
+     *
      * @param position the resulting Content's Position.
      * @param contentProvider the ContentProvider used to actually fetch the Content.
      */

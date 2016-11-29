@@ -1,7 +1,10 @@
 package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
-import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.content.HttpContent;
+import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import rx.Observable;
@@ -11,7 +14,7 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static de.otto.rx.composer.content.ErrorContent.*;
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -62,7 +65,7 @@ final class HttpGetContentProvider implements ContentProvider {
                 .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
                 .map(response -> (Content) new HttpContent(url, position, response))
                 .onErrorReturn(e -> errorContent(position, e))
-                .filter(Content::hasContent);
+                .filter(Content::isAvailable);
     }
 
     private String resolveUrl(final Parameters parameters) {

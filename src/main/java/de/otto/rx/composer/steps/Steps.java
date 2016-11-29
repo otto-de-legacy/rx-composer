@@ -11,6 +11,9 @@ import java.util.function.Function;
 import static de.otto.rx.composer.steps.CompositeStep.StepContinuation;
 import static java.util.Arrays.asList;
 
+/**
+ * Factory methods used to create {@link Step steps}.
+ */
 public final class Steps {
 
     private Steps() {}

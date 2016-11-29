@@ -7,25 +7,29 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 
-public final class EmptyContent implements Content {
+public final class EmptyContent extends SingleContent {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmptyContent.class);
 
     private final Position position;
+    private final String source;
     private LocalDateTime created = now();
 
-    private EmptyContent(final Position position) {
+    private EmptyContent(final Position position, final String source) {
         this.position = position;
-        LOG.info("Created EmptyContent for position {}", position);
+        this.source = source;
+        LOG.info("Created EmptyContent for position {} from source {}", position, source);
     }
 
     public static EmptyContent emptyContent(final Position position) {
-        return new EmptyContent(position);
+        return new EmptyContent(position, position.name());
+    }
+
+    public static EmptyContent emptyContent(final Position position, final String source) {
+        return new EmptyContent(position, source);
     }
 
     /**
@@ -41,7 +45,7 @@ public final class EmptyContent implements Content {
      */
     @Override
     public String getSource() {
-        return position.name();
+        return source;
     }
 
     /**
@@ -58,7 +62,7 @@ public final class EmptyContent implements Content {
      * @return true, if content is available and not empty, false otherwise.
      */
     @Override
-    public boolean hasContent() {
+    public boolean isAvailable() {
         return false;
     }
 
@@ -98,13 +102,4 @@ public final class EmptyContent implements Content {
         return created;
     }
 
-    /**
-     * The availability of the content.
-     *
-     * @return availability
-     */
-    @Override
-    public Availability getAvailability() {
-        return EMPTY;
-    }
 }

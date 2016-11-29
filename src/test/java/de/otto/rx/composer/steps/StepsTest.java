@@ -8,7 +8,6 @@ import rx.Observable;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.steps.Steps.forPos;
 import static de.otto.rx.composer.steps.Steps.then;
@@ -52,7 +51,7 @@ public class StepsTest {
     public void shouldExecuteStep() {
         // given
         final Content mockContent = mock(Content.class);
-        when(mockContent.getAvailability()).thenReturn(AVAILABLE);
+        when(mockContent.isAvailable()).thenReturn(true);
         when(mockContent.getBody()).thenReturn("Foo");
         // and
         final ContentProvider mockProvider = mock(ContentProvider.class);

@@ -29,7 +29,7 @@ public class HttpClient implements AutoCloseable {
     }
 
     public HttpClient(final int httpThreadpoolSize, final int connectTimeoutMillis, final int readTimeoutMillis) {
-        ClientConfig clientConfig = new ClientConfig();
+        final ClientConfig clientConfig = new ClientConfig();
         clientConfig.property(ASYNC_THREADPOOL_SIZE, httpThreadpoolSize);
         clientConfig.property(CONNECT_TIMEOUT, connectTimeoutMillis);
         clientConfig.property(READ_TIMEOUT, readTimeoutMillis);

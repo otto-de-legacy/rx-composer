@@ -3,6 +3,7 @@ package de.otto.rx.composer.steps;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.content.SingleContent;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 import rx.Observable;
@@ -10,8 +11,6 @@ import rx.Observable;
 import java.time.LocalDateTime;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.steps.Steps.forPos;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,7 +35,7 @@ public class SingleStepTest {
         final Observable<Content> result = step.execute(emptyParameters());
         // then
         final Content content = result.toBlocking().single();
-        assertThat(content.getAvailability(), is(AVAILABLE));
+        assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Yeah!"));
     }
 
@@ -48,12 +47,12 @@ public class SingleStepTest {
         final Observable<Content> result = step.execute(emptyParameters());
         // then
         final Content content = result.toBlocking().single();
-        assertThat(content.getAvailability(), is(ERROR));
+        assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
     }
 
     private Content someContent(final String body) {
-        return  new Content() {
+        return new SingleContent() {
             @Override
             public String getSource() {
                 return body;
@@ -65,7 +64,7 @@ public class SingleStepTest {
             }
 
             @Override
-            public boolean hasContent() {
+            public boolean isAvailable() {
                 return true;
             }
 
@@ -84,10 +83,6 @@ public class SingleStepTest {
                 return LocalDateTime.now();
             }
 
-            @Override
-            public Availability getAvailability() {
-                return AVAILABLE;
-            }
         };
     }
 

@@ -6,9 +6,6 @@ import org.junit.Test;
 import javax.ws.rs.core.Response;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,12 +51,12 @@ public class HttpContentTest {
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
+        assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Hello Test"));
-        assertThat(content.getAvailability(), is(AVAILABLE));
     }
 
     @Test
-    public void shouldBeEmptyIfNoContentIsReturned() {
+    public void shouldBeUnavailableOnEmptyBody() {
         // given
         final Response mockResponse = mock(Response.class);
         when(mockResponse.readEntity(String.class)).thenReturn("");
@@ -67,19 +64,19 @@ public class HttpContentTest {
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
+        assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
-        assertThat(content.getAvailability(), is(EMPTY));
     }
 
     @Test
-    public void shouldBeErrorContent() {
+    public void shouldBeUnavailableOnError() {
         // given
         final Response mockResponse = mock(Response.class);
         when(mockResponse.getStatus()).thenReturn(404);
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
+        assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
-        assertThat(content.getAvailability(), is(ERROR));
     }
 }

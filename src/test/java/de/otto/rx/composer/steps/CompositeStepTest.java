@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.content.SingleContent;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 
@@ -56,7 +57,7 @@ public class CompositeStepTest {
     }
 
     private Content someContent(final Position position) {
-        return new Content() {
+        return new SingleContent() {
             @Override
             public String getSource() {
                 return position.name();
@@ -68,7 +69,7 @@ public class CompositeStepTest {
             }
 
             @Override
-            public boolean hasContent() {
+            public boolean isAvailable() {
                 return true;
             }
 
@@ -87,10 +88,6 @@ public class CompositeStepTest {
                 return LocalDateTime.now();
             }
 
-            @Override
-            public Availability getAvailability() {
-                return Availability.AVAILABLE;
-            }
         };
 
     }

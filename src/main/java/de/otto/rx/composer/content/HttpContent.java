@@ -6,20 +6,17 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static java.time.LocalDateTime.now;
 
-public final class HttpContent implements Content {
+public final class HttpContent extends SingleContent {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpContent.class);
 
     private final String source;
     private final Position position;
     private final String body;
-    private final Availability availability;
     private final Headers headers;
+    private final boolean available;
     private final LocalDateTime created = now();
 
     /**
@@ -35,11 +32,9 @@ public final class HttpContent implements Content {
         this.source = source;
         this.position = position;
         this.body = response.readEntity(String.class);
-        this.availability = response.getStatus() > 399
-                ? ERROR
-                : body == null || body.isEmpty() ? EMPTY : AVAILABLE;
+        this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
         this.headers = Headers.of(response.getHeaders());
-        LOG.trace("{} content pos={} status={} source={}", availability, position, response.getStatus(), source);
+        LOG.trace("{} content pos={} status={} source={}", available ? "Available" : "Unavailable", position, response.getStatus(), source);
     }
 
     /**
@@ -71,8 +66,8 @@ public final class HttpContent implements Content {
      * @return true, if content is available and not empty, false otherwise.
      */
     @Override
-    public boolean hasContent() {
-        return availability == AVAILABLE && !getBody().isEmpty();
+    public boolean isAvailable() {
+        return available;
     }
 
     /**
@@ -111,15 +106,6 @@ public final class HttpContent implements Content {
         return created;
     }
 
-    /**
-     * The availability of the content.
-     *
-     * @return availability
-     */
-    public Availability getAvailability() {
-        return this.availability;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -127,20 +113,21 @@ public final class HttpContent implements Content {
 
         HttpContent that = (HttpContent) o;
 
+        if (available != that.available) return false;
+        if (source != null ? !source.equals(that.source) : that.source != null) return false;
         if (position != null ? !position.equals(that.position) : that.position != null) return false;
         if (body != null ? !body.equals(that.body) : that.body != null) return false;
-        if (availability != that.availability) return false;
         if (headers != null ? !headers.equals(that.headers) : that.headers != null) return false;
         return created != null ? created.equals(that.created) : that.created == null;
-
     }
 
     @Override
     public int hashCode() {
-        int result = position != null ? position.hashCode() : 0;
+        int result = source != null ? source.hashCode() : 0;
+        result = 31 * result + (position != null ? position.hashCode() : 0);
         result = 31 * result + (body != null ? body.hashCode() : 0);
-        result = 31 * result + (availability != null ? availability.hashCode() : 0);
         result = 31 * result + (headers != null ? headers.hashCode() : 0);
+        result = 31 * result + (available ? 1 : 0);
         result = 31 * result + (created != null ? created.hashCode() : 0);
         return result;
     }
@@ -150,7 +137,7 @@ public final class HttpContent implements Content {
         return "HttpContent{" +
                 "position=" + position +
                 ", body='" + body + '\'' +
-                ", status=" + availability +
+                ", available=" + available+
                 ", headers=" + headers +
                 ", created=" + created +
                 '}';

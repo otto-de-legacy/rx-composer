@@ -2,7 +2,6 @@ package de.otto.rx.composer.providers;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.*;
-import de.otto.rx.composer.steps.Step;
 import org.junit.Test;
 import rx.Observable;
 
@@ -10,12 +9,9 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
-import static de.otto.rx.composer.content.Content.Availability.AVAILABLE;
-import static de.otto.rx.composer.content.Content.Availability.EMPTY;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.fetchQuickest;
-import static de.otto.rx.composer.steps.Steps.forPos;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -67,7 +63,7 @@ public class QuickestWinsContentProviderTest {
         assertThat(content.getBody(), is("Yeah!"));
     }
 
-    private static final class TestContent implements Content {
+    private static final class TestContent extends SingleContent {
         private final String source;
         private final String text;
         private final AbcPosition position;
@@ -91,7 +87,7 @@ public class QuickestWinsContentProviderTest {
         }
 
         @Override
-        public boolean hasContent() {
+        public boolean isAvailable() {
             return !text.isEmpty();
         }
 
@@ -110,10 +106,6 @@ public class QuickestWinsContentProviderTest {
             return now();
         }
 
-        @Override
-        public Availability getAvailability() {
-            return hasContent() ? AVAILABLE : EMPTY;
-        }
     }
 
 }

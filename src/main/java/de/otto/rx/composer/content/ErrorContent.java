@@ -7,11 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
-import static de.otto.rx.composer.content.Content.Availability.ERROR;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 
-public final class ErrorContent implements Content {
+public final class ErrorContent extends SingleContent {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorContent.class);
 
     private final Position position;
@@ -58,7 +57,7 @@ public final class ErrorContent implements Content {
      * @return true, if content is available and not empty, false otherwise.
      */
     @Override
-    public boolean hasContent() {
+    public boolean isAvailable() {
         return false;
     }
 
@@ -98,13 +97,4 @@ public final class ErrorContent implements Content {
         return created;
     }
 
-    /**
-     * The availability of the content.
-     *
-     * @return availability
-     */
-    @Override
-    public Availability getAvailability() {
-        return ERROR;
-    }
 }
