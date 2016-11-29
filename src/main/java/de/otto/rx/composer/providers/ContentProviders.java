@@ -74,6 +74,7 @@ public final class ContentProviders {
      *     provider over content coming from the second, and so on.
      * </p>
      *
+     * @param predicate the predicate used to match the contents
      * @param contentProviders list of content providers, where the first entries are more important than following entries.
      * @return OneOfManyContentProvider
      */
@@ -108,6 +109,7 @@ public final class ContentProviders {
      * The {@link Content} returned by this provider is a composite Content, consisting of all single Contents
      * from the providers in the same order as specified.
      *
+     * @param predicate the predicate used to match the contents
      * @param contentProviders the providers used to generate the composite Content. The ordering of the content
      *                         providers is used to order the composite contents.
      * @return ContentProvider

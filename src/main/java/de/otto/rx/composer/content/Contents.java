@@ -23,6 +23,7 @@ public final class Contents {
          * Add a content item to the collection of contents if content is available.
          *
          * @param content the added content item.
+         * @return this
          */
         public Builder add(final Content content) {
             if (content.isAvailable()) {

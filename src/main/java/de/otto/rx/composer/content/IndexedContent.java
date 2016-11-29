@@ -102,7 +102,7 @@ public final class IndexedContent implements Content {
     /**
      * Returns whether or not this instance is a composite, consisting of more than one valid contents.
      *
-     * @return
+     * @return boolean
      */
     @Override
     public boolean isComposite() {

@@ -14,7 +14,7 @@ public interface ContentProvider {
      * Returns an Observable Content for the given Position and Parameters.
      * <p>
      *     The returned Observable must be {@link rx.Observable#empty() empty}, if no Content is
-     *     {@link de.otto.rx.composer.content.Content.Availability available}.
+     *     {@link Content#isAvailable()}  available}.
      * </p>
      * <p>
      *     Only a {@link Observable#single() single} Content is emitted by the Observer, if available.

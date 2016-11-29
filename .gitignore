@@ -1,5 +1,6 @@
 build
 out
+.shelf
 .gradle
 *.iml
 *.ipr

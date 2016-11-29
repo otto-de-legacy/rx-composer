@@ -24,26 +24,26 @@ import static rx.Observable.from;
  * </p>
  * <p>
  *     Example:
- *     <pre><code>
- *         final Plan plan = planIsTo(
- *              forPos(
- *                  X,
- *                  fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
- *                  then(
- *                      (final Content content) -> parameters(ImmutableMap.of("param", content.getBody()),
- *                      forPos(
- *                          Y,
- *                          fetchViaHttpGet(httpClient, "http://example.com/otherContent{?param}"), TEXT_HTML_TYPE)),
- *                      forPos(
- *                          Z,
- *                          fetchViaHttpGet(httpClient, "http://example.com/moreContent{?param}", TEXT_HTML_TYPE))
- *                  )
- *              )
- *         );
- *
- *         final Contents contents = plan.execute(emptyParameters());
- *     </code></pre>
  * </p>
+ * <pre><code>
+ *     final Plan plan = planIsTo(
+ *          forPos(
+ *              X,
+ *              fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+ *              then(
+ *                  (final Content content) -&gt; parameters(ImmutableMap.of("param", content.getBody()),
+ *                  forPos(
+ *                      Y,
+ *                      fetchViaHttpGet(httpClient, "http://example.com/otherContent{?param}"), TEXT_HTML_TYPE)),
+ *                  forPos(
+ *                      Z,
+ *                      fetchViaHttpGet(httpClient, "http://example.com/moreContent{?param}", TEXT_HTML_TYPE))
+ *              )
+ *          )
+ *     );
+ *
+ *     final Contents contents = plan.execute(emptyParameters());
+ * </code></pre>
  * <p>
  *     During execution, content is retrieved asynchronously, whenever possible. In the example above, the first step
  *     is to fetch plain text content for position X. The returned text is then provided as a {@link Parameters parameter}
