@@ -17,30 +17,17 @@ import static org.mockito.Mockito.when;
 public class HttpContentTest {
 
     @Test
-    public void shouldIgnoreCaseOfKeys() {
-        // given
-        final Response mockResponse = mock(Response.class);
-        when(mockResponse.getHeaders()).thenReturn(new StringKeyIgnoreCaseMultivaluedMap<Object>() {{
-            put("X-SomeHeader", singletonList("somevalue"));
-        }});
-        // when
-        final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
-        // then
-        assertThat(content.getHeaders().getValue("x-someheader", String.class).get(), is("somevalue"));
-    }
-
-    @Test
     public void shouldPropagateResponseHeadersToContent() {
         // given
         final Response mockResponse = mock(Response.class);
-        when(mockResponse.getHeaders()).thenReturn(new StringKeyIgnoreCaseMultivaluedMap<Object>() {{
+        when(mockResponse.getStringHeaders()).thenReturn(new StringKeyIgnoreCaseMultivaluedMap<String>() {{
             put("X-SomeHeader", singletonList("somevalue"));
             put("x-otherheader", asList("foo", "bar"));
         }});
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
         // then
-        assertThat(content.getHeaders().getValues("x-otherheader", String.class), contains("foo", "bar"));
+        assertThat(content.getHeaders().getAll("x-otherheader"), contains("foo", "bar"));
     }
 
     @Test

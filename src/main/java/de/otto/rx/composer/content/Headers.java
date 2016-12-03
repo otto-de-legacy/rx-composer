@@ -1,6 +1,5 @@
 package de.otto.rx.composer.content;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -17,14 +16,14 @@ import static com.google.common.collect.ImmutableList.copyOf;
  * </p>
  */
 public final class Headers {
-    private final ImmutableMap<String,List<Object>> headers;
+    private final ImmutableMap<String,ImmutableList<String>> headers;
 
     /**
      * Creates Headers from a Map.
      *
      * @param headers Map of headers.
      */
-    private Headers(final Map<String, List<Object>> headers) {
+    private Headers(final Map<String, List<String>> headers) {
         this.headers = headers != null ? lowerCaseKeysOf(headers) : ImmutableMap.of();
     }
 
@@ -32,45 +31,51 @@ public final class Headers {
         return new Headers(null);
     }
 
-    public static Headers of(final Map<String, List<Object>> headers) {
+    public static Headers of(final Map<String, List<String>> headers) {
         return new Headers(headers);
     }
 
     /**
-     * Returns an optionally available header value for a case-insensitive key as
-     * an expected type. If the value has multiple values, the first value is returned.
+     * Returns an optionally available header value for a case-insensitive key.
      * <p>
-     *     If the value has a different type as requested, a ClassCastException will be thrown.
+     *     If the value has multiple values, the first value is returned.
      * </p>
      * @param key case-insensitive key of the header value.
-     * @param asType the expected type of the value
-     * @param <T> dito
      * @return optional value
      */
-    public <T> Optional<T> getValue(final String key, final Class<T> asType) {
-        return Optional.ofNullable(
-                getValues(key, asType).isEmpty()
-                        ? null
-                        : getValues(key, asType).iterator().next());
+    public Optional<String> get(final String key) {
+        final ImmutableList<String> values = getAll(key);
+        return values.isEmpty()
+                ? Optional.empty()
+                : Optional.of(values.get(0));
+    }
+
+    /**
+     * Returns a header value for a case-insensitive key, or the default value, if the header does not exist.
+     * <p>
+     *     If the value has multiple values, the first value is returned.
+     * </p>
+     * @param key case-insensitive key of the header value.
+     * @param defaultValue default value that is returned if value does not exist.
+     * @return value or default value
+     */
+    public String get(final String key, final String defaultValue) {
+        final ImmutableList<String> values = getAll(key);
+        return values.isEmpty()
+                ? defaultValue
+                : values.get(0);
     }
 
     /**
      * Returns the immutable collection of values for the given case-insensitive key.
-     * <p>
-     *     If the value has a different type as requested, a ClassCastException will be thrown.
-     * </p>
      * @param key case-insensitive key of the header values
-     * @param asType the expected type of the values
-     * @param <T> dito
      * @return immutable collection of values.
      */
     @SuppressWarnings("unchecked")
-    public <T> ImmutableCollection<T> getValues(final String key, final Class<T> asType) {
+    public ImmutableList<String> getAll(final String key) {
         final String caseInsensitiveKey = key.toLowerCase();
-        final ImmutableCollection<T> values = (ImmutableCollection<T>) headers.get(caseInsensitiveKey);
-        return values == null || values.isEmpty()
-                        ? ImmutableList.of()
-                        : values;
+        final ImmutableList<String> values = headers.get(caseInsensitiveKey);
+        return values != null ? values : ImmutableList.of();
     }
 
     @Override
@@ -102,12 +107,11 @@ public final class Headers {
      * @param headers the given headers
      * @return immutable headers with lower-case keys.
      */
-    private ImmutableMap<String, List<Object>> lowerCaseKeysOf(final Map<String, List<Object>> headers) {
-        final ImmutableMap.Builder<String, List<Object>> builder = ImmutableMap.builder();
-        headers.entrySet().forEach(entry -> {
-            List<Object> values = entry.getValue();
-            builder.put(entry.getKey().toLowerCase(), copyOf(values));
-        });
+    private ImmutableMap<String, ImmutableList<String>> lowerCaseKeysOf(final Map<String, List<String>> headers) {
+        final ImmutableMap.Builder<String, ImmutableList<String>> builder = ImmutableMap.builder();
+        headers.entrySet().forEach(
+                entry -> builder.put(entry.getKey().toLowerCase(), copyOf(entry.getValue()))
+        );
         return builder.build();
     }
 }
