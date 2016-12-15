@@ -27,11 +27,11 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
        
             // Specify what to fetch:
             final Page page = consistsOf(
-                    pagelet(
+                    fragment(
                             X,
                             withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/html"))
                     ),
-                    pagelet(
+                    fragment(
                             Y,
                             withSingle(contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
                     )
@@ -43,7 +43,7 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
 
             // Specify what to fetch:
             final Page page = consistsOf(
-                    pagelet(X, withFirst(of(
+                    fragment(X, withFirst(of(
                             contentFrom(httpClient, "http://example.com/someContent", "text/html"),
                             contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
                     )
@@ -55,16 +55,16 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
 ### Fetch contents using the results of an initial call to a microservice:
 
             final Page page = consistsOf(
-                    pagelet(
+                    fragment(
                             X,
                             withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/plain")),
                             followedBy(
                                     (final Content content) -> parameters(of("param", content.getBody())),
-                                    pagelet(
+                                    fragment(
                                             Y,
                                             withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN))
                                     ),
-                                    pagelet(
+                                    fragment(
                                             Z,
                                             withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN))
                                     )
