@@ -1,5 +1,7 @@
 package de.otto.rx.composer.content;
 
+import de.otto.rx.composer.page.Page;
+
 import java.time.LocalDateTime;
 
 /**
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
  *     that is fetching the content will decide, which content is selected for the position.
  * </p>
  * <p>
- *     ContentProviders that are generating multiple Contents for a single position in a {@link de.otto.rx.composer.Plan}
+ *     ContentProviders that are generating multiple Contents for a single position in a {@link Page}
  *     will return a {@link #isComposite() composite} Content instance. In this case {@code isComposite} will return
  *     true and {@link #asComposite()} will return a {@link CompositeContent}.
  * </p>
@@ -21,7 +23,7 @@ import java.time.LocalDateTime;
 public interface Content {
 
     /**
-     * The content position inside of the {@link de.otto.rx.composer.Plan}
+     * The content position inside of the {@link Page}
      *
      * @return Position
      */
@@ -75,7 +77,7 @@ public interface Content {
     LocalDateTime getCreated();
 
     /**
-     * Returns whether or not this instance is a composite, consisting of more than one valid contents.
+     * Returns whether or not this instance is a composite, withAll of more than one valid contents.
      *
      * @return boolean
      */

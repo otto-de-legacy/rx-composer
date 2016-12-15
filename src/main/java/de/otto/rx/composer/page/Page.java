@@ -1,11 +1,10 @@
-package de.otto.rx.composer;
+package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
-import de.otto.rx.composer.steps.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,34 +18,34 @@ import static rx.Observable.from;
  * A plan describes how to gather {@link de.otto.rx.composer.content.Content} from one or more
  * {@link de.otto.rx.composer.providers.ContentProvider}s.
  * <p>
- *     The plan consists of several {@link Step steps} that describe how to get content for the different
+ *     The plan consists of several {@link Fragment steps} that describe how to get content for the different
  *     {@link de.otto.rx.composer.content.Position positions} of the Plan.
  * </p>
  * <p>
  *     Example:
  * </p>
  * <pre><code>
- *     final Plan plan = planIsTo(
- *          forPos(
+ *     final Plan plan = consistsOf(
+ *          fragment(
  *              X,
- *              fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
- *              then(
+ *              contentFrom(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
+ *              followedBy(
  *                  (final Content content) -&gt; parameters(ImmutableMap.of("param", content.getBody()),
- *                  forPos(
+ *                  fragment(
  *                      Y,
- *                      fetchViaHttpGet(httpClient, "http://example.com/otherContent{?param}"), TEXT_HTML_TYPE)),
- *                  forPos(
+ *                      contentFrom(httpClient, "http://example.com/otherContent{?param}"), TEXT_HTML_TYPE)),
+ *                  fragment(
  *                      Z,
- *                      fetchViaHttpGet(httpClient, "http://example.com/moreContent{?param}", TEXT_HTML_TYPE))
+ *                      contentFrom(httpClient, "http://example.com/moreContent{?param}", TEXT_HTML_TYPE))
  *              )
  *          )
  *     );
  *
- *     final Contents contents = plan.execute(emptyParameters());
+ *     final Contents contents = plan.fetchWith(emptyParameters());
  * </code></pre>
  * <p>
  *     During execution, content is retrieved asynchronously, whenever possible. In the example above, the first step
- *     is to fetch plain text content for position X. The returned text is then provided as a {@link Parameters parameter}
+ *     is to fetch plain text content for position X. The returned text is followedBy provided as a {@link Parameters parameter}
  *     to fetch content for Y and Z.
  * </p>
  * <p>
@@ -54,36 +53,36 @@ import static rx.Observable.from;
  * </p>
  *
  */
-public final class Plan {
+public final class Page {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Plan.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Page.class);
 
-    private final ImmutableList<Step> steps;
+    private final ImmutableList<Fragment> fragments;
 
-    private Plan(final ImmutableList<Step> steps) {
-        this.steps = steps;
+    private Page(final ImmutableList<Fragment> fragments) {
+        this.fragments = fragments;
     }
 
     /**
-     * Create a Plan using one ore more {@link Step}s.
+     * Create a Plan using one ore more {@link Fragment}s.
      * <p>
-     *     Steps can be created using the factory methods of {@link de.otto.rx.composer.steps.Steps}.
+     *     Steps can be created using the factory methods of {@link Fragments}.
      * </p>
      * <p>
      *     The returned Plan <em>MUST NOT</em> not be executed concurrently. You should build a new Plan for every request,
      *     otherwise you will see unpredictable results.
      * </p>
-     * @param firstStep the first step to execute
-     * @param moreSteps optionally more steps
+     * @param firstFragment the first step to fetchWith
+     * @param moreFragments optionally more steps
      * @return execution Plan
      */
-    public static Plan planIsTo(final Step firstStep, final Step... moreSteps) {
-        final Builder<Step> steps = builder();
-        steps.add(firstStep);
-        if (moreSteps != null) {
-            steps.add(moreSteps);
+    public static Page consistsOf(final Fragment firstFragment, final Fragment... moreFragments) {
+        final Builder<Fragment> steps = builder();
+        steps.add(firstFragment);
+        if (moreFragments != null) {
+            steps.add(moreFragments);
         }
-        return new Plan(steps.build());
+        return new Page(steps.build());
     }
 
     /**
@@ -91,13 +90,13 @@ public final class Plan {
      * @param params Parameters used to fetch the content
      * @return available Contents
      */
-    public Contents execute(final Parameters params) {
+    public Contents fetchWith(final Parameters params) {
         LOG.trace("Started execution");
         // use a latch to await execution of all steps:
         final CountDownLatch latch = new CountDownLatch(1);
         final Contents.Builder contents = contentsBuilder();
-        from(steps)
-                .flatMap((step) -> step.execute(params))
+        from(fragments)
+                .flatMap((step) -> step.fetchWith(params))
                 .subscribe(
                         (c) -> {
                             LOG.trace("Got Content for {}", c.getPosition());
@@ -121,8 +120,8 @@ public final class Plan {
         return contents.build();
     }
 
-    ImmutableList<Step> getSteps() {
-        return steps;
+    ImmutableList<Fragment> getFragments() {
+        return fragments;
     }
 
 }

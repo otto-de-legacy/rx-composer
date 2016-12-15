@@ -38,7 +38,7 @@ public class HttpClientTest {
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Hello World", "text/plain").after(300, TimeUnit.MILLISECONDS));
-        try (final HttpClient httpClient = new HttpClient(1000, 200)) {
+        try (final HttpClient httpClient = new HttpClient(1000, 250)) {
             httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
         } catch (final ProcessingException e) {
             throw e.getCause();

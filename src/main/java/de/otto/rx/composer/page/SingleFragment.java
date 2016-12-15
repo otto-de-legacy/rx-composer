@@ -1,4 +1,4 @@
-package de.otto.rx.composer.steps;
+package de.otto.rx.composer.page;
 
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.ErrorContent;
@@ -15,9 +15,9 @@ import static rx.Observable.just;
 /**
  * A single Step in a Plan to retrieve content using a {@link ContentProvider}.
  */
-class SingleStep implements Step {
+class SingleFragment implements Fragment {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SingleStep.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingleFragment.class);
 
     /**
      * The {@link ContentProvider} is responsible for getting Observable {@link Content}.
@@ -34,8 +34,8 @@ class SingleStep implements Step {
      * @param position the resulting Content's Position.
      * @param contentProvider the ContentProvider used to actually fetch the Content.
      */
-    SingleStep(final Position position,
-               final ContentProvider contentProvider) {
+    SingleFragment(final Position position,
+                   final ContentProvider contentProvider) {
         this.position = position;
         this.contentProvider = contentProvider;
     }
@@ -48,7 +48,7 @@ class SingleStep implements Step {
      * </p>
      */
     @Override
-    public Observable<Content> execute(final Parameters parameters) {
+    public Observable<Content> fetchWith(final Parameters parameters) {
         try {
             return contentProvider
                     .getContent(position, parameters)

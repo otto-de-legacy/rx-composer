@@ -20,16 +20,20 @@ public final class ContentProviders {
 
     private ContentProviders() {}
 
-    public static ContentProvider fetchViaHttpGet(final HttpClient httpClient,
-                                                  final String url,
-                                                  final MediaType accept) {
+    public static ContentProvider contentFrom(final HttpClient httpClient,
+                                              final String url,
+                                              final String accept) {
         return new HttpGetContentProvider(httpClient, url, accept);
     }
 
-    public static ContentProvider fetchViaHttpGet(final HttpClient httpClient,
-                                                  final UriTemplate uriTemplate,
-                                                  final MediaType accept) {
+    public static ContentProvider contentFrom(final HttpClient httpClient,
+                                              final UriTemplate uriTemplate,
+                                              final String accept) {
         return new HttpGetContentProvider(httpClient, uriTemplate, accept);
+    }
+
+    public static ContentProvider withSingle(final ContentProvider contentProvider) {
+        return contentProvider;
     }
 
     /**
@@ -42,7 +46,7 @@ public final class ContentProviders {
      * @param contentProviders the ContentProviders.
      * @return QuickestWinsContentProvider
      */
-    public static ContentProvider fetchQuickest(final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withQuickest(final ImmutableList<ContentProvider> contentProviders) {
         return new QuickestWinsContentProvider(
                 contentProviders,
                 contentMatcher(Content::isAvailable, "No content available"));
@@ -58,7 +62,7 @@ public final class ContentProviders {
      * @param contentProviders list of content providers, where the first entries are more important than following entries.
      * @return OneOfManyContentProvider
      */
-    public static ContentProvider fetchFirst(final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withFirst(final ImmutableList<ContentProvider> contentProviders) {
         return new SelectingContentProvider(
                 contentProviders,
                 contentMatcher(Content::isAvailable, "No content available"),
@@ -78,8 +82,8 @@ public final class ContentProviders {
      * @param contentProviders list of content providers, where the first entries are more important than following entries.
      * @return OneOfManyContentProvider
      */
-    public static ContentProvider fetchFirstMatching(final Predicate<Content> predicate,
-                                                     final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withFirstMatching(final Predicate<Content> predicate,
+                                                    final ImmutableList<ContentProvider> contentProviders) {
         return new SelectingContentProvider(
                 contentProviders,
                 contentMatcher(predicate.and(Content::isAvailable), "No content available"),
@@ -89,14 +93,14 @@ public final class ContentProviders {
 
     /**
      * Fetch contents from all the given providers for a single position. The {@link Content} returned by this
-     * provider is a composite Content, consisting of all single Contents from the providers in the same order as
+     * provider is a composite Content, withAll of all single Contents from the providers in the same order as
      * specified.
      *
      * @param contentProviders the providers used to generate the composite Content. The ordering of the content
      *                         providers is used to order the composite contents.
      * @return ContentProvider
      */
-    public static ContentProvider fetchAll(final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withAll(final ImmutableList<ContentProvider> contentProviders) {
         return new SelectingContentProvider(
                 contentProviders,
                 contentMatcher(Content::isAvailable, "No content available"),
@@ -106,7 +110,7 @@ public final class ContentProviders {
 
     /**
      * Fetch all contents matching the given predicate from all the given providers for a single position.
-     * The {@link Content} returned by this provider is a composite Content, consisting of all single Contents
+     * The {@link Content} returned by this provider is a composite Content, withAll of all single Contents
      * from the providers in the same order as specified.
      *
      * @param predicate the predicate used to match the contents
@@ -114,7 +118,7 @@ public final class ContentProviders {
      *                         providers is used to order the composite contents.
      * @return ContentProvider
      */
-    public static ContentProvider fetchAllMatching(final Predicate<Content> predicate, final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withAllMatching(final Predicate<Content> predicate, final ImmutableList<ContentProvider> contentProviders) {
         return new SelectingContentProvider(
                 contentProviders,
                 contentMatcher(predicate.and(Content::isAvailable), "No content available"),

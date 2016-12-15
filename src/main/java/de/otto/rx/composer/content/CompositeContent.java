@@ -12,7 +12,7 @@ import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 
 /**
- * A composite consisting of two ore more available {@link Content} items.
+ * A composite withAll of two ore more available {@link Content} items.
  * <p>
  *     All items of the Composite must have the same content {@link #getPosition() position}.
  * </p>

@@ -4,7 +4,7 @@ A DSL for reactive composition of content from different microservices using RxJ
 
 ## Status
 
-Far from beeing stable. More of an early proof of concept.
+Work in Progress
 
 ## About
 
@@ -26,49 +26,47 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
 ### Fetching two contents for a single page in parallel:
        
             // Specify what to fetch:
-            final Plan plan = planIsTo(
-                    forPos(
+            final Page page = consistsOf(
+                    pagelet(
                             X,
-                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE)
+                            withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/html"))
                     ),
-                    forPos(
+                    pagelet(
                             Y,
-                            fetchViaHttpGet(httpClient, "http://example.com/someOtherContent", TEXT_PLAIN_TYPE)
+                            withSingle(contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
                     )
             );
-            // Execute the Plan and get the contents:
-            final Contents result = plan.execute(emptyParameters());
+            // Fetch contents of the page:
+            final Contents result = page.fetchWith(emptyParameters());
 
 ### Fetching the first content that is not empty:
 
             // Specify what to fetch:
-            final Plan plan = planIsTo(
-                    forPos(X, fetchFirst(of(
-                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
-                            fetchViaHttpGet(httpClient, "http://example.com/someOtherContent", TEXT_PLAIN_TYPE))
+            final Page page = consistsOf(
+                    pagelet(X, withFirst(of(
+                            contentFrom(httpClient, "http://example.com/someContent", "text/html"),
+                            contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
                     )
             ));
-            // Execute the Plan and get the contents:
-            final Contents result = plan.execute(emptyParameters());
+
+            // Fetch contents of the page:
+            final Contents result = page.fetchWith(emptyParameters());
 
 ### Fetch contents using the results of an initial call to a microservice:
 
-            final Plan plan = planIsTo(
-                    forPos(
+            final Page page = consistsOf(
+                    pagelet(
                             X,
-                            // first fetch content:
-                            fetchViaHttpGet(httpClient, "http://example.com/someContent", TEXT_PLAIN_TYPE),
-                            // then fetch more contents:
-                            then(
-                                    // extract parameters for the following calls using this function:
-                                    (final Content content) -> Parameters.from(ImmutableMap.of("param", content.getBody())),
-                                    forPos(
+                            withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/plain")),
+                            followedBy(
+                                    (final Content content) -> parameters(of("param", content.getBody())),
+                                    pagelet(
                                             Y,
-                                            fetchViaHttpGet(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN_TYPE)
+                                            withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN))
                                     ),
-                                    forPos(
+                                    pagelet(
                                             Z,
-                                            fetchViaHttpGet(httpClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN_TYPE)
+                                            withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN))
                                     )
                             )
                     )

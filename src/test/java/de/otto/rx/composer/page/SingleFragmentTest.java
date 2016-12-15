@@ -1,4 +1,4 @@
-package de.otto.rx.composer.steps;
+package de.otto.rx.composer.page;
 
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
@@ -12,28 +12,28 @@ import java.time.LocalDateTime;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.steps.Steps.forPos;
+import static de.otto.rx.composer.page.Fragments.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static rx.Observable.just;
 
-public class SingleStepTest {
+public class SingleFragmentTest {
 
     @Test
     public void shouldBuildSingleStepUsingForPos() {
-        final Step step = forPos(X, mock(ContentProvider.class));
-        assertThat(step, is(instanceOf(SingleStep.class)));
+        final Fragment fragment = fragment(X, mock(ContentProvider.class));
+        assertThat(fragment, is(instanceOf(SingleFragment.class)));
     }
 
     @Test
     public void shouldFetchContent() {
         // given
-        final Step step = forPos(X, (position, parameters) -> just(someContent("Yeah!")));
+        final Fragment fragment = fragment(X, (position, parameters) -> just(someContent("Yeah!")));
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
-        // then
+        final Observable<Content> result = fragment.fetchWith(emptyParameters());
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Yeah!"));
@@ -42,10 +42,10 @@ public class SingleStepTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Step step = forPos(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
+        final Fragment fragment = fragment(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
-        final Observable<Content> result = step.execute(emptyParameters());
-        // then
+        final Observable<Content> result = fragment.fetchWith(emptyParameters());
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));

@@ -1,6 +1,5 @@
 package de.otto.rx.composer.providers;
 
-import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.*;
 import org.junit.Test;
 import rx.Observable;
@@ -12,9 +11,9 @@ import static com.google.common.collect.ImmutableList.*;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchAll;
-import static de.otto.rx.composer.providers.ContentProviders.fetchFirst;
-import static de.otto.rx.composer.providers.ContentProviders.fetchFirstMatching;
+import static de.otto.rx.composer.providers.ContentProviders.withAll;
+import static de.otto.rx.composer.providers.ContentProviders.withFirst;
+import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -29,13 +28,13 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldFetchFirstWithContent() {
         // given
-        final ContentProvider contentProvider = fetchFirst(of(
+        final ContentProvider contentProvider = withFirst(of(
                 (position, parameters) -> just(new TestContent(X, "Foo")),
                 (position, parameters) -> just(new TestContent(X, "Bar"))
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
     }
@@ -43,13 +42,13 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldFetchAllWithContent() {
         // given
-        final ContentProvider contentProvider = fetchAll(of(
+        final ContentProvider contentProvider = withAll(of(
                 (position, parameters) -> just(new TestContent(X, "Foo")),
                 (position, parameters) -> just(new TestContent(X, "Bar"))
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.isComposite(), is(true));
         assertThat(content.getBody(), is("Foo\nBar"));
@@ -58,7 +57,7 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldFetchFirstMatchingPredicate() {
         // given
-        final ContentProvider contentProvider = fetchFirstMatching(
+        final ContentProvider contentProvider = withFirstMatching(
                 (content) -> content.getBody().contains("a"),
                 of(
                         (position, parameters) -> just(new TestContent(X, "Foo")),
@@ -67,7 +66,7 @@ public class SelectingContentProviderTest {
         );
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Bar"));
     }
@@ -75,13 +74,13 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldSelectFirstNotEmpty() {
         // given
-        final ContentProvider contentProvider = fetchFirst(of(
+        final ContentProvider contentProvider = withFirst(of(
                 (position, parameters) -> just(new TestContent(X, "")),
                 (position, parameters) -> just(new TestContent(X, "Hello World"))
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Iterator<Content> content = result.toBlocking().toIterable().iterator();
         assertThat(content.next().getBody(), is("Hello World"));
         assertThat(content.hasNext(), is(false));
@@ -90,13 +89,13 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldHandleEmptyContents() {
         // given
-        final ContentProvider contentProvider = fetchFirst(of(
+        final ContentProvider contentProvider = withFirst(of(
                 (position, parameters) -> just(new TestContent(X, "")),
                 (position, parameters) -> just(new TestContent(X, ""))
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
     }
@@ -104,7 +103,7 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final ContentProvider contentProvider = fetchFirst(of(
+        final ContentProvider contentProvider = withFirst(of(
                 (position, parameters) -> {
                     throw new IllegalStateException("Bumm!!!");
                 },
@@ -112,7 +111,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }
@@ -123,7 +122,7 @@ public class SelectingContentProviderTest {
         final ContentProvider nestedProvider = mock(ContentProvider.class);
         when(nestedProvider.getContent(X, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
         // and
-        final ContentProvider fetchFirstProvider = fetchFirst(of(
+        final ContentProvider fetchFirstProvider = withFirst(of(
                 nestedProvider,
                 (position, parameters) -> just(new TestContent(X, "Bar"))
         ));
@@ -131,7 +130,7 @@ public class SelectingContentProviderTest {
         fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
         fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
         final Content content = fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
-        // then
+        // followedBy
         assertThat(content.getBody(), is("Foo"));
         verify(nestedProvider, times(3)).getContent(X, emptyParameters());
     }

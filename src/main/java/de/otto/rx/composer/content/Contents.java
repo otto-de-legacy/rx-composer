@@ -2,6 +2,7 @@ package de.otto.rx.composer.content;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import de.otto.rx.composer.page.Page;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,7 +12,7 @@ import static com.google.common.collect.Maps.uniqueIndex;
 import static de.otto.rx.composer.content.EmptyContent.emptyContent;
 
 /**
- * Threadsafe container used to gather {@link Content}s when executing a {@link de.otto.rx.composer.Plan}.
+ * Threadsafe container used to gather {@link Content}s when executing a {@link Page}.
  */
 public final class Contents {
 

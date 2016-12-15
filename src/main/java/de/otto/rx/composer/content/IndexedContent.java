@@ -1,6 +1,6 @@
 package de.otto.rx.composer.content;
 
-import de.otto.rx.composer.Plan;
+import de.otto.rx.composer.page.Page;
 import de.otto.rx.composer.providers.ContentProvider;
 
 import java.time.LocalDateTime;
@@ -46,7 +46,7 @@ public final class IndexedContent implements Content {
     }
 
     /**
-     * The content position inside of the {@link Plan}
+     * The content position inside of the {@link Page}
      *
      * @return Position
      */
@@ -100,7 +100,7 @@ public final class IndexedContent implements Content {
     }
 
     /**
-     * Returns whether or not this instance is a composite, consisting of more than one valid contents.
+     * Returns whether or not this instance is a composite, withAll of more than one valid contents.
      *
      * @return boolean
      */

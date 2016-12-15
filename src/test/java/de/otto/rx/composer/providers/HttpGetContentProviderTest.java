@@ -12,7 +12,8 @@ import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchViaHttpGet;
+import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -29,9 +30,9 @@ public class HttpGetContentProviderTest {
         final Response response = someResponse(200, "Foo");
         final HttpClient mockClient = someHttpClient(response, "/test");
         // when
-        final ContentProvider contentProvider = fetchViaHttpGet(mockClient, "/test", TEXT_PLAIN_TYPE);
+        final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final Content content = contentProvider.getContent(X, emptyParameters()).toBlocking().single();
-        // then
+        // followedBy
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Foo"));
@@ -43,9 +44,9 @@ public class HttpGetContentProviderTest {
         final Response response = someResponse(200, "FooBar");
         final HttpClient mockClient = someHttpClient(response, "/test?foo=bar");
         // when
-        final ContentProvider contentProvider = fetchViaHttpGet(mockClient, fromTemplate("/test{?foo}"), TEXT_PLAIN_TYPE);
+        final ContentProvider contentProvider = contentFrom(mockClient, fromTemplate("/test{?foo}"), TEXT_PLAIN);
         final Content content = contentProvider.getContent(X, parameters(of("foo", "bar"))).toBlocking().single();
-        // then
+        // followedBy
         verify(mockClient).get("/test?foo=bar", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("FooBar"));
@@ -57,9 +58,9 @@ public class HttpGetContentProviderTest {
         final Response response = someResponse(200, "");
         final HttpClient mockClient = someHttpClient(response, "/test");
         // when
-        final ContentProvider contentProvider = fetchViaHttpGet(mockClient, "/test", TEXT_PLAIN_TYPE);
+        final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final Iterator<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking().getIterator();
-        // then
+        // followedBy
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.hasNext(), is(false));
     }
@@ -70,9 +71,9 @@ public class HttpGetContentProviderTest {
         final Response response = someResponse(500, "Some Error Description");
         final HttpClient mockClient = someHttpClient(response, "/test");
         // when
-        final ContentProvider contentProvider = fetchViaHttpGet(mockClient, "/test", TEXT_PLAIN_TYPE);
+        final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final Iterator<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking().getIterator();
-        // then
+        // followedBy
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.hasNext(), is(false));
     }
@@ -83,9 +84,9 @@ public class HttpGetContentProviderTest {
         // this will throw an Exception (from Jersey Client) because /test is not an absolute URL.
         final HttpClient httpClient = new HttpClient(1, 1);
         // when
-        final ContentProvider contentProvider = fetchViaHttpGet(httpClient, "/test", TEXT_PLAIN_TYPE);
+        final ContentProvider contentProvider = contentFrom(httpClient, "/test", TEXT_PLAIN);
         final Iterator<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking().getIterator();
-        // then
+        // followedBy
         //verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.hasNext(), is(false));
     }

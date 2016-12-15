@@ -26,7 +26,7 @@ public class HttpContentTest {
         }});
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
-        // then
+        // followedBy
         assertThat(content.getHeaders().getAll("x-otherheader"), contains("foo", "bar"));
     }
 
@@ -37,7 +37,7 @@ public class HttpContentTest {
         when(mockResponse.readEntity(String.class)).thenReturn("Hello Test");
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
-        // then
+        // followedBy
         assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Hello Test"));
     }
@@ -50,7 +50,7 @@ public class HttpContentTest {
         when(mockResponse.getStatus()).thenReturn(200);
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
-        // then
+        // followedBy
         assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
     }
@@ -62,7 +62,7 @@ public class HttpContentTest {
         when(mockResponse.getStatus()).thenReturn(404);
         // when
         final HttpContent content = new HttpContent("http://example.com/test", A, mockResponse);
-        // then
+        // followedBy
         assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));
     }

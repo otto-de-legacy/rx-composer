@@ -1,5 +1,6 @@
 package de.otto.rx.composer.content;
 
+import de.otto.rx.composer.page.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ public final class HttpContent extends SingleContent {
      * Create a HttpContent element, representing {@link Content} retrieved from a (micro)service.
      *
      * @param source The URI of the requested service
-     * @param position The content position inside of the {@link de.otto.rx.composer.Plan}.
+     * @param position The content position inside of the {@link Page}.
      * @param response The HTTP response returned from a different (micro)service.
      */
     public HttpContent(final String source,
@@ -52,7 +53,7 @@ public final class HttpContent extends SingleContent {
     }
 
     /**
-     * The content position inside of the {@link de.otto.rx.composer.Plan}
+     * The content position inside of the {@link Page}
      *
      * @return Position
      */

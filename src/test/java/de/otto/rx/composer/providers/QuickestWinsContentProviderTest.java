@@ -11,7 +11,7 @@ import java.util.Iterator;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.providers.ContentProviders.fetchQuickest;
+import static de.otto.rx.composer.providers.ContentProviders.withQuickest;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -22,13 +22,13 @@ public class QuickestWinsContentProviderTest {
     @Test
     public void shouldReturnOnlyNonEmptyContent() {
         // given
-        final ContentProvider fetchQuickest = fetchQuickest(ImmutableList.of(
+        final ContentProvider fetchQuickest = withQuickest(ImmutableList.of(
                 (position, parameters) -> just(new TestContent("First", X, "")),
                 (position, parameters) -> just(new TestContent("Second", X, "Yeah!"))
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }
@@ -36,13 +36,13 @@ public class QuickestWinsContentProviderTest {
     @Test
     public void shouldHandleOnlyEmptyContents() {
         // given
-        final ContentProvider fetchQuickest = fetchQuickest(ImmutableList.of(
+        final ContentProvider fetchQuickest = withQuickest(ImmutableList.of(
                 (position, parameters) -> just(new TestContent("First", X, "")),
                 (position, parameters) -> just(new TestContent("Second", X, ""))
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
     }
@@ -50,7 +50,7 @@ public class QuickestWinsContentProviderTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final ContentProvider fetchQuickest = fetchQuickest(ImmutableList.of(
+        final ContentProvider fetchQuickest = withQuickest(ImmutableList.of(
                 (position, parameters) -> {
                     throw new IllegalStateException("Bumm!!!");
                 },
@@ -58,7 +58,7 @@ public class QuickestWinsContentProviderTest {
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // then
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }

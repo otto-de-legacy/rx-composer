@@ -1,17 +1,17 @@
-package de.otto.rx.composer.steps;
+package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.util.List;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.*;
 import static rx.Observable.just;
 import static rx.Observable.merge;
 
@@ -19,58 +19,58 @@ import static rx.Observable.merge;
  * {@inheritDoc}
  *
  * <p>
- *     A Step that consists of single delegate Step and a list of nested Steps that are used to continue
- *     retrieving content based on the results of the initial Step.
+ *     A Fragment that consists of a single delegate Fragment and a list of nested Fragments that are used to continue
+ *     retrieving content based on the results of the initial content.
  * </p>
  * <p>
  *     Example:
  * </p>
  * <p>
  *     First fetch {@link Content} from System X. Extract {@link Parameters} from this Content and proceed
- *     with these Parameters by calling the nested Steps.
+ *     with these Parameters by calling the nested Fragments.
  * </p>
  */
-class CompositeStep implements Step {
+class CompositeFragment implements Fragment {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CompositeStep.class);
+    private static final Logger LOG = getLogger(CompositeFragment.class);
 
-    static class StepContinuation {
-        final ImmutableList<Step> nested;
+    static class FragmentContinuation {
+        final ImmutableList<Fragment> nested;
         final Function<Content,Parameters> paramExtractor;
 
-        StepContinuation(final Function<Content, Parameters> paramExtractor,
-                         final ImmutableList<Step> nested) {
+        FragmentContinuation(final Function<Content, Parameters> paramExtractor,
+                             final ImmutableList<Fragment> nested) {
             this.nested = nested;
             this.paramExtractor = paramExtractor;
         }
     }
 
-    /** The initial Step. */
-    private final Step first;
-    /** The StepContinuation that is executed using the results from the first Step. */
-    private final StepContinuation continuation;
+    /** The initial Fragment. */
+    private final Fragment first;
+    /** The continuation that is executed using the results from the first Fragment. */
+    private final FragmentContinuation continuation;
 
     /**
-     * Creates a CompositeStep from a first Step and a StepContinuation.
-     * @param first the fist / initial Step to execute
-     * @param continuation Function to extract Parameters from the first Step plus list of nested Steps.
+     * Creates a CompositeFragment from a first Fragment and a continuation.
+     * @param first the fist / initial Fragment to fetch
+     * @param continuation Function to extract Parameters from the first Fragment plus list of nested Fragments.
      */
-    CompositeStep(final Step first,
-                  final StepContinuation continuation) {
+    CompositeFragment(final Fragment first,
+                      final FragmentContinuation continuation) {
         this.first = first;
         this.continuation = continuation;
     }
 
     @Override
-    public Observable<Content> execute(final Parameters parameters) {
+    public Observable<Content> fetchWith(final Parameters parameters) {
         return first
-                .execute(parameters)
+                .fetchWith(parameters)
                 .flatMap(content -> {
                     final Parameters nestedParams = parameters.with(continuation.paramExtractor.apply(content));
                     final List<Observable<Content>> observables = this.continuation.nested
                             .stream()
                             .map(step -> step
-                                    .execute(nestedParams)
+                                    .fetchWith(nestedParams)
                                     .doOnError((t) -> LOG.error(t.getMessage(), t))
                             )
                             .collect(toList());

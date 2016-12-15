@@ -1,4 +1,4 @@
-package de.otto.rx.composer.steps;
+package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
@@ -9,8 +9,8 @@ import rx.Observable;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.steps.Steps.forPos;
-import static de.otto.rx.composer.steps.Steps.then;
+import static de.otto.rx.composer.page.Fragments.*;
+import static de.otto.rx.composer.page.Fragments.followedBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -18,33 +18,33 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static rx.Observable.just;
 
-public class StepsTest {
+public class FragmentsTest {
 
     @Test
     public void shouldSetPosition() {
         // given
-        final Step step = forPos(X, mock(ContentProvider.class));
-        // then
-        assertThat(step.getPosition(), is(X));
+        final Fragment fragment = fragment(X, mock(ContentProvider.class));
+        // followedBy
+        assertThat(fragment.getPosition(), is(X));
     }
 
     @Test
     public void shouldBuildSingleStepUsingForPos() {
-        final Step step = forPos(X, mock(ContentProvider.class));
-        assertThat(step, is(instanceOf(SingleStep.class)));
+        final Fragment fragment = fragment(X, mock(ContentProvider.class));
+        assertThat(fragment, is(instanceOf(SingleFragment.class)));
     }
 
     @Test
     public void shouldBuildCompositeStepUsingForPos() {
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         final ContentProvider thenFetch = mock(ContentProvider.class);
-        final Step step = forPos(
+        final Fragment fragment = fragment(
                 X,
                 fetchInitial,
-                then(
+                followedBy(
                         (c)-> emptyParameters(),
-                        forPos(Y, thenFetch)));
-        assertThat(step, is(instanceOf(CompositeStep.class)));
+                        fragment(Y, thenFetch)));
+        assertThat(fragment, is(instanceOf(CompositeFragment.class)));
     }
 
     @Test
@@ -57,20 +57,20 @@ public class StepsTest {
         final ContentProvider mockProvider = mock(ContentProvider.class);
         when(mockProvider.getContent(X, emptyParameters())).thenReturn(just(mockContent));
         // and
-        final Step step = forPos(X, mockProvider);
+        final Fragment fragment = fragment(X, mockProvider);
         // when Step
-        final Observable<Content> result =  step.execute(emptyParameters());
-        // then
+        final Observable<Content> result =  fragment.fetchWith(emptyParameters());
+        // followedBy
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToBuildCompositeWithoutContinuation() {
-        forPos(
+        fragment(
                 X,
                 mock(ContentProvider.class),
-                new CompositeStep.StepContinuation((c)->emptyParameters(), ImmutableList.of()));
+                new CompositeFragment.FragmentContinuation((c)->emptyParameters(), ImmutableList.of()));
     }
 
 }

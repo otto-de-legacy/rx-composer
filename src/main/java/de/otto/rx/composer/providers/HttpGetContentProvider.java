@@ -15,6 +15,7 @@ import java.util.Arrays;
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
+import static javax.ws.rs.core.MediaType.valueOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -35,22 +36,22 @@ final class HttpGetContentProvider implements ContentProvider {
 
     HttpGetContentProvider(final HttpClient httpClient,
                            final UriTemplate uriTemplate,
-                           final MediaType accept) {
+                           final String accept) {
         checkNotNull(uriTemplate, "uriTemplate must not be null.");
         this.httpClient = httpClient;
         this.uriTemplate = uriTemplate;
         this.url = null;
-        this.accept = accept;
+        this.accept = valueOf(accept);
     }
 
     HttpGetContentProvider(final HttpClient httpClient,
                            final String url,
-                           final MediaType accept) {
+                           final String accept) {
         checkNotNull(url, "url must not be null.");
         this.httpClient = httpClient;
         this.url = url;
         this.uriTemplate = null;
-        this.accept = accept;
+        this.accept = valueOf(accept);
     }
 
     @Override

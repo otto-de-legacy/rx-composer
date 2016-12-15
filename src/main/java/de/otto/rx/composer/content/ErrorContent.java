@@ -1,6 +1,6 @@
 package de.otto.rx.composer.content;
 
-import de.otto.rx.composer.Plan;
+import de.otto.rx.composer.page.Page;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public final class ErrorContent extends SingleContent {
     }
 
     /**
-     * The content position inside of the {@link Plan}
+     * The content position inside of the {@link Page}
      *
      * @return Position
      */

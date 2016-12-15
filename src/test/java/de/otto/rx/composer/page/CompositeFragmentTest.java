@@ -1,4 +1,4 @@
-package de.otto.rx.composer.steps;
+package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
@@ -14,8 +14,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.steps.Steps.forPos;
-import static de.otto.rx.composer.steps.Steps.then;
+import static de.otto.rx.composer.page.Fragments.followedBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
@@ -23,17 +22,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static rx.Observable.just;
 
-public class CompositeStepTest {
+public class CompositeFragmentTest {
 
     @Test
     public void shouldExecuteInitialContentProvider() {
         // given
         final ContentProvider initial = mock(ContentProvider.class);
         when(initial.getContent(A, emptyParameters())).thenReturn(just(mock(Content.class)));
-        final Step step = forPos(A, initial, then((c) -> emptyParameters(), mock(Step.class)));
+        final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
         // when
-        step.execute(emptyParameters());
-        // then
+        fragment.fetchWith(emptyParameters());
+        // followedBy
         verify(initial).getContent(A, emptyParameters());
     }
 
@@ -43,17 +42,17 @@ public class CompositeStepTest {
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         when(fetchInitial.getContent(A, emptyParameters())).thenReturn(just(someContent(A)));
         // and
-        final Step nestedStep = mock(Step.class);
-        when(nestedStep.getPosition()).thenReturn(B);
-        when(nestedStep.execute(emptyParameters())).thenReturn(just(someContent(B)));
+        final Fragment nestedFragment = mock(Fragment.class);
+        when(nestedFragment.getPosition()).thenReturn(B);
+        when(nestedFragment.fetchWith(emptyParameters())).thenReturn(just(someContent(B)));
         // and
-        final Step compositeStep = forPos(A, fetchInitial, then((c) -> emptyParameters(), nestedStep));
+        final Fragment compositeFragment = Fragments.fragment(A, fetchInitial, followedBy((c) -> emptyParameters(), nestedFragment));
         // when
-        ImmutableList<Content> contents = copyOf(compositeStep.execute(emptyParameters()).toBlocking().toIterable());
+        ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(emptyParameters()).toBlocking().toIterable());
 
-        // then
+        // followedBy
         assertThat(contents, hasSize(2));
-        verify(nestedStep).execute(emptyParameters());
+        verify(nestedFragment).fetchWith(emptyParameters());
     }
 
     private Content someContent(final Position position) {
