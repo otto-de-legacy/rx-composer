@@ -8,6 +8,7 @@ import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
@@ -62,6 +63,7 @@ final class HttpGetContentProvider implements ContentProvider {
                 : this.url;
         return httpClient
                 .get(url, accept)
+                .subscribeOn(Schedulers.io())
                 .doOnNext(c -> LOG.trace("Got next content for position {} from {}", position, url))
                 .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
                 .map(response -> (Content) new HttpContent(url, position, response))
