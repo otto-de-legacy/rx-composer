@@ -13,7 +13,7 @@ import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static rx.Observable.just;
 
 /**
- * A single Step in a Plan to retrieve content using a {@link ContentProvider}.
+ * A single Fragment in a Plan to retrieve content using a {@link ContentProvider}.
  */
 class SingleFragment implements Fragment {
 
@@ -24,12 +24,12 @@ class SingleFragment implements Fragment {
      */
     private final ContentProvider contentProvider;
     /**
-     * The Step's Position in the Plan.
+     * The Fragment's Position in the Plan.
      */
     private final Position position;
 
     /**
-     * Create a SingleStep instance for a Position using a ContentProvider.
+     * Create a SingleFragment instance for a Position using a ContentProvider.
      *
      * @param position the resulting Content's Position.
      * @param contentProvider the ContentProvider used to actually fetch the Content.

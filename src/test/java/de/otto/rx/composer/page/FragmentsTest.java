@@ -9,8 +9,8 @@ import rx.Observable;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.page.Fragments.*;
 import static de.otto.rx.composer.page.Fragments.followedBy;
+import static de.otto.rx.composer.page.Fragments.fragment;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -29,13 +29,13 @@ public class FragmentsTest {
     }
 
     @Test
-    public void shouldBuildSingleStepUsingForPos() {
+    public void shouldBuildSingleFragmentUsingForPos() {
         final Fragment fragment = fragment(X, mock(ContentProvider.class));
         assertThat(fragment, is(instanceOf(SingleFragment.class)));
     }
 
     @Test
-    public void shouldBuildCompositeStepUsingForPos() {
+    public void shouldBuildCompositeFragmentUsingForPos() {
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         final ContentProvider thenFetch = mock(ContentProvider.class);
         final Fragment fragment = fragment(
@@ -48,7 +48,7 @@ public class FragmentsTest {
     }
 
     @Test
-    public void shouldExecuteStep() {
+    public void shouldExecuteFragment() {
         // given
         final Content mockContent = mock(Content.class);
         when(mockContent.isAvailable()).thenReturn(true);
@@ -58,7 +58,7 @@ public class FragmentsTest {
         when(mockProvider.getContent(X, emptyParameters())).thenReturn(just(mockContent));
         // and
         final Fragment fragment = fragment(X, mockProvider);
-        // when Step
+        // when Fragment
         final Observable<Content> result =  fragment.fetchWith(emptyParameters());
         // followedBy
         final Content content = result.toBlocking().single();

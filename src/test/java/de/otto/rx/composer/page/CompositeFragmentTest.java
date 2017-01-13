@@ -37,7 +37,7 @@ public class CompositeFragmentTest {
     }
 
     @Test
-    public void shouldExecuteNestedStep() {
+    public void shouldExecuteNestedFragment() {
         // given
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         when(fetchInitial.getContent(A, emptyParameters())).thenReturn(just(someContent(A)));

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
-import static org.slf4j.LoggerFactory.*;
+import static org.slf4j.LoggerFactory.getLogger;
 import static rx.Observable.just;
 import static rx.Observable.merge;
 
@@ -69,12 +69,12 @@ class CompositeFragment implements Fragment {
                     final Parameters nestedParams = parameters.with(continuation.paramExtractor.apply(content));
                     final List<Observable<Content>> observables = this.continuation.nested
                             .stream()
-                            .map(step -> step
+                            .map(fragment -> fragment
                                     .fetchWith(nestedParams)
                                     .doOnError((t) -> LOG.error(t.getMessage(), t))
                             )
                             .collect(toList());
-                    // Add the content, so we can retrieve the content from the first step:
+                    // Add the content, so we can retrieve the content from the first fragment:
                     observables.add(just(content));
                     return merge(observables)
                             .doOnError((t) -> LOG.error(t.getMessage(), t));

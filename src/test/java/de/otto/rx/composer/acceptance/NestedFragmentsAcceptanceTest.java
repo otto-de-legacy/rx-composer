@@ -1,11 +1,10 @@
 package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
-import de.otto.rx.composer.page.Fragments;
-import de.otto.rx.composer.page.Page;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.http.HttpClient;
+import de.otto.rx.composer.page.Page;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -13,16 +12,17 @@ import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static com.google.common.collect.ImmutableMap.*;
-import static de.otto.rx.composer.page.Fragments.followedBy;
-import static de.otto.rx.composer.page.Fragments.fragment;
-import static de.otto.rx.composer.page.Page.consistsOf;
+import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.AbcPosition.Z;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
-import static de.otto.rx.composer.providers.ContentProviders.*;
+import static de.otto.rx.composer.page.Fragments.followedBy;
+import static de.otto.rx.composer.page.Fragments.fragment;
+import static de.otto.rx.composer.page.Page.consistsOf;
+import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static de.otto.rx.composer.providers.ContentProviders.withSingle;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -34,7 +34,7 @@ public class NestedFragmentsAcceptanceTest {
     public ClientDriverRule driver = new ClientDriverRule();
 
     @Test
-    public void shouldHandleNestedSteps() throws Exception {
+    public void shouldHandleNestedFragments() throws Exception {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),

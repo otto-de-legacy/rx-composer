@@ -7,7 +7,7 @@ import rx.Observable;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 
-import static com.google.common.collect.ImmutableList.*;
+import static com.google.common.collect.ImmutableList.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -117,7 +117,7 @@ public class SelectingContentProviderTest {
     }
 
     @Test
-    public void shouldExecuteStepMultipleTimes() {
+    public void shouldExecuteFragmentMultipleTimes() {
         // given
         final ContentProvider nestedProvider = mock(ContentProvider.class);
         when(nestedProvider.getContent(X, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));

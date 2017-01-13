@@ -24,7 +24,7 @@ public final class Fragments {
      *
      * @param position the Position inside the Plan
      * @param contentProvider the ContentProvider used to fetch the Content.
-     * @return Step
+     * @return Fragment
      */
     public static Fragment fragment(final Position position, final ContentProvider contentProvider)   {
         return new SingleFragment(position, contentProvider);
@@ -32,32 +32,32 @@ public final class Fragments {
 
     /**
      * Create a {@link CompositeFragment} used to fetch Content for the specified Position. Depending on
-     * this Content, use the StepContinuation to fetch one or more followup Contents.
+     * this Content, use the FragmentContinuation to fetch one or more followup Contents.
      *
      * @param position the Position of the initial Content.
      * @param contentProvider the ContentProvider used to fetch the Content for the given Position.
-     * @param then the continuation that is fetching more Content depending on the results of the initial Step.
-     * @return Step
+     * @param then the continuation that is fetching more Content depending on the results of the initial Fragment.
+     * @return Fragment
      */
     public static Fragment fragment(final Position position,
                                     final ContentProvider contentProvider,
                                     final FragmentContinuation then)   {
         if (then == null || then.nested.isEmpty()) {
-            throw new IllegalArgumentException("StepContinuation provided by param 'followedBy' must not be null or empty.");
+            throw new IllegalArgumentException("FragmentContinuation provided by param 'followedBy' must not be null or empty.");
         } else {
             return new CompositeFragment(fragment(position, contentProvider), then);
         }
     }
 
     /**
-     * Create a StepContinuation that is used to specify the followup Steps for a CompositeStep.
+     * Create a FragmentContinuation that is used to specify the followup Fragments for a CompositeFragment.
      * <p>
-     *     This method can be used to create the StepContinuation for {@link #fragment(Position, ContentProvider, FragmentContinuation)}
+     *     This method can be used to create the FragmentContinuation for {@link #fragment(Position, ContentProvider, FragmentContinuation)}
      * </p>
      * @param parameterExtractor a Function used to extract additional Parameters from a Content item.
-     * @param first the first Step of the Continuation.
-     * @param more optionally more Steps of the Continuation.
-     * @return StepContinuation
+     * @param first the first Fragment of the Continuation.
+     * @param more optionally more Fragments of the Continuation.
+     * @return FragmentContinuation
      */
     public static FragmentContinuation followedBy(final Function<Content,Parameters> parameterExtractor,
                                                   final Fragment first,

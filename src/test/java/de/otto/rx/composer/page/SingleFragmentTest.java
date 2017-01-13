@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.page.Fragments.*;
+import static de.otto.rx.composer.page.Fragments.fragment;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -22,7 +22,7 @@ import static rx.Observable.just;
 public class SingleFragmentTest {
 
     @Test
-    public void shouldBuildSingleStepUsingForPos() {
+    public void shouldBuildSingleFragmentUsingForPos() {
         final Fragment fragment = fragment(X, mock(ContentProvider.class));
         assertThat(fragment, is(instanceOf(SingleFragment.class)));
     }

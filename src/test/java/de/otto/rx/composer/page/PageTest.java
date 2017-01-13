@@ -21,12 +21,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static rx.Observable.*;
+import static rx.Observable.empty;
+import static rx.Observable.just;
 
 public class PageTest {
 
     @Test
-    public void shouldCreatePlanWithSomeSteps() {
+    public void shouldCreatePlanWithSomeFragments() {
         // given
         final Fragment doFirst = mock(Fragment.class);
         final Fragment doSecond = mock(Fragment.class);
@@ -44,7 +45,7 @@ public class PageTest {
     }
 
     @Test
-    public void shouldExecuteSteps() {
+    public void shouldExecuteFragments() {
         // given
         final Fragment doFirst = mock(Fragment.class);
         final Fragment doSecond = mock(Fragment.class);
@@ -75,7 +76,7 @@ public class PageTest {
     }
 
     @Test
-    public void shouldIgnoreStepsWithEmptyResults() {
+    public void shouldIgnoreFragmentsWithEmptyResults() {
         // given
         final Fragment doFirst = mock(Fragment.class);
         when(doFirst.getPosition()).thenReturn(X);
