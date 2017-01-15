@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import static javax.ws.rs.client.ClientBuilder.newClient;
 import static org.glassfish.jersey.client.ClientProperties.ASYNC_THREADPOOL_SIZE;
 import static org.glassfish.jersey.client.ClientProperties.CONNECT_TIMEOUT;
+import static org.glassfish.jersey.client.ClientProperties.FOLLOW_REDIRECTS;
 import static org.glassfish.jersey.client.ClientProperties.READ_TIMEOUT;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -33,6 +34,7 @@ public class HttpClient implements AutoCloseable {
         clientConfig.property(ASYNC_THREADPOOL_SIZE, httpThreadpoolSize);
         clientConfig.property(CONNECT_TIMEOUT, connectTimeoutMillis);
         clientConfig.property(READ_TIMEOUT, readTimeoutMillis);
+        clientConfig.property(FOLLOW_REDIRECTS, true);
         client = newClient(clientConfig);
     }
 
