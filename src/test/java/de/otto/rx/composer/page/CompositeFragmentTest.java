@@ -32,7 +32,7 @@ public class CompositeFragmentTest {
         final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
         // when
         fragment.fetchWith(emptyParameters());
-        // followedBy
+        // then
         verify(initial).getContent(A, emptyParameters());
     }
 
@@ -50,7 +50,7 @@ public class CompositeFragmentTest {
         // when
         ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(emptyParameters()).toBlocking().toIterable());
 
-        // followedBy
+        // then
         assertThat(contents, hasSize(2));
         verify(nestedFragment).fetchWith(emptyParameters());
     }

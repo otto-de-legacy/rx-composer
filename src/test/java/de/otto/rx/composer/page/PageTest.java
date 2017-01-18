@@ -38,7 +38,7 @@ public class PageTest {
         );
         // when
         final ImmutableList<Fragment> fragments = page.getFragments();
-        // followedBy
+        // then
         assertThat(fragments, hasSize(2));
         assertThat(fragments.get(0).getPosition(), is(X));
         assertThat(fragments.get(1).getPosition(), is(Y));
@@ -54,7 +54,7 @@ public class PageTest {
         );
         // when
         page.fetchWith(emptyParameters());
-        // followedBy
+        // then
         verify(doFirst).fetchWith(any());
         verify(doSecond).fetchWith(any());
     }
@@ -71,7 +71,7 @@ public class PageTest {
         );
         // when
         final Contents contents = page.fetchWith(emptyParameters());
-        // followedBy
+        // then
         assertThat(contents.getBody(X), is("Foo"));
     }
 
@@ -87,7 +87,7 @@ public class PageTest {
         );
         // when
         final Contents contents = page.fetchWith(emptyParameters());
-        // followedBy
+        // then
         assertThat(contents.get(X).isAvailable(), is(false));
     }
 
@@ -102,7 +102,7 @@ public class PageTest {
         // when
         page.fetchWith(emptyParameters());
         page.fetchWith(emptyParameters());
-        // followedBy
+        // then
         verify(doFirst, times(2)).fetchWith(any());
         verify(doSecond, times(2)).fetchWith(any());
     }
@@ -120,7 +120,7 @@ public class PageTest {
         );
         // when
         page.fetchWith(someParameters);
-        // followedBy
+        // then
         verify(doFirst).fetchWith(someParameters);
         verify(doSecond).fetchWith(someParameters);
     }

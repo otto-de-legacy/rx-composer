@@ -33,7 +33,7 @@ public class SingleFragmentTest {
         final Fragment fragment = fragment(X, (position, parameters) -> just(someContent("Yeah!")));
         // when
         final Observable<Content> result = fragment.fetchWith(emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(true));
         assertThat(content.getBody(), is("Yeah!"));
@@ -45,7 +45,7 @@ public class SingleFragmentTest {
         final Fragment fragment = fragment(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
         final Observable<Content> result = fragment.fetchWith(emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(false));
         assertThat(content.getBody(), is(""));

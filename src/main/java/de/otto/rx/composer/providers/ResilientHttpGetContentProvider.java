@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static de.otto.rx.composer.providers.HystrixWrapper.from;
 import static javax.ws.rs.core.MediaType.valueOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -27,33 +28,38 @@ import static org.slf4j.LoggerFactory.getLogger;
  *     the {@link Parameters} when {@link #getContent(Position, Parameters) getting content}.
  * </p>
  */
-final class HttpGetContentProvider implements ContentProvider {
+final class ResilientHttpGetContentProvider implements ContentProvider {
 
-    private static final Logger LOG = getLogger(HttpGetContentProvider.class);
+    private static final Logger LOG = getLogger(ResilientHttpGetContentProvider.class);
 
     private final HttpClient httpClient;
     private final UriTemplate uriTemplate;
     private final String url;
     private final MediaType accept;
+    private final String commandKey;
 
-    HttpGetContentProvider(final HttpClient httpClient,
-                           final UriTemplate uriTemplate,
-                           final String accept) {
+    ResilientHttpGetContentProvider(final HttpClient httpClient,
+                                    final UriTemplate uriTemplate,
+                                    final String accept,
+                                    final String commandKey) {
         checkNotNull(uriTemplate, "uriTemplate must not be null.");
         this.httpClient = httpClient;
         this.uriTemplate = uriTemplate;
         this.url = null;
         this.accept = valueOf(accept);
+        this.commandKey = commandKey;
     }
 
-    HttpGetContentProvider(final HttpClient httpClient,
-                           final String url,
-                           final String accept) {
+    ResilientHttpGetContentProvider(final HttpClient httpClient,
+                                    final String url,
+                                    final String accept,
+                                    final String commandKey) {
         checkNotNull(url, "url must not be null.");
         this.httpClient = httpClient;
         this.url = url;
         this.uriTemplate = null;
         this.accept = valueOf(accept);
+        this.commandKey = commandKey;
     }
 
     @Override
@@ -62,22 +68,24 @@ final class HttpGetContentProvider implements ContentProvider {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
                 : this.url;
-        return httpClient
+        final Observable<Content> contentObservable = httpClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(response -> {
-                    LOG.trace("Got next content for position {} from {}", position, url);
+                    LOG.trace("Got next content for position {} from {} with HTTP status {}", position, url, response.getStatusInfo().getStatusCode());
                     switch (response.getStatusInfo().getFamily()) {
                         case SERVER_ERROR:
                             throw new ServerErrorException(response);
                         case CLIENT_ERROR:
+                            // TODO: ErrorContent for client errors?
                             throw new ClientErrorException(response);
                         default:
                             break;
                     }
                 })
-                .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
-                .map(response -> (Content) new HttpContent(url, position, response))
+                .map(response -> (Content) new HttpContent(url, position, response));
+        return from(contentObservable, commandKey, httpClient.getTimeoutMillis() + 50)
+                .doOnError(t -> LOG.error("Error fetching content {} for position {}: {} ({})", url, position, t.getCause().getMessage(), t.getMessage()))
                 .filter(Content::isAvailable);
     }
 

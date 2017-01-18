@@ -24,7 +24,7 @@ public class FragmentsTest {
     public void shouldSetPosition() {
         // given
         final Fragment fragment = fragment(X, mock(ContentProvider.class));
-        // followedBy
+        // then
         assertThat(fragment.getPosition(), is(X));
     }
 
@@ -60,7 +60,7 @@ public class FragmentsTest {
         final Fragment fragment = fragment(X, mockProvider);
         // when Fragment
         final Observable<Content> result =  fragment.fetchWith(emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
     }

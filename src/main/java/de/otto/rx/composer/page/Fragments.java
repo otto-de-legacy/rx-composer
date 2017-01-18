@@ -52,7 +52,7 @@ public final class Fragments {
     /**
      * Create a FragmentContinuation that is used to specify the followup Fragments for a CompositeFragment.
      * <p>
-     *     This method can be used to create the FragmentContinuation for {@link #fragment(Position, ContentProvider, FragmentContinuation)}
+     *     This method can be used to create the FragmentContinuation for {@link Fragments#fragment(Position, ContentProvider, FragmentContinuation)}
      * </p>
      * @param parameterExtractor a Function used to extract additional Parameters from a Content item.
      * @param first the first Fragment of the Continuation.

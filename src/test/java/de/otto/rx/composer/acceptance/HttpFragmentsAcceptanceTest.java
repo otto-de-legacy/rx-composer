@@ -22,7 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
-public class SingleFragmentsAcceptanceTest {
+public class HttpFragmentsAcceptanceTest {
 
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();

@@ -34,7 +34,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
     }
@@ -48,7 +48,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.isComposite(), is(true));
         assertThat(content.getBody(), is("Foo\nBar"));
@@ -66,7 +66,7 @@ public class SelectingContentProviderTest {
         );
         // when
         final Observable<Content> result =  contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Bar"));
     }
@@ -80,7 +80,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Iterator<Content> content = result.toBlocking().toIterable().iterator();
         assertThat(content.next().getBody(), is("Hello World"));
         assertThat(content.hasNext(), is(false));
@@ -95,7 +95,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
     }
@@ -111,7 +111,7 @@ public class SelectingContentProviderTest {
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }
@@ -130,7 +130,7 @@ public class SelectingContentProviderTest {
         fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
         fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
         final Content content = fetchFirstProvider.getContent(X, emptyParameters()).toBlocking().single();
-        // followedBy
+        // then
         assertThat(content.getBody(), is("Foo"));
         verify(nestedProvider, times(3)).getContent(X, emptyParameters());
     }

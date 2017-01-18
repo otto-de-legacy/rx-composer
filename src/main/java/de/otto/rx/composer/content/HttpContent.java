@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 
+import static de.otto.rx.composer.content.Headers.of;
 import static java.time.LocalDateTime.now;
 
 public final class HttpContent extends SingleContent {
@@ -34,7 +35,7 @@ public final class HttpContent extends SingleContent {
         this.position = position;
         this.body = response.readEntity(String.class);
         this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
-        this.headers = Headers.of(response.getStringHeaders());
+        this.headers = of(response.getStringHeaders());
         LOG.trace("{} content pos={} status={} source={}", available ? "Available" : "Unavailable", position, response.getStatus(), source);
     }
 

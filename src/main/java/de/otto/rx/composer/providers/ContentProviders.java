@@ -8,7 +8,6 @@ import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
 import java.util.function.Predicate;
 
 import static de.otto.rx.composer.content.ContentMatcher.contentMatcher;
@@ -30,6 +29,20 @@ public final class ContentProviders {
                                               final UriTemplate uriTemplate,
                                               final String accept) {
         return new HttpGetContentProvider(httpClient, uriTemplate, accept);
+    }
+
+    public static ContentProvider resilientContentFrom(final HttpClient httpClient,
+                                                       final String url,
+                                                       final String accept,
+                                                       final String commandKey) {
+        return new ResilientHttpGetContentProvider(httpClient, url, accept, commandKey);
+    }
+
+    public static ContentProvider resilientContentFrom(final HttpClient httpClient,
+                                                       final UriTemplate uriTemplate,
+                                                       final String accept,
+                                                       final String commandKey) {
+        return new ResilientHttpGetContentProvider(httpClient, uriTemplate, accept, commandKey);
     }
 
     public static ContentProvider withSingle(final ContentProvider contentProvider) {

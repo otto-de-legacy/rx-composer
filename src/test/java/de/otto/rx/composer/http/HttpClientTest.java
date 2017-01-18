@@ -45,4 +45,30 @@ public class HttpClientTest {
         }
     }
 
+    @Test
+    public void shouldReturnWithClientErrorResponse() throws Throwable {
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Not Found", "text/plain")
+                        .withStatus(404));
+        try (final HttpClient httpClient = new HttpClient(1000, 500)) {
+            Response response = httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
+            assertThat(response.getStatus(), is(404));
+            assertThat(response.readEntity(String.class), is("Not Found"));
+        }
+    }
+
+    @Test
+    public void shouldReturnWithServerErrorResponse() throws Throwable {
+        driver.addExpectation(
+                onRequestTo("/someContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain")
+                        .withStatus(500));
+        try (final HttpClient httpClient = new HttpClient(1000, 500)) {
+            Response response = httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
+            assertThat(response.getStatus(), is(500));
+            assertThat(response.readEntity(String.class), is("Server Error"));
+        }
+    }
+
 }

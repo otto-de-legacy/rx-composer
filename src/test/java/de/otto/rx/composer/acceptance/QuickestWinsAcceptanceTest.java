@@ -1,9 +1,9 @@
 package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
-import de.otto.rx.composer.page.Page;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.http.HttpClient;
+import de.otto.rx.composer.page.Page;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -11,12 +11,12 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static com.google.common.collect.ImmutableList.of;
-import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.providers.ContentProviders.*;
+import static de.otto.rx.composer.page.Fragments.fragment;
+import static de.otto.rx.composer.page.Page.consistsOf;
+import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
 import static de.otto.rx.composer.providers.ContentProviders.withQuickest;
-import static de.otto.rx.composer.page.Fragments.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,7 +33,7 @@ public class QuickestWinsAcceptanceTest {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").after(50, MILLISECONDS));
+                giveResponse("Hello", "text/plain").after(100, MILLISECONDS));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"));

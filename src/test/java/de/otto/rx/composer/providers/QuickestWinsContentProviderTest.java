@@ -28,7 +28,7 @@ public class QuickestWinsContentProviderTest {
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }
@@ -42,7 +42,7 @@ public class QuickestWinsContentProviderTest {
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
     }
@@ -58,7 +58,7 @@ public class QuickestWinsContentProviderTest {
         ));
         // when
         final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
-        // followedBy
+        // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
     }

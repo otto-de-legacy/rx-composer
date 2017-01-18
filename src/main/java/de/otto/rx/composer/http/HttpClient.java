@@ -24,6 +24,7 @@ public class HttpClient implements AutoCloseable {
     private static final Logger LOG = getLogger(HttpClient.class);
 
     private final Client client;
+    private final int timeoutMillis;
 
     public HttpClient(final int connectTimeoutMillis, final int readTimeoutMillis) {
         this(DEFAULT_HTTP_THREADPOOL_SIZE, connectTimeoutMillis, readTimeoutMillis);
@@ -36,10 +37,16 @@ public class HttpClient implements AutoCloseable {
         clientConfig.property(READ_TIMEOUT, readTimeoutMillis);
         clientConfig.property(FOLLOW_REDIRECTS, true);
         client = newClient(clientConfig);
+        this.timeoutMillis = readTimeoutMillis;
     }
 
     public HttpClient(final Configuration configuration) {
         client = newClient(configuration);
+        this.timeoutMillis = (int) configuration.getProperty(READ_TIMEOUT);
+    }
+
+    public int getTimeoutMillis() {
+        return timeoutMillis;
     }
 
     public Observable<Response> get(final String uri,

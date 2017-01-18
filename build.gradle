@@ -15,6 +15,7 @@ dependencies {
     compile libraries.logging
     compile libraries.guava
     compile libraries.uritemplates
+    compile libraries.hystrix
     compile libraries.rx
 
     testCompile libraries.test

@@ -10,6 +10,7 @@ import rx.Observable;
 import java.util.List;
 import java.util.function.Function;
 
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 import static rx.Observable.just;
@@ -65,13 +66,16 @@ class CompositeFragment implements Fragment {
     public Observable<Content> fetchWith(final Parameters parameters) {
         return first
                 .fetchWith(parameters)
+                .onErrorReturn(e -> errorContent(first.getPosition(), e))
+                .filter(Content::isAvailable)
                 .flatMap(content -> {
                     final Parameters nestedParams = parameters.with(continuation.paramExtractor.apply(content));
                     final List<Observable<Content>> observables = this.continuation.nested
                             .stream()
                             .map(fragment -> fragment
                                     .fetchWith(nestedParams)
-                                    .doOnError((t) -> LOG.error(t.getMessage(), t))
+                                    .onErrorReturn(e -> errorContent(fragment.getPosition(), e))
+                                    .filter(Content::isAvailable)
                             )
                             .collect(toList());
                     // Add the content, so we can retrieve the content from the first fragment:

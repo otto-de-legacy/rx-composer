@@ -52,8 +52,8 @@ class SingleFragment implements Fragment {
         try {
             return contentProvider
                     .getContent(position, parameters)
-                    .doOnError((t) -> LOG.error(t.getMessage(), t))
-                    .onErrorReturn((e) -> errorContent(position, e));
+                    .onErrorReturn(e -> errorContent(position, e))
+                    .filter(Content::isAvailable);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             return just(errorContent(position, e));
