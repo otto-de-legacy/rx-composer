@@ -15,6 +15,11 @@ import static de.otto.rx.composer.providers.ContentProviders.withQuickest;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static rx.Observable.fromCallable;
 import static rx.Observable.just;
 
 public class QuickestWinsContentProviderTest {
@@ -51,9 +56,7 @@ public class QuickestWinsContentProviderTest {
     public void shouldHandleExceptions() {
         // given
         final ContentProvider fetchQuickest = withQuickest(ImmutableList.of(
-                (position, parameters) -> {
-                    throw new IllegalStateException("Bumm!!!");
-                },
+                someContentProviderThrowing(new IllegalStateException("Bumm!!!")),
                 (position, parameters) -> just(new TestContent("Second", X, "Yeah!"))
         ));
         // when
@@ -61,6 +64,20 @@ public class QuickestWinsContentProviderTest {
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
+    }
+
+    @Test
+    public void shouldHandleFailingProviders() {
+        // given
+        final ContentProvider fetchQuickest = withQuickest(ImmutableList.of(
+                someContentProviderThrowing(new IllegalStateException("Bumm!!!")),
+                someContentProviderThrowing(new IllegalStateException("Bumm!!!"))
+        ));
+        // when
+        final Observable<Content> result = fetchQuickest.getContent(X, emptyParameters());
+        // then
+        final Content content = result.toBlocking().singleOrDefault(null);
+        assertThat(content, is(nullValue()));
     }
 
     private static final class TestContent extends SingleContent {
@@ -106,6 +123,14 @@ public class QuickestWinsContentProviderTest {
             return now();
         }
 
+    }
+
+    private ContentProvider someContentProviderThrowing(final Exception e) {
+        final ContentProvider delegate = mock(ContentProvider.class);
+        when(delegate.getContent(any(Position.class), any(Parameters.class))).thenReturn(fromCallable(() -> {
+            throw e;
+        }));
+        return delegate;
     }
 
 }

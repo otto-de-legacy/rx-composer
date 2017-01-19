@@ -31,18 +31,10 @@ public final class ContentProviders {
         return new HttpGetContentProvider(httpClient, uriTemplate, accept);
     }
 
-    public static ContentProvider resilientContentFrom(final HttpClient httpClient,
-                                                       final String url,
-                                                       final String accept,
-                                                       final String commandKey) {
-        return new ResilientHttpGetContentProvider(httpClient, url, accept, commandKey);
-    }
-
-    public static ContentProvider resilientContentFrom(final HttpClient httpClient,
-                                                       final UriTemplate uriTemplate,
-                                                       final String accept,
-                                                       final String commandKey) {
-        return new ResilientHttpGetContentProvider(httpClient, uriTemplate, accept, commandKey);
+    public static ContentProvider withResilient(final ContentProvider delegate,
+                                            final int timeoutMillis,
+                                            final String commandKey) {
+        return new CircuitBreakingContentProvider(delegate, timeoutMillis, commandKey);
     }
 
     public static ContentProvider withSingle(final ContentProvider contentProvider) {

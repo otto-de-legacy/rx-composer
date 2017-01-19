@@ -71,6 +71,7 @@ final class HttpGetContentProvider implements ContentProvider {
                         case SERVER_ERROR:
                             throw new ServerErrorException(response);
                         case CLIENT_ERROR:
+                            // TODO: ErrorContent for client errors?
                             throw new ClientErrorException(response);
                         default:
                             break;

@@ -63,15 +63,11 @@ final class SelectingContentProvider implements ContentProvider {
                 .stream()
                 .map(contentProvider -> {
                     final int pos = subIndex.getAndIncrement();
-                    try {
-                        return contentProvider
-                                .getContent(position, parameters)
-                                .map(content -> indexed(content, pos))
-                                .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
-                                .onErrorReturn(throwable -> indexed(errorContent(position, throwable), pos));
-                    } catch (final Exception e) {
-                        return just(indexed(errorContent(position, e), pos));
-                    }
+                    return contentProvider
+                            .getContent(position, parameters)
+                            .map(content -> indexed(content, pos))
+                            .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
+                            .onErrorReturn(throwable -> indexed(errorContent(position, throwable), pos));
                 })
                 .collect(toList()));
         return mergedContent

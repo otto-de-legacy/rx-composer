@@ -29,7 +29,7 @@ public final class CompositeContent implements Content {
         checkNotNull(headers, "Parameter 'headers' must not be null");
         checkArgument(contents.size() > 1, "A composite must at least have two content items.");
         final Position expectedPosition = contents.get(0).getPosition();
-        checkState(contents.stream().allMatch(content -> content.getPosition().equals(expectedPosition)), "All contents of a Composite must have the same position");
+        checkArgument(contents.stream().allMatch(content -> content.getPosition().equals(expectedPosition)), "All contents of a Composite must have the same position");
         this.contents = contents;
         this.headers = headers;
     }

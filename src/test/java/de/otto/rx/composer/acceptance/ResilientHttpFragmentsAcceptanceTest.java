@@ -15,8 +15,8 @@ import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
-import static de.otto.rx.composer.providers.ContentProviders.resilientContentFrom;
-import static de.otto.rx.composer.providers.ContentProviders.withSingle;
+import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static de.otto.rx.composer.providers.ContentProviders.withResilient;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -41,11 +41,17 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     ),
                     fragment(
                             Y,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     )
             );
 
@@ -70,11 +76,17 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     ),
                     fragment(
                             Y,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     )
             );
 
@@ -99,11 +111,17 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     ),
                     fragment(
                             Y,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
+                                    1000,
+                                    commandKey())
                     )
             );
 
@@ -153,11 +171,19 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(resilientContentFrom(httpClient, "INVALID_URL", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, "INVALID_URL", TEXT_PLAIN),
+                                    200,
+                                    commandKey()
+                            )
                     ),
                     fragment(
                             Y,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
+                                    200,
+                                    commandKey()
+                            )
                     )
             );
 
@@ -181,10 +207,13 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             Y,
-                            withSingle(resilientContentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN, commandKey()))
+                            withResilient(
+                                    contentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
+                                    200,
+                                    commandKey())
                     )
             );
-            for (int i = 0; i < 51; i++) {
+            for (int i = 0; i < 150; i++) {
                 page.fetchWith(emptyParameters());
             }
 

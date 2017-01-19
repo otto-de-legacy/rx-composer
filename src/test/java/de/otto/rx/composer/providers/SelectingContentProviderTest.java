@@ -17,10 +17,12 @@ import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
 import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static rx.Observable.fromCallable;
 import static rx.Observable.just;
 
 public class SelectingContentProviderTest {
@@ -104,9 +106,7 @@ public class SelectingContentProviderTest {
     public void shouldHandleExceptions() {
         // given
         final ContentProvider contentProvider = withFirst(of(
-                (position, parameters) -> {
-                    throw new IllegalStateException("Bumm!!!");
-                },
+                someContentProviderThrowing(new IllegalStateException("Bumm!!!")),
                 (position, parameters) -> just(new TestContent(X, "Yeah!"))
         ));
         // when
@@ -176,4 +176,13 @@ public class SelectingContentProviderTest {
         }
 
     }
+
+    private ContentProvider someContentProviderThrowing(final Exception e) {
+        final ContentProvider delegate = mock(ContentProvider.class);
+        when(delegate.getContent(any(Position.class), any(Parameters.class))).thenReturn(fromCallable(() -> {
+            throw e;
+        }));
+        return delegate;
+    }
+
 }

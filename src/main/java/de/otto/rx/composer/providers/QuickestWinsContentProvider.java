@@ -34,16 +34,10 @@ final class QuickestWinsContentProvider implements ContentProvider {
                                           final Parameters parameters) {
         final Observable<Content> mergedContent = merge(contentProviders
                 .stream()
-                .map(contentProvider -> {
-                    try {
-                        return contentProvider
-                                .getContent(position, parameters)
-                                .doOnError(this::traceError)
-                                .onErrorReturn((e) -> errorContent(position, e));
-                    } catch (final Exception e) {
-                        return just(errorContent(position, e));
-                    }
-                })
+                .map(contentProvider -> contentProvider
+                        .getContent(position, parameters)
+                        .doOnError(this::traceError)
+                        .onErrorReturn((Throwable t) -> errorContent(position, t)))
                 .collect(Collectors.toList()));
         return mergedContent
                 .filter(contentMatcher::test)
