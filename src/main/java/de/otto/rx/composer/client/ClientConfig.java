@@ -1,21 +1,21 @@
 package de.otto.rx.composer.client;
 
-import static de.otto.rx.composer.client.ClientConfig.DefaultConfigRef.DEFAULT_CONFIG;
 
 public final class ClientConfig {
 
-    public enum DefaultConfigRef implements ClientConfigRef {DEFAULT_CONFIG}
+    public static final String DEFAULT_CONFIG = "default";
 
-    private final ClientConfigRef clientConfigRef;
+    private final String key;
     private final int connectTimeout;
     private final int readTimeout;
+
     private final int retries;
 
-    private ClientConfig(final ClientConfigRef clientConfigRef,
+    private ClientConfig(final String key,
                          final int connectTimeout,
                          final int readTimeout,
                          final int retries) {
-        this.clientConfigRef = clientConfigRef;
+        this.key = key;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.retries = retries;
@@ -35,15 +35,15 @@ public final class ClientConfig {
                 1);
     }
 
-    public static ClientConfig clientConfig(final ClientConfigRef clientConfigRef,
+    public static ClientConfig clientConfig(final String key,
                                             final int connectTimeout,
                                             final int readTimeout,
                                             final int retries) {
-        return new ClientConfig(clientConfigRef, connectTimeout, readTimeout, retries);
+        return new ClientConfig(key, connectTimeout, readTimeout, retries);
     }
 
-    public ClientConfigRef getRef() {
-        return clientConfigRef;
+    public String getKey() {
+        return key;
     }
 
     public int getConnectTimeout() {
