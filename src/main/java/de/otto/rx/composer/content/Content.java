@@ -30,16 +30,16 @@ public interface Content {
     Position getPosition();
 
     /**
-     * Returns the source of the Content.
+     * Returns the config of the Content.
      * <p>
-     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * For HTTP Content, this is the URL. In other cases, some other unique config key should be used,
      * as this method is used to track the behaviour during execution.
      * </p>
      * <p>
-     *     The source is mostly used for logging purposes.
+     *     The config is mostly used for logging purposes.
      * </p>
      *
-     * @return content source
+     * @return content config
      */
     String getSource();
 

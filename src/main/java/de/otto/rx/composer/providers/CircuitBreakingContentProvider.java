@@ -1,25 +1,14 @@
 package de.otto.rx.composer.providers;
 
-import com.damnhandy.uri.template.UriTemplate;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import rx.Observable;
-import rx.schedulers.Schedulers;
 
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
-
-import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.providers.HystrixWrapper.from;
-import static javax.ws.rs.core.MediaType.valueOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

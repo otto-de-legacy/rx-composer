@@ -8,7 +8,7 @@ import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey;
 import static com.netflix.hystrix.HystrixCommandProperties.Setter;
 import static rx.Observable.just;
 
-public class HystrixWrapper<T> extends HystrixObservableCommand<T> {
+class HystrixWrapper<T> extends HystrixObservableCommand<T> {
 
     private Observable<T> observable;
     private Observable<T> fallback;

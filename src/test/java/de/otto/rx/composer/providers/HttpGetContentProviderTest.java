@@ -1,7 +1,7 @@
 package de.otto.rx.composer.providers;
 
+import de.otto.rx.composer.client.HttpServiceClient;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.http.HttpClient;
 import org.glassfish.jersey.message.internal.Statuses;
 import org.junit.Test;
 import rx.observables.BlockingObservable;
@@ -33,7 +33,7 @@ public class HttpGetContentProviderTest {
     public void shouldFetchContentByUrl() throws Exception {
         // given
         final Response response = someResponse(200, "Foo");
-        final HttpClient mockClient = someHttpClient(response, "/test");
+        final HttpServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final Content content = contentProvider.getContent(X, emptyParameters()).toBlocking().single();
@@ -47,7 +47,7 @@ public class HttpGetContentProviderTest {
     public void shouldFetchContentByUriTemplate() {
         // given
         final Response response = someResponse(200, "FooBar");
-        final HttpClient mockClient = someHttpClient(response, "/test?foo=bar");
+        final HttpServiceClient mockClient = someHttpClient(response, "/test?foo=bar");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, fromTemplate("/test{?foo}"), TEXT_PLAIN);
         final Content content = contentProvider.getContent(X, parameters(of("foo", "bar"))).toBlocking().single();
@@ -61,7 +61,7 @@ public class HttpGetContentProviderTest {
     public void shouldIgnoreEmptyContent() {
         // given
         final Response response = someResponse(200, "");
-        final HttpClient mockClient = someHttpClient(response, "/test");
+        final HttpServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final Iterator<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking().getIterator();
@@ -74,7 +74,7 @@ public class HttpGetContentProviderTest {
     public void shouldThrowExceptionOnHttpServerError() {
         // given
         final Response response = someResponse(500, "Some Server Error");
-        final HttpClient mockClient = someHttpClient(response, "/test");
+        final HttpServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final BlockingObservable<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking();
@@ -87,7 +87,7 @@ public class HttpGetContentProviderTest {
     public void shouldThrowExceptionOnHttpClientError() {
         // given
         final Response response = someResponse(404, "Not Found");
-        final HttpClient mockClient = someHttpClient(response, "/test");
+        final HttpServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
         final BlockingObservable<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking();
@@ -100,7 +100,7 @@ public class HttpGetContentProviderTest {
     public void shouldPassExceptions() {
         // given
         // this will throw an Exception (from Jersey Client) because /test is not an absolute URL.
-        final HttpClient mockClient = someHttpClient(mock(Response.class), "/test");
+        final HttpServiceClient mockClient = someHttpClient(mock(Response.class), "/test");
         when(mockClient.get("/test", TEXT_PLAIN_TYPE)).thenReturn(fromCallable(() -> {
             throw new RuntimeException("KA-WUMMMM!");
         }));
@@ -113,7 +113,7 @@ public class HttpGetContentProviderTest {
     public void shouldPassCheckedExceptionAsRuntimeException() {
         // given
         // this will throw an Exception (from Jersey Client) because /test is not an absolute URL.
-        final HttpClient mockClient = someHttpClient(mock(Response.class), "/test");
+        final HttpServiceClient mockClient = someHttpClient(mock(Response.class), "/test");
         when(mockClient.get("/test", TEXT_PLAIN_TYPE)).thenReturn(fromCallable(() -> {
             throw new Exception("KA-WUMMMM!");
         }));
@@ -130,8 +130,8 @@ public class HttpGetContentProviderTest {
         return response;
     }
 
-    private HttpClient someHttpClient(final Response response, final String uri) {
-        final HttpClient mockClient = mock(HttpClient.class);
+    private HttpServiceClient someHttpClient(final Response response, final String uri) {
+        final HttpServiceClient mockClient = mock(HttpServiceClient.class);
         when(mockClient.get(uri, TEXT_PLAIN_TYPE)).thenReturn(just(response));
         return mockClient;
     }

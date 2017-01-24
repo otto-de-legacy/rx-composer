@@ -1,9 +1,9 @@
 package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
+import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
-import de.otto.rx.composer.http.HttpClient;
 import de.otto.rx.composer.page.Page;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +13,7 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static com.google.common.collect.ImmutableMap.of;
+import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.AbcPosition.Z;
@@ -46,20 +47,20 @@ public class NestedFragmentsAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("Otto", "text/plain").withStatus(200));
 
-        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+        try (final ServiceClient serviceClient = noRetriesClient()) {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(contentFrom(httpClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN)),
+                            withSingle(contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN)),
                             followedBy(
                                     (final Content content) -> parameters(of("param", content.getBody())),
                                     fragment(
                                             Y,
-                                            withSingle(contentFrom(httpClient, fromTemplate(driver.getBaseUrl() + "/someOtherContent{?param}"), TEXT_PLAIN))
+                                            withSingle(contentFrom(serviceClient, fromTemplate(driver.getBaseUrl() + "/someOtherContent{?param}"), TEXT_PLAIN))
                                     ),
                                     fragment(
                                             Z,
-                                            withSingle(contentFrom(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
+                                            withSingle(contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
                                     )
                             )
                     )

@@ -1,11 +1,11 @@
 package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
+import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -31,26 +31,26 @@ final class HttpGetContentProvider implements ContentProvider {
 
     private static final Logger LOG = getLogger(HttpGetContentProvider.class);
 
-    private final HttpClient httpClient;
+    private final ServiceClient serviceClient;
     private final UriTemplate uriTemplate;
     private final String url;
     private final MediaType accept;
 
-    HttpGetContentProvider(final HttpClient httpClient,
+    HttpGetContentProvider(final ServiceClient serviceClient,
                            final UriTemplate uriTemplate,
                            final String accept) {
         checkNotNull(uriTemplate, "uriTemplate must not be null.");
-        this.httpClient = httpClient;
+        this.serviceClient = serviceClient;
         this.uriTemplate = uriTemplate;
         this.url = null;
         this.accept = valueOf(accept);
     }
 
-    HttpGetContentProvider(final HttpClient httpClient,
+    HttpGetContentProvider(final ServiceClient serviceClient,
                            final String url,
                            final String accept) {
         checkNotNull(url, "url must not be null.");
-        this.httpClient = httpClient;
+        this.serviceClient = serviceClient;
         this.url = url;
         this.uriTemplate = null;
         this.accept = valueOf(accept);
@@ -62,7 +62,7 @@ final class HttpGetContentProvider implements ContentProvider {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
                 : this.url;
-        return httpClient
+        return serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(response -> {

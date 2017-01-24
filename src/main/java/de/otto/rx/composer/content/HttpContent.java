@@ -36,17 +36,17 @@ public final class HttpContent extends SingleContent {
         this.body = response.readEntity(String.class);
         this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
         this.headers = of(response.getStringHeaders());
-        LOG.trace("{} content pos={} status={} source={}", available ? "Available" : "Unavailable", position, response.getStatus(), source);
+        LOG.trace("{} content pos={} status={} config={}", available ? "Available" : "Unavailable", position, response.getStatus(), source);
     }
 
     /**
-     * Returns the source of the Content.
+     * Returns the config of the Content.
      * <p>
-     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * For HTTP Content, this is the URL. In other cases, some other unique config key should be used,
      * as this method is used to track the behaviour during execution.
      * </p>
      *
-     * @return source identifier
+     * @return config identifier
      */
     @Override
     public String getSource() {

@@ -21,7 +21,7 @@ public final class EmptyContent extends SingleContent {
     private EmptyContent(final Position position, final String source) {
         this.position = position;
         this.source = source;
-        LOG.info("Created EmptyContent for position {} from source {}", position, source);
+        LOG.info("Created EmptyContent for position {} from config {}", position, source);
     }
 
     public static EmptyContent emptyContent(final Position position) {
@@ -33,15 +33,15 @@ public final class EmptyContent extends SingleContent {
     }
 
     /**
-     * Returns the source of the Content.
+     * Returns the config of the Content.
      * <p>
-     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * For HTTP Content, this is the URL. In other cases, some other unique config key should be used,
      * as this method is used to track the behaviour during execution.
      * </p>
      * <p>
-     *     ErrorContent does not know about the 'real' source, position.name() is used instead.
+     *     ErrorContent does not know about the 'real' config, position.name() is used instead.
      * </p>
-     * @return source identifier
+     * @return config identifier
      */
     @Override
     public String getSource() {

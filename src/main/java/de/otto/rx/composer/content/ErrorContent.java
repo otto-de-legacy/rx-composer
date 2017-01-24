@@ -28,15 +28,15 @@ public final class ErrorContent extends SingleContent {
     }
 
     /**
-     * Returns the source of the Content.
+     * Returns the config of the Content.
      * <p>
-     * For HTTP Content, this is the URL. In other cases, some other unique source key should be used,
+     * For HTTP Content, this is the URL. In other cases, some other unique config key should be used,
      * as this method is used to track the behaviour during execution.
      * </p>
      * <p>
-     *     ErrorContent does not know about the 'real' source, position.name() is used instead.
+     *     ErrorContent does not know about the 'real' config, position.name() is used instead.
      * </p>
-     * @return source identifier
+     * @return config identifier
      */
     @Override
     public String getSource() {

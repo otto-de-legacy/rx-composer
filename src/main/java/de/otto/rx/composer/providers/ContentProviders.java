@@ -2,9 +2,9 @@ package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.collect.ImmutableList;
+import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.IndexedContent;
-import de.otto.rx.composer.http.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +19,16 @@ public final class ContentProviders {
 
     private ContentProviders() {}
 
-    public static ContentProvider contentFrom(final HttpClient httpClient,
+    public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept) {
-        return new HttpGetContentProvider(httpClient, url, accept);
+        return new HttpGetContentProvider(serviceClient, url, accept);
     }
 
-    public static ContentProvider contentFrom(final HttpClient httpClient,
+    public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept) {
-        return new HttpGetContentProvider(httpClient, uriTemplate, accept);
+        return new HttpGetContentProvider(serviceClient, uriTemplate, accept);
     }
 
     public static ContentProvider withResilient(final ContentProvider delegate,

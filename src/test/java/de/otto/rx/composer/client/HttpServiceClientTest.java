@@ -1,4 +1,4 @@
-package de.otto.rx.composer.http;
+package de.otto.rx.composer.client;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import org.junit.Rule;
@@ -12,11 +12,12 @@ import java.util.concurrent.TimeUnit;
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
+import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class HttpClientTest {
+public class HttpServiceClientTest {
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
 
@@ -26,8 +27,8 @@ public class HttpClientTest {
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Hello World", "text/plain"));
 
-        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
-            final Response response = httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
+        try (final ServiceClient serviceClient = noRetriesClient()) {
+            final Response response = serviceClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
             assertThat(response.getStatus(), is(200));
             assertThat(response.readEntity(String.class), is("Hello World"));
         }
@@ -38,7 +39,7 @@ public class HttpClientTest {
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Hello World", "text/plain").after(300, TimeUnit.MILLISECONDS));
-        try (final HttpClient httpClient = new HttpClient(1000, 250)) {
+        try (final ServiceClient httpClient = noRetriesClient()) {
             httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
         } catch (final ProcessingException e) {
             throw e.getCause();
@@ -51,7 +52,7 @@ public class HttpClientTest {
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Not Found", "text/plain")
                         .withStatus(404));
-        try (final HttpClient httpClient = new HttpClient(1000, 500)) {
+        try (final ServiceClient httpClient = noRetriesClient()) {
             Response response = httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
             assertThat(response.getStatus(), is(404));
             assertThat(response.readEntity(String.class), is("Not Found"));
@@ -64,7 +65,7 @@ public class HttpClientTest {
                 onRequestTo("/someContent").withMethod(GET),
                 giveResponse("Server Error", "text/plain")
                         .withStatus(500));
-        try (final HttpClient httpClient = new HttpClient(1000, 500)) {
+        try (final ServiceClient httpClient = noRetriesClient()) {
             Response response = httpClient.get(driver.getBaseUrl() + "/someContent", TEXT_PLAIN_TYPE).toBlocking().single();
             assertThat(response.getStatus(), is(500));
             assertThat(response.readEntity(String.class), is("Server Error"));
