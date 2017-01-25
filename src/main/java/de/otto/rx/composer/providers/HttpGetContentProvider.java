@@ -37,25 +37,36 @@ final class HttpGetContentProvider implements ContentProvider {
     private final UriTemplate uriTemplate;
     private final String url;
     private final MediaType accept;
+    private final ContentProvider fallback;
 
     HttpGetContentProvider(final ServiceClient serviceClient,
                            final UriTemplate uriTemplate,
-                           final String accept) {
+                           final String accept,
+                           final ContentProvider fallback) {
         checkNotNull(uriTemplate, "uriTemplate must not be null.");
         this.serviceClient = serviceClient;
         this.uriTemplate = uriTemplate;
         this.url = null;
         this.accept = valueOf(accept);
+        if (fallback != null && !serviceClient.getClientConfig().isResilient()) {
+            throw new IllegalArgumentException("Unable to configure a fallback with non-resilient service clients.");
+        }
+        this.fallback = fallback;
     }
 
     HttpGetContentProvider(final ServiceClient serviceClient,
                            final String url,
-                           final String accept) {
+                           final String accept,
+                           final ContentProvider fallback) {
         checkNotNull(url, "url must not be null.");
         this.serviceClient = serviceClient;
         this.url = url;
         this.uriTemplate = null;
         this.accept = valueOf(accept);
+        if (fallback != null && !serviceClient.getClientConfig().isResilient()) {
+            throw new IllegalArgumentException("Unable to configure a fallback with non-resilient service clients.");
+        }
+        this.fallback = fallback;
     }
 
     @Override
@@ -83,8 +94,12 @@ final class HttpGetContentProvider implements ContentProvider {
 
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
-        if (clientConfig.isCircuitBreaking()) {
-            return from(contentObservable.retry(clientConfig.getRetries()), clientConfig.getKey(), clientConfig.getReadTimeout())
+        if (clientConfig.isResilient()) {
+            final Observable<Content> observable = from(
+                    contentObservable.retry(clientConfig.getRetries()),
+                    fallback != null ? fallback.getContent(position, parameters) : null,
+                    clientConfig.getKey(), clientConfig.getReadTimeout());
+            return observable
                     .doOnError(t -> LOG.error("Caught Exception from CircuitBreaker: for position {}: {} ({})", position, t.getCause().getMessage(), t.getMessage()))
                     .filter(Content::isAvailable);
         } else {

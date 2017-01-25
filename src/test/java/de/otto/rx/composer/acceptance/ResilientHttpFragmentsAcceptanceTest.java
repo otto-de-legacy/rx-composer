@@ -2,11 +2,13 @@ package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
-import de.otto.rx.composer.content.Contents;
+import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.page.Page;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.time.LocalDateTime;
 
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
@@ -20,10 +22,13 @@ import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static de.otto.rx.composer.providers.ContentProviders.fallbackTo;
+import static de.otto.rx.composer.providers.ContentProviders.withSingle;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static rx.Observable.just;
 
 public class ResilientHttpFragmentsAcceptanceTest {
 
@@ -180,7 +185,6 @@ public class ResilientHttpFragmentsAcceptanceTest {
         }
     }
 
-    /*
     @Test
     public void shouldFallbackOnHttpError() throws Exception {
         // given
@@ -188,16 +192,21 @@ public class ResilientHttpFragmentsAcceptanceTest {
                 onRequestTo("/someErrorContent").withMethod(GET),
                 giveResponse("Server Error", "text/plain").withStatus(500));
         driver.addExpectation(
-                onRequestTo("/someOtherContent").withMethod(GET),
+                onRequestTo("/someFallbackContent").withMethod(GET),
                 giveResponse("Fallback Content", "text/plain").withStatus(200));
 
-        try (final HttpClient httpClient = new HttpClient(1000, 1000)) {
+        try (
+                final ServiceClient serviceClient = noRetriesClient();
+                final ServiceClient fallbackClient = noResiliencyClient()
+        ) {
             final Page page = consistsOf(
-                    fragment(X, withSingle(
-                            resilientContentFrom()(httpClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
-                                    fallbackTo(resilientContentFrom()(httpClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                            fallbackTo(contentFrom(fallbackClient, driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
+                                    )
                             )
-                    ))
+                    )
             );
 
             final Contents result = page.fetchWith(emptyParameters());
@@ -206,7 +215,60 @@ public class ResilientHttpFragmentsAcceptanceTest {
             assertThat(result.get(X).getBody(), is("Fallback Content"));
         }
     }
-    */
+
+    @Test
+    public void shouldFallbackToStaticContent() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someErrorContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain").withStatus(500));
+
+        try (final ServiceClient serviceClient = noRetriesClient()) {
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                            fallbackTo((position, parameters) -> just(someContent(position, "Some Fallback")))
+                                    )
+                            )
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters());
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).isAvailable(), is(true));
+            assertThat(result.get(X).getBody(), is("Some Fallback"));
+        }
+    }
+
+    @Test
+    public void shouldRetryBeforeFallback() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain").withStatus(500));
+
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Some Content", "text/plain").withStatus(200));
+
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someFlakyContent", TEXT_PLAIN,
+                                            fallbackTo((position, parameters) -> just(someContent(position, "Some Fallback")))
+                                    )
+                            )
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters());
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).isAvailable(), is(true));
+            assertThat(result.get(X).getBody(), is("Some Content"));
+        }
+    }
 
     @Test
     public void shouldExecutePlanWithExceptions() throws Exception {
@@ -262,9 +324,40 @@ public class ResilientHttpFragmentsAcceptanceTest {
         }
     }
 
-    private static int counter = 0;
-    private String commandKey() {
-        return "test service #" + counter++;
+    private Content someContent(final Position position, final String body) {
+        return new SingleContent() {
+            @Override
+            public String getSource() {
+                return position.name();
+            }
+
+            @Override
+            public Position getPosition() {
+                return position;
+            }
+
+            @Override
+            public boolean isAvailable() {
+                return true;
+            }
+
+            @Override
+            public String getBody() {
+                return body;
+            }
+
+            @Override
+            public Headers getHeaders() {
+                return Headers.emptyHeaders();
+            }
+
+            @Override
+            public LocalDateTime getCreated() {
+                return LocalDateTime.now();
+            }
+
+        };
+
     }
 
 }

@@ -6,19 +6,19 @@ public final class ClientConfig {
     private final String key;
     private final int connectTimeout;
     private final int readTimeout;
-    private final boolean circuitBreaker;
+    private final boolean resilient;
     private final int retries;
 
     public ClientConfig(final String key,
                          final int connectTimeout,
                          final int readTimeout,
-                         final boolean circuitBreaker,
+                         final boolean resilient,
                          final int retries) {
         this.key = key;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.retries = retries;
-        this.circuitBreaker = retries > 0 || circuitBreaker;
+        this.resilient = retries > 0 || resilient;
     }
 
     public static ClientConfig singleRetry() {
@@ -69,8 +69,8 @@ public final class ClientConfig {
         return readTimeout;
     }
 
-    public boolean isCircuitBreaking() {
-        return circuitBreaker;
+    public boolean isResilient() {
+        return resilient;
     }
 
     public int getRetries() {

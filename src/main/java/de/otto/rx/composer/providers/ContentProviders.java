@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 
 import static de.otto.rx.composer.content.ContentMatcher.contentMatcher;
 import static java.util.Comparator.comparingInt;
+import static rx.Observable.just;
 
 public final class ContentProviders {
 
@@ -22,13 +23,39 @@ public final class ContentProviders {
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept) {
-        return new HttpGetContentProvider(serviceClient, url, accept);
+        return new HttpGetContentProvider(serviceClient, url, accept, null);
+    }
+
+    public static ContentProvider contentFrom(final ServiceClient serviceClient,
+                                              final String url,
+                                              final String accept,
+                                              final ContentProvider fallback) {
+        return new HttpGetContentProvider(serviceClient, url, accept, fallback);
     }
 
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept) {
-        return new HttpGetContentProvider(serviceClient, uriTemplate, accept);
+        return new HttpGetContentProvider(serviceClient, uriTemplate, accept, null);
+    }
+
+    public static ContentProvider contentFrom(final ServiceClient serviceClient,
+                                              final UriTemplate uriTemplate,
+                                              final String accept,
+                                              final ContentProvider fallback) {
+        return new HttpGetContentProvider(serviceClient, uriTemplate, accept, fallback);
+    }
+
+    public static ContentProvider fallbackTo(final ContentProvider contentProvider) {
+        return contentProvider;
+    }
+
+    public static ContentProvider fallbackTo(final rx.Observable<Content> observable) {
+        return (position, parameters) -> observable;
+    }
+
+    public static ContentProvider fallbackTo(final Content content) {
+        return (position, parameters) -> just(content);
     }
 
     public static ContentProvider withSingle(final ContentProvider contentProvider) {
