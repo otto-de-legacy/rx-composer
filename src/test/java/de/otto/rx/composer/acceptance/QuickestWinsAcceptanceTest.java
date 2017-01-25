@@ -4,6 +4,7 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static com.google.common.collect.ImmutableList.of;
+import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -28,6 +30,20 @@ public class QuickestWinsAcceptanceTest {
 
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
+
+    @Before
+    public void warmUp() throws Exception {
+        driver.addExpectation(
+                onRequestTo("/warmup").withMethod(GET),
+                giveResponse("ok", "text/plain"));
+
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
+            contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
+                    .getContent(() -> "warmup", emptyParameters())
+                    .toBlocking()
+                    .first();
+        }
+    }
 
     @Test
     public void shouldSelectQuickest() throws Exception {

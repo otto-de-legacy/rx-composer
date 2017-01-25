@@ -4,20 +4,22 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
+import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
+import static de.otto.rx.composer.client.HttpServiceClient.singleRetryClient;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
-import static de.otto.rx.composer.providers.ContentProviders.withResilient;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,6 +29,20 @@ public class ResilientHttpFragmentsAcceptanceTest {
 
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
+
+    @Before
+    public void warmUp() throws Exception {
+        driver.addExpectation(
+                onRequestTo("/warmup").withMethod(GET),
+                giveResponse("ok", "text/plain"));
+
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
+            contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
+                    .getContent(() -> "warmup", emptyParameters())
+                    .toBlocking()
+                    .first();
+        }
+    }
 
     @Test
     public void shouldExecutePlanWithTwoRestResources() throws Exception {
@@ -42,17 +58,11 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN)
                     ),
                     fragment(
                             Y,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN)
                     )
             );
 
@@ -77,17 +87,11 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN)
                     ),
                     fragment(
                             Y,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN)
                     )
             );
 
@@ -112,17 +116,11 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN)
                     ),
                     fragment(
                             Y,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
-                                    1000,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN)
                     )
             );
 
@@ -130,6 +128,55 @@ public class ResilientHttpFragmentsAcceptanceTest {
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
+        }
+    }
+
+    @Test
+    public void shouldRetryAfterHttpErrors() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain")
+                        .withStatus(500)).times(1);
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Some Content", "text/plain")
+                        .withStatus(200)).times(1);
+
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = consistsOf(
+                    fragment(
+                            X,
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someFlakyContent", TEXT_PLAIN)
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters());
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).isAvailable(), is(true));
+            assertThat(result.get(X).getBody(), is("Some Content"));
+        }
+    }
+
+    @Test
+    public void shouldFailAfterRetriesWithHttpErrors() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someFailingContent").withMethod(GET),
+                giveResponse("First Server Error", "text/plain")
+                        .withStatus(500)).times(2);
+
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = consistsOf(
+                    fragment(
+                            X,
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someFailingContent", TEXT_PLAIN)
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters());
+            assertThat(result.getAll(), hasSize(0));
+            assertThat(result.get(X).isAvailable(), is(false));
         }
     }
 
@@ -172,19 +219,11 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withResilient(
-                                    contentFrom(serviceClient, "INVALID_URL", TEXT_PLAIN),
-                                    200,
-                                    commandKey()
-                            )
+                            contentFrom(serviceClient, "INVALID_URL", TEXT_PLAIN)
                     ),
                     fragment(
                             Y,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN),
-                                    200,
-                                    commandKey()
-                            )
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN)
                     )
             );
 
@@ -209,10 +248,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(
                             Y,
-                            withResilient(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
-                                    200,
-                                    commandKey())
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN)
                     )
             );
             for (int i = 0; i < 150; i++) {

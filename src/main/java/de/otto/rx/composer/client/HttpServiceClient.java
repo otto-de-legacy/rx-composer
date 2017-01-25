@@ -8,6 +8,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static de.otto.rx.composer.client.ClientConfig.noResiliency;
 import static de.otto.rx.composer.client.ClientConfig.noRetries;
 import static de.otto.rx.composer.client.ClientConfig.singleRetry;
 import static javax.ws.rs.client.ClientBuilder.newClient;
@@ -36,12 +37,64 @@ public class HttpServiceClient implements ServiceClient {
         this.clientConfig = config;
     }
 
-    public static HttpServiceClient singleRetryClient() {
+    /**
+     * Returns a ServiceClient to access HTTP microservices protected by a circuit breaker, with a single retry on error.
+     * <p>
+     *     The timeouts are configured as:
+     * </p>
+     * <ul>
+     *      <li>{@code connectTimeout:} 1000ms</li>
+     *      <li>{@code readTimeout:} 500ms</li>
+     * </ul>
+     *
+     * @return HTTP ServiceClient
+     */
+    public static ServiceClient singleRetryClient() {
         return new HttpServiceClient(singleRetry());
     }
 
-    public static HttpServiceClient noRetriesClient() {
+    public static ServiceClient singleRetryClient(final String key, final int connectTimeout, final int readTimeout) {
+        return new HttpServiceClient(singleRetry(key, connectTimeout, readTimeout));
+    }
+
+    /**
+     * Returns a ServiceClient to access HTTP microservices protected by a circuit breaker, but not doing retries on error.
+     * <p>
+     *     The timeouts are configured as:
+     * </p>
+     * <ul>
+     *      <li>{@code connectTimeout:} 1000ms</li>
+     *      <li>{@code readTimeout:} 500ms</li>
+     * </ul>
+     *
+     * @return HTTP ServiceClient
+     */
+    public static ServiceClient noRetriesClient() {
         return new HttpServiceClient(noRetries());
+    }
+
+    public static ServiceClient noRetriesClient(final String key, final int connectTimeout, final int readTimeout) {
+        return new HttpServiceClient(noRetries(key, connectTimeout, readTimeout));
+    }
+
+    /**
+     * Returns a ServiceClient to access HTTP microservices that is not protected by a circuit breaker and not doing retries on error.
+     * <p>
+     *     The timeouts are configured as:
+     * </p>
+     * <ul>
+     *      <li>{@code connectTimeout:} 1000ms</li>
+     *      <li>{@code readTimeout:} 500ms</li>
+     * </ul>
+     *
+     * @return HTTP ServiceClient
+     */
+    public static ServiceClient noResiliencyClient() {
+        return new HttpServiceClient(noResiliency());
+    }
+
+    public static ServiceClient noResiliencyClient(final String key, final int connectTimeout, final int readTimeout) {
+        return new HttpServiceClient(noResiliency(key, connectTimeout, readTimeout));
     }
 
     public static HttpServiceClient clientFor(final ClientConfig config) {

@@ -3,43 +3,58 @@ package de.otto.rx.composer.client;
 
 public final class ClientConfig {
 
-    public static final String DEFAULT_CONFIG = "default";
-
     private final String key;
     private final int connectTimeout;
     private final int readTimeout;
-
+    private final boolean circuitBreaker;
     private final int retries;
 
-    private ClientConfig(final String key,
+    public ClientConfig(final String key,
                          final int connectTimeout,
                          final int readTimeout,
+                         final boolean circuitBreaker,
                          final int retries) {
         this.key = key;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.retries = retries;
+        this.circuitBreaker = retries > 0 || circuitBreaker;
     }
 
     public static ClientConfig singleRetry() {
-        return new ClientConfig(DEFAULT_CONFIG,
+        return new ClientConfig("default-single-retry",
                 1000,
-                250,
+                500,
+                true,
                 1);
+    }
+
+    public static ClientConfig singleRetry(final String key, final int connectTimeout, final int readTimeout) {
+        return new ClientConfig(key, connectTimeout, readTimeout, true,1);
+    }
+
+    public static ClientConfig noResiliency() {
+        return new ClientConfig("default-no-resiliency",
+                1000,
+                500,
+                false,
+                0);
+    }
+
+    public static ClientConfig noResiliency(final String key, final int connectTimeout, final int readTimeout) {
+        return new ClientConfig(key, connectTimeout, readTimeout, false, 0);
     }
 
     public static ClientConfig noRetries() {
-        return new ClientConfig(DEFAULT_CONFIG,
+        return new ClientConfig("default-no-retries",
                 1000,
-                250,
-                1);
+                500,
+                true,
+                0);
     }
 
-    public static ClientConfig clientConfig(final String key,
-                                            final int connectTimeout,
-                                            final int readTimeout,
-                                            final int retries) {
-        return new ClientConfig(key, connectTimeout, readTimeout, retries);
+    public static ClientConfig noRetries(final String key, final int connectTimeout, final int readTimeout) {
+        return new ClientConfig(key, connectTimeout, readTimeout, true, 0);
     }
 
     public String getKey() {
@@ -52,6 +67,10 @@ public final class ClientConfig {
 
     public int getReadTimeout() {
         return readTimeout;
+    }
+
+    public boolean isCircuitBreaking() {
+        return circuitBreaker;
     }
 
     public int getRetries() {

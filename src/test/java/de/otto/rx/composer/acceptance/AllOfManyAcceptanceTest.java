@@ -5,6 +5,7 @@ import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.CompositeContent;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static com.google.common.collect.ImmutableList.of;
+import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -29,6 +31,20 @@ public class AllOfManyAcceptanceTest {
 
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
+
+    @Before
+    public void warmUp() throws Exception {
+        driver.addExpectation(
+                onRequestTo("/warmup").withMethod(GET),
+                giveResponse("ok", "text/plain"));
+
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
+            contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
+                    .getContent(() -> "warmup", emptyParameters())
+                    .toBlocking()
+                    .first();
+        }
+    }
 
     @Test
     public void shouldSelectMultipleContents() throws Exception {
@@ -114,10 +130,11 @@ public class AllOfManyAcceptanceTest {
         // given
         driver.addExpectation(
                 onRequestTo("/someContent").withMethod(GET),
-                giveResponse("Hello", "text/plain").after(300, MILLISECONDS));
+                giveResponse("Hello", "text/plain").after(500, MILLISECONDS));
         driver.addExpectation(
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain")).anyTimes();
+
         try (final ServiceClient serviceClient = noRetriesClient()) {
             final Page page = consistsOf(
                     fragment(X, withAll(of(
@@ -126,9 +143,11 @@ public class AllOfManyAcceptanceTest {
                             contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
                     )
             ));
+
             final Contents result = page.fetchWith(emptyParameters());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isComposite(), is(true));
+
             final CompositeContent content = result.get(X).asComposite();
             assertThat(content.getContents(), hasSize(2));
             assertThat(content.getBody(), is("World\nWorld"));

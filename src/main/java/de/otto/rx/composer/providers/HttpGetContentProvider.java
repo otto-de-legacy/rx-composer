@@ -1,6 +1,7 @@
 package de.otto.rx.composer.providers;
 
 import com.damnhandy.uri.template.UriTemplate;
+import de.otto.rx.composer.client.ClientConfig;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.HttpContent;
@@ -10,14 +11,15 @@ import org.slf4j.Logger;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static de.otto.rx.composer.providers.HystrixWrapper.from;
 import static javax.ws.rs.core.MediaType.valueOf;
+import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -62,24 +64,34 @@ final class HttpGetContentProvider implements ContentProvider {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
                 : this.url;
-        return serviceClient
+        final Observable<Content> contentObservable = serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(response -> {
                     LOG.trace("Got next content for position {} from {}", position, url);
-                    switch (response.getStatusInfo().getFamily()) {
-                        case SERVER_ERROR:
-                            throw new ServerErrorException(response);
-                        case CLIENT_ERROR:
-                            // TODO: ErrorContent for client errors?
-                            throw new ClientErrorException(response);
-                        default:
-                            break;
+                    if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
+                        /*
+                        Throw Exception so the circuit breaker is able to open the circuit,
+                        retry execution or return the fallback value.
+                        Don't do this for CLIENT_ERRORS as this is unlikely to be helful in
+                        most situations.
+                         */
+                        throw new ServerErrorException(response);
                     }
                 })
-                .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
-                .map(response -> (Content) new HttpContent(url, position, response))
-                .filter(Content::isAvailable);
+                .map(response -> (Content) new HttpContent(url, position, response));
+
+        final ClientConfig clientConfig = serviceClient.getClientConfig();
+
+        if (clientConfig.isCircuitBreaking()) {
+            return from(contentObservable.retry(clientConfig.getRetries()), clientConfig.getKey(), clientConfig.getReadTimeout())
+                    .doOnError(t -> LOG.error("Caught Exception from CircuitBreaker: for position {}: {} ({})", position, t.getCause().getMessage(), t.getMessage()))
+                    .filter(Content::isAvailable);
+        } else {
+            return contentObservable
+                    .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
+                    .filter(Content::isAvailable);
+        }
     }
 
     private String resolveUrl(final Parameters parameters) {

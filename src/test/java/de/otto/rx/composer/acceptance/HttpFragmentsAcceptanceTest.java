@@ -4,13 +4,14 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
-import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
+import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -28,6 +29,20 @@ public class HttpFragmentsAcceptanceTest {
     @Rule
     public ClientDriverRule driver = new ClientDriverRule();
 
+    @Before
+    public void warmUp() throws Exception {
+        driver.addExpectation(
+                onRequestTo("/warmup").withMethod(GET),
+                giveResponse("ok", "text/plain"));
+
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
+            contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
+                    .getContent(() -> "warmup", emptyParameters())
+                    .toBlocking()
+                    .first();
+        }
+    }
+
     @Test
     public void shouldExecutePlanWithTwoRestResources() throws Exception {
         // given
@@ -38,7 +53,7 @@ public class HttpFragmentsAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(200));
 
-        try (final ServiceClient serviceClient = noRetriesClient()) {
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
             final Page page = consistsOf(
                     fragment(
                             X,
@@ -71,7 +86,7 @@ public class HttpFragmentsAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(200));
 
-        try (final ServiceClient serviceClient = noRetriesClient()) {
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
             final Page page = consistsOf(
                     fragment(
                             X,
@@ -100,7 +115,7 @@ public class HttpFragmentsAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(200));
 
-        try (final ServiceClient serviceClient = noRetriesClient()) {
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
             final Page page = consistsOf(
                     fragment(
                             X,
@@ -126,7 +141,7 @@ public class HttpFragmentsAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain").withStatus(200));
 
-        try (final ServiceClient serviceClient = noRetriesClient()) {
+        try (final ServiceClient serviceClient = noResiliencyClient()) {
             final Page page = consistsOf(
                     fragment(
                             X,

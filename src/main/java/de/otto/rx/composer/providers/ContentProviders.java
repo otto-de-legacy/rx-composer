@@ -31,12 +31,6 @@ public final class ContentProviders {
         return new HttpGetContentProvider(serviceClient, uriTemplate, accept);
     }
 
-    public static ContentProvider withResilient(final ContentProvider delegate,
-                                            final int timeoutMillis,
-                                            final String commandKey) {
-        return new CircuitBreakingContentProvider(delegate, timeoutMillis, commandKey);
-    }
-
     public static ContentProvider withSingle(final ContentProvider contentProvider) {
         return contentProvider;
     }
