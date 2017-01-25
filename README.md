@@ -23,29 +23,85 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
 
 ## Examples
 
+### Using ServiceClient configurations
+
+In order to retrieve content from other mircoservices, ServiceClients are used. There are some predefined
+ServiceClients like:
+* `HttpServiceClient.singleRetryClient():` A client that is using a circuit breaker with single retry to access content.
+* `HttpServiceClient.noRetriesClient():` Another client, that is not doing retries, but still using a circuit breaker.
+* `HttpServiceClient.noResiliencyClient():` A client without any circuit breaker or retries, but with the possibility to
+ configure timeouts.
+
+```java
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = ...
+        );
+
+```
+
+By default, all clients are configured with a connectTimeout of 1000ms and a readTimeout of 500 ms. It is possible to override these
+defaults like this:
+
+```java
+        try (final ServiceClient serviceClient = singleRetryClient("custom-test-client", 200, 50)) {
+            final Page page = ...
+        );
+
+```
+
+
+
 ### Fetching two contents for a single page in parallel:
        
             // Specify what to fetch:
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/html"))
+                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", "text/html"))
                     ),
                     fragment(
                             Y,
-                            withSingle(contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
+                            withSingle(contentFrom(serviceClient, "http://example.com/someOtherContent", "text/html"))
                     )
             );
             // Fetch contents of the page:
             final Contents result = page.fetchWith(emptyParameters());
+
+### Fetching content with a fallback to some static content on error:
+
+Using a ServiceClient like `noRetries()` or `singleRetry`, it is possible to configure a fallback, if retrieving content
+from the primary ContentProvider fails because of timeouts, exceptions or HTTP server errors:
+
+```java
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
+                                    fallbackTo((position, parameters) -> just(fallbackContent(position, "Some Fallback Content"))))
+                            )
+                    )
+            );
+
+```
+
+The `fallbackTo` methods accepts all kinds of ContentProviders. The following example is falling back to a different
+service, using a differently configured ServiceClient:
+
+```java
+            ...
+                    contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
+                            fallbackTo(contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN))
+                    )
+            ...
+
+```
 
 ### Fetching the first content that is not empty:
 
             // Specify what to fetch:
             final Page page = consistsOf(
                     fragment(X, withFirst(of(
-                            contentFrom(httpClient, "http://example.com/someContent", "text/html"),
-                            contentFrom(httpClient, "http://example.com/someOtherContent", "text/html"))
+                            contentFrom(serviceClient, "http://example.com/someContent", "text/html"),
+                            contentFrom(serviceClient, "http://example.com/someOtherContent", "text/html"))
                     )
             ));
 
@@ -57,16 +113,16 @@ Rx-Composer is meant to solve such kind of problems. It provides you with an eas
             final Page page = consistsOf(
                     fragment(
                             X,
-                            withSingle(contentFrom(httpClient, "http://example.com/someContent", "text/plain")),
+                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", "text/plain")),
                             followedBy(
                                     (final Content content) -> parameters(of("param", content.getBody())),
                                     fragment(
                                             Y,
-                                            withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN))
+                                            withSingle(contentFrom(serviceClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN))
                                     ),
                                     fragment(
                                             Z,
-                                            withSingle(contentFrom(httpClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN))
+                                            withSingle(contentFrom(serviceClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN))
                                     )
                             )
                     )

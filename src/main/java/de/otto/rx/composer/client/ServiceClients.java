@@ -8,6 +8,7 @@ import static de.otto.rx.composer.client.HttpServiceClient.clientFor;
 import static java.util.Arrays.stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
+// TODO: Verwendung dieser Klasse ist noch nicht so klar...
 public class ServiceClients implements AutoCloseable {
 
     private static final Logger LOG = getLogger(ServiceClients.class);
