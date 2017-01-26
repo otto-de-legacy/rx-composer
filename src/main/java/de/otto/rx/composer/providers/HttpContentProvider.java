@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static de.otto.rx.composer.providers.HystrixWrapper.from;
+import static de.otto.rx.composer.providers.HystrixObservableContent.from;
 import static javax.ws.rs.core.MediaType.valueOf;
 import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -29,9 +29,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  *     the {@link Parameters} when {@link #getContent(Position, Parameters) getting content}.
  * </p>
  */
-final class HttpGetContentProvider implements ContentProvider {
+final class HttpContentProvider implements ContentProvider {
 
-    private static final Logger LOG = getLogger(HttpGetContentProvider.class);
+    private static final Logger LOG = getLogger(HttpContentProvider.class);
 
     private final ServiceClient serviceClient;
     private final UriTemplate uriTemplate;
@@ -39,10 +39,10 @@ final class HttpGetContentProvider implements ContentProvider {
     private final MediaType accept;
     private final ContentProvider fallback;
 
-    HttpGetContentProvider(final ServiceClient serviceClient,
-                           final UriTemplate uriTemplate,
-                           final String accept,
-                           final ContentProvider fallback) {
+    HttpContentProvider(final ServiceClient serviceClient,
+                        final UriTemplate uriTemplate,
+                        final String accept,
+                        final ContentProvider fallback) {
         checkNotNull(uriTemplate, "uriTemplate must not be null.");
         this.serviceClient = serviceClient;
         this.uriTemplate = uriTemplate;
@@ -54,10 +54,10 @@ final class HttpGetContentProvider implements ContentProvider {
         this.fallback = fallback;
     }
 
-    HttpGetContentProvider(final ServiceClient serviceClient,
-                           final String url,
-                           final String accept,
-                           final ContentProvider fallback) {
+    HttpContentProvider(final ServiceClient serviceClient,
+                        final String url,
+                        final String accept,
+                        final ContentProvider fallback) {
         checkNotNull(url, "url must not be null.");
         this.serviceClient = serviceClient;
         this.url = url;
@@ -95,10 +95,11 @@ final class HttpGetContentProvider implements ContentProvider {
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
         if (clientConfig.isResilient()) {
+
             final Observable<Content> observable = from(
                     contentObservable.retry(clientConfig.getRetries()),
                     fallback != null ? fallback.getContent(position, parameters) : null,
-                    clientConfig.getKey(), clientConfig.getReadTimeout());
+                    clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
                     .doOnError(t -> LOG.error("Caught Exception from CircuitBreaker: for position {}: {} ({})", position, t.getCause().getMessage(), t.getMessage()))
                     .filter(Content::isAvailable);

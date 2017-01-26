@@ -79,7 +79,7 @@ public class OneOfManyAcceptanceTest {
                 onRequestTo("/someOtherContent").withMethod(GET),
                 giveResponse("World", "text/plain"));
 
-        try (final ServiceClient serviceClient = noRetriesClient("test", 1000, 250)) {
+        try (final ServiceClient serviceClient = noRetriesClient(() -> "testConfig", 1000, 250)) {
             final Page page = consistsOf(
                     fragment(X, withFirst(of(
                             contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),

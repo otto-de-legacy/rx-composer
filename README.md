@@ -4,7 +4,7 @@ A DSL for reactive composition of content from different microservices using RxJ
 
 ## Status
 
-Work in Progress
+_**Work in Progress**_
 
 ## About
 
@@ -43,7 +43,11 @@ By default, all clients are configured with a connectTimeout of 1000ms and a rea
 defaults like this:
 
 ```java
-        try (final ServiceClient serviceClient = singleRetryClient("custom-test-client", 200, 50)) {
+        enum CustomRef implements Ref {exampleConfig}
+
+        ...
+
+        try (final ServiceClient serviceClient = singleRetryClient(exampleConfig, 200, 50)) {
             final Page page = ...
         );
 

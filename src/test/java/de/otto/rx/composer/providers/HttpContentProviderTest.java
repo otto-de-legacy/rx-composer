@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static rx.Observable.fromCallable;
 import static rx.Observable.just;
 
-public class HttpGetContentProviderTest {
+public class HttpContentProviderTest {
 
     @Test
     public void shouldFetchContentByUrl() throws Exception {

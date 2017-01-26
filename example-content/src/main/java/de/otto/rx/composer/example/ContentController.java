@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.PreDestroy;
+
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.collect.ImmutableMap.of;
-import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
+import static de.otto.rx.composer.client.HttpServiceClient.singleRetryClient;
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -29,7 +31,12 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 @Controller
 public class ContentController {
 
-    private final ServiceClient client = noRetriesClient();
+    private final ServiceClient client = singleRetryClient();
+
+    @PreDestroy
+    public void shutdown() throws Exception {
+        client.close();
+    }
 
     @RequestMapping(path = "/", produces = "text/html")
     @ResponseBody

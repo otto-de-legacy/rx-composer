@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import static de.otto.rx.composer.client.ClientConfig.noResiliency;
 import static de.otto.rx.composer.client.ClientConfig.singleRetry;
+import static de.otto.rx.composer.client.DefaultRef.singleRetry;
 import static de.otto.rx.composer.client.ServiceClients.serviceClients;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -22,7 +23,7 @@ public class ServiceClientsTest {
     public void shouldConfigureMoreServiceClients() {
         ServiceClients serviceClients = serviceClients(noResiliency(), singleRetry());
 
-        ServiceClient serviceClient = serviceClients.getBy("default-single-retry");
+        ServiceClient serviceClient = serviceClients.getBy(singleRetry);
         assertThat(serviceClient.getClientConfig().isResilient(), is(true));
         assertThat(serviceClient.getClientConfig().getRetries(), is(1));
     }

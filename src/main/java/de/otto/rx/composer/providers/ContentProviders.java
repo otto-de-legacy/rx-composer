@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.IndexedContent;
+import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.content.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,44 +22,142 @@ public final class ContentProviders {
 
     private ContentProviders() {}
 
+    /**
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     *
+     * @param serviceClient ServiceClient used to get content
+     * @param url the URL of the requested service
+     * @param accept media type of the accepted content.
+     * @return ContentProvider
+     */
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept) {
-        return new HttpGetContentProvider(serviceClient, url, accept, null);
+        return new HttpContentProvider(serviceClient, url, accept, null);
     }
 
+    /**
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     *
+     * @param serviceClient ServiceClient used to get content
+     * @param url the URL of the requested service
+     * @param accept media type of the accepted content.
+     * @param fallback ContentProvider used as a fallback, if execution is failing with an exception of HTTP server error.
+     * @return ContentProvider
+     */
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept,
                                               final ContentProvider fallback) {
-        return new HttpGetContentProvider(serviceClient, url, accept, fallback);
+        return new HttpContentProvider(serviceClient, url, accept, fallback);
     }
 
+    /**
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     *
+     * @param serviceClient ServiceClient used to get content
+     * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
+     *                    param of {@link ContentProvider#getContent(Position, Parameters)} is used to fill the
+     *                    template variables.
+     * @param accept media type of the accepted content.
+     * @return ContentProvider
+     */
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept) {
-        return new HttpGetContentProvider(serviceClient, uriTemplate, accept, null);
+        return new HttpContentProvider(serviceClient, uriTemplate, accept, null);
     }
 
+    /**
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     *
+     * @param serviceClient ServiceClient used to get content
+     * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
+     *                    param of {@link ContentProvider#getContent(Position, Parameters)} is used to fill the
+     *                    template variables.
+     * @param accept media type of the accepted content.
+     * @param fallback ContentProvider used as a fallback, if execution is failing with an exception of HTTP server error.
+     * @return ContentProvider
+     */
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept,
                                               final ContentProvider fallback) {
-        return new HttpGetContentProvider(serviceClient, uriTemplate, accept, fallback);
+        return new HttpContentProvider(serviceClient, uriTemplate, accept, fallback);
     }
 
-    public static ContentProvider fallbackTo(final ContentProvider contentProvider) {
-        return contentProvider;
+    /**
+     * Semantic sugar to make explicit, that the specified provider is used as a fallback for another provider.
+     * <p>
+     *     Example:
+     * </p>
+     * <pre><code>
+     *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
+     *          fallbackTo(contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN))
+     *     )
+     * </code></pre>
+     *
+     * @param fallbackProvider the fallback provider
+     * @return ContentProvider
+     */
+    public static ContentProvider fallbackTo(final ContentProvider fallbackProvider) {
+        return fallbackProvider;
     }
 
+    /**
+     * Semantic sugar to make explicit, that the specified Observable&lt;Content&gt; is used as a fallback
+     * for another provider.
+     * <p>
+     *     Example:
+     * </p>
+     * <pre><code>
+     *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
+     *          fallbackTo(Observable.just(someFallbackContent()))
+     *     )
+     * </code></pre>
+     *
+     * @param observable the observable content used as fallback
+     * @return ContentProvider
+     */
     public static ContentProvider fallbackTo(final rx.Observable<Content> observable) {
         return (position, parameters) -> observable;
     }
 
-    public static ContentProvider fallbackTo(final Content content) {
-        return (position, parameters) -> just(content);
+    /**
+     * Semantic sugar to make explicit, that the specified {@link Content} is used as a fallback value
+     * for another provider.
+     * <p>
+     *     Example:
+     * </p>
+     * <pre><code>
+     *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
+     *          fallbackTo(someFallbackContent())
+     *     )
+     * </code></pre>
+     *
+     * @param fallbackContent the content used as fallback
+     * @return ContentProvider
+     */
+    public static ContentProvider fallbackTo(final Content fallbackContent) {
+        return (position, parameters) -> just(fallbackContent);
     }
 
+    /**
+     * Semantic sugar to make explicit, that only a single content provider is used for a fragment.
+     * <p>
+     *     Example:
+     * </p>
+     * <pre><code>
+     *     fragment(X,
+     *          withSingle(
+     *                  contentFrom(client, "http://example.com/someContent", TEXT_PLAIN)
+     *          )
+     *     )
+     * </code></pre>
+     *
+     * @param contentProvider the single content provider
+     * @return contentProvider
+     */
     public static ContentProvider withSingle(final ContentProvider contentProvider) {
         return contentProvider;
     }

@@ -28,13 +28,14 @@ public class HttpServiceClient implements ServiceClient {
     private final ClientConfig clientConfig;
 
     private HttpServiceClient(final ClientConfig config) {
-        final org.glassfish.jersey.client.ClientConfig clientConfig = new org.glassfish.jersey.client.ClientConfig();
-        clientConfig.property(ASYNC_THREADPOOL_SIZE, DEFAULT_HTTP_THREADPOOL_SIZE);
-        clientConfig.property(CONNECT_TIMEOUT, config.getConnectTimeout());
-        clientConfig.property(READ_TIMEOUT, config.getReadTimeout());
-        clientConfig.property(FOLLOW_REDIRECTS, true);
-        client = newClient(clientConfig);
+        final org.glassfish.jersey.client.ClientConfig jerseyConfig = new org.glassfish.jersey.client.ClientConfig();
+        jerseyConfig.property(ASYNC_THREADPOOL_SIZE, DEFAULT_HTTP_THREADPOOL_SIZE);
+        jerseyConfig.property(CONNECT_TIMEOUT, config.getConnectTimeout());
+        jerseyConfig.property(READ_TIMEOUT, config.getReadTimeout());
+        jerseyConfig.property(FOLLOW_REDIRECTS, true);
+        client = newClient(jerseyConfig);
         this.clientConfig = config;
+        LOG.info("Client created with {}", clientConfig);
     }
 
     /**
@@ -53,7 +54,7 @@ public class HttpServiceClient implements ServiceClient {
         return new HttpServiceClient(singleRetry());
     }
 
-    public static ServiceClient singleRetryClient(final String key, final int connectTimeout, final int readTimeout) {
+    public static ServiceClient singleRetryClient(final Ref key, final int connectTimeout, final int readTimeout) {
         return new HttpServiceClient(singleRetry(key, connectTimeout, readTimeout));
     }
 
@@ -73,7 +74,7 @@ public class HttpServiceClient implements ServiceClient {
         return new HttpServiceClient(noRetries());
     }
 
-    public static ServiceClient noRetriesClient(final String key, final int connectTimeout, final int readTimeout) {
+    public static ServiceClient noRetriesClient(final Ref key, final int connectTimeout, final int readTimeout) {
         return new HttpServiceClient(noRetries(key, connectTimeout, readTimeout));
     }
 
@@ -93,7 +94,7 @@ public class HttpServiceClient implements ServiceClient {
         return new HttpServiceClient(noResiliency());
     }
 
-    public static ServiceClient noResiliencyClient(final String key, final int connectTimeout, final int readTimeout) {
+    public static ServiceClient noResiliencyClient(final Ref key, final int connectTimeout, final int readTimeout) {
         return new HttpServiceClient(noResiliency(key, connectTimeout, readTimeout));
     }
 
@@ -118,6 +119,7 @@ public class HttpServiceClient implements ServiceClient {
 
     @Override
     public void close() throws Exception {
+        LOG.info("Closing HTTP client '{}'", clientConfig.getRef());
         client.close();
     }
 }

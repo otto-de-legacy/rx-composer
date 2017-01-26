@@ -2,6 +2,7 @@ package de.otto.rx.composer.acceptance;
 
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
+import de.otto.rx.composer.client.ServiceClients;
 import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.page.Page;
 import org.junit.Before;
@@ -13,9 +14,11 @@ import java.time.LocalDateTime;
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
+import static de.otto.rx.composer.client.DefaultRef.noRetries;
 import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static de.otto.rx.composer.client.HttpServiceClient.singleRetryClient;
+import static de.otto.rx.composer.client.ServiceClients.defaultClients;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -190,20 +193,17 @@ public class ResilientHttpFragmentsAcceptanceTest {
         // given
         driver.addExpectation(
                 onRequestTo("/someErrorContent").withMethod(GET),
-                giveResponse("Server Error", "text/plain").withStatus(500));
+                giveResponse("Server Error", "text/plain").withStatus(500)).times(2);
         driver.addExpectation(
                 onRequestTo("/someFallbackContent").withMethod(GET),
                 giveResponse("Fallback Content", "text/plain").withStatus(200));
 
-        try (
-                final ServiceClient serviceClient = noRetriesClient();
-                final ServiceClient fallbackClient = noResiliencyClient()
-        ) {
+        try (final ServiceClients clients = defaultClients()) {
             final Page page = consistsOf(
                     fragment(X,
                             withSingle(
-                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
-                                            fallbackTo(contentFrom(fallbackClient, driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
+                                    contentFrom(clients.getDefault(), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                            fallbackTo(contentFrom(clients.getBy(noRetries), driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
                                     )
                             )
                     )
