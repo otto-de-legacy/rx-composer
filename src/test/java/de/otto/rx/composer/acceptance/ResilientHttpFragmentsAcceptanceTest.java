@@ -202,7 +202,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(X,
                             withSingle(
-                                    contentFrom(clients.getDefault(), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                    contentFrom(clients.get(), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
                                             fallbackTo(contentFrom(clients.getBy(noRetries), driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
                                     )
                             )

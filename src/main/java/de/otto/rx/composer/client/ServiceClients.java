@@ -3,14 +3,16 @@ package de.otto.rx.composer.client;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.client.ClientConfig.noResiliency;
 import static de.otto.rx.composer.client.ClientConfig.noRetries;
 import static de.otto.rx.composer.client.ClientConfig.singleRetry;
-import static de.otto.rx.composer.client.DefaultRef.noResiliency;
-import static de.otto.rx.composer.client.DefaultRef.noRetries;
-import static de.otto.rx.composer.client.DefaultRef.singleRetry;
 import static de.otto.rx.composer.client.HttpServiceClient.clientFor;
+import static de.otto.rx.composer.util.Collectors.toImmutableMap;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -18,13 +20,8 @@ public class ServiceClients implements AutoCloseable {
 
     private static final Logger LOG = getLogger(ServiceClients.class);
 
-    private static ImmutableMap<String,ClientConfig> defaultConfigs = ImmutableMap.of(
-            singleRetry.name(), singleRetry(),
-            noRetries.name(), noRetries(),
-            noResiliency.name(), noResiliency()
-    );
-    private final Ref defaultRef;
-    private final ImmutableMap<Ref, ServiceClient> serviceClients;
+    private final String defaultRef;
+    private final ImmutableMap<String, ServiceClient> serviceClients;
 
     /**
      * Creates a ServiceClients instance with a {@link ClientConfig#singleRetry()} as default client configuration, and
@@ -63,14 +60,16 @@ public class ServiceClients implements AutoCloseable {
      * @return ServiceClients
      */
     public static ServiceClients defaultClientsWith(final ClientConfig defaultClientConfig) {
-        final ImmutableMap.Builder<Ref, ServiceClient> builder = ImmutableMap.builder();
-        defaultConfigs.values().forEach(config -> builder.put(config.getRef(), clientFor(config)));
-
-        if (!defaultConfigs.containsKey(defaultClientConfig.getRef().name())) {
-            builder.put(defaultClientConfig.getRef(), clientFor(defaultClientConfig));
+        final Map<Ref, ServiceClient> map = new HashMap<>();
+        asList(singleRetry(), noRetries(), noResiliency()).forEach(config -> map.put(config.getRef(), clientFor(config)));
+        // add defaultClientConfig if it's not already in the standard configurations:
+        if (stream(DefaultRef.values())
+                .map(Enum::name)
+                .noneMatch(n->n.equals(defaultClientConfig.getRef().name()))) {
+            map.put(defaultClientConfig.getRef(), clientFor(defaultClientConfig));
         }
 
-        return new ServiceClients(defaultClientConfig.getRef(), builder.build());
+        return new ServiceClients(defaultClientConfig.getRef(), map);
     }
 
     /**
@@ -104,11 +103,15 @@ public class ServiceClients implements AutoCloseable {
         return new ServiceClients(defaultClientConfig.getRef(), builder.build());
     }
 
-    // TODO: Die default-config sollte verwendet werden, wenn der ref nicht bekannt ist.
-    // In diesem Fall muss jedoch der ClientConfig Key auf den übergebenen ref geändert werden, damit Hystrix korrekt
-    // mit den commandKeys umgeht!
+    /**
+     * Returns the ServiceClient with the {@link ClientConfig} identified by {@code ref}.
+     *
+     * @param ref reference of the client configuration
+     * @return ServiceClient
+     * @throws IllegalArgumentException if the refered ServiceClient is not configured.
+     */
     public ServiceClient getBy(final Ref ref) {
-        final ServiceClient serviceClient = serviceClients.get(ref);
+        final ServiceClient serviceClient = serviceClients.get(ref.name());
         if (serviceClient == null) {
             throw new IllegalArgumentException("Unknown ref");
         } else {
@@ -116,7 +119,12 @@ public class ServiceClients implements AutoCloseable {
         }
     }
 
-    public ServiceClient getDefault() {
+    /**
+     * Returns the default ServiceClient
+     *
+     * @return ServiceClient
+     */
+    public ServiceClient get() {
         return serviceClients.get(defaultRef);
     }
 
@@ -138,9 +146,9 @@ public class ServiceClients implements AutoCloseable {
     }
 
     private ServiceClients(final Ref defaultKey,
-                           final ImmutableMap<Ref, ServiceClient> serviceClients) {
-        this.defaultRef = checkNotNull(defaultKey);
-        this.serviceClients = checkNotNull(serviceClients);
+                           final Map<Ref, ServiceClient> serviceClients) {
+        this.defaultRef = checkNotNull(defaultKey).name();
+        this.serviceClients = checkNotNull(serviceClients).entrySet().stream().collect(toImmutableMap((e)->e.getKey().name(), Map.Entry::getValue));
     }
 
 }
