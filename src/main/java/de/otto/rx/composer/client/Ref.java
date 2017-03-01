@@ -2,18 +2,14 @@ package de.otto.rx.composer.client;
 
 /**
  * A reference to a {@link ClientConfig client configuration}.
- *
- * <p>Usage:</p>
+ * <p>
+ *     This type is intended to be implemented by an {@code enum} that is implementing {@code Ref}:
+ * </p>
  * <pre><code>
- *     enum MyRefs implements Ref {
+ *     enum MyRef implements Ref {
  *          someConfig,
  *          someOtherConfig
  *     }
- * </code></pre>
- *
- * <p>Or:</p>
- * <pre><code>
- *     Ref someConfigRef = () -&gt; "someConfig"
  * </code></pre>
  */
 public interface Ref {

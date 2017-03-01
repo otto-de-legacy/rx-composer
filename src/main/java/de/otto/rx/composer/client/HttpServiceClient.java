@@ -118,7 +118,7 @@ public class HttpServiceClient implements ServiceClient {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         LOG.info("Closing HTTP client '{}'", clientConfig.getRef());
         client.close();
     }

@@ -18,7 +18,7 @@ public class ServiceClientsTest {
     public void shouldConfigureDefaultServiceClients() {
         ServiceClients serviceClients = defaultClients();
 
-        assertThat(serviceClients.get().getClientConfig().getRef(), is(DefaultRef.singleRetry));
+        assertThat(serviceClients.getDefault().getClientConfig().getRef(), is(DefaultRef.singleRetry));
         assertThat(serviceClients.getBy(singleRetry).getClientConfig().getRef(), is(DefaultRef.singleRetry));
         assertThat(serviceClients.getBy(noRetries).getClientConfig().getRef(), is(DefaultRef.noRetries));
         assertThat(serviceClients.getBy(DefaultRef.noResiliency).getClientConfig().getRef(), is(DefaultRef.noResiliency));
@@ -28,7 +28,7 @@ public class ServiceClientsTest {
     public void shouldConfigureDefaultServiceClientsWithOtherDefault() {
         ServiceClients serviceClients = defaultClientsWith(noResiliency());
 
-        assertThat(serviceClients.get().getClientConfig().getRef(), is(DefaultRef.noResiliency));
+        assertThat(serviceClients.getDefault().getClientConfig().getRef(), is(DefaultRef.noResiliency));
         assertThat(serviceClients.getBy(singleRetry).getClientConfig().getRef(), is(DefaultRef.singleRetry));
         assertThat(serviceClients.getBy(noRetries).getClientConfig().getRef(), is(DefaultRef.noRetries));
         assertThat(serviceClients.getBy(DefaultRef.noResiliency).getClientConfig().getRef(), is(DefaultRef.noResiliency));
@@ -38,7 +38,7 @@ public class ServiceClientsTest {
     public void shouldConfigureDefaultServiceClientsWithAdditionalDefault() {
         ServiceClients serviceClients = defaultClientsWith(noResiliency(()->"test", 100, 50));
 
-        assertThat(serviceClients.get().getClientConfig().getRef().name(), is("test"));
+        assertThat(serviceClients.getDefault().getClientConfig().getRef().name(), is("test"));
         assertThat(serviceClients.getBy(singleRetry).getClientConfig().getRef(), is(DefaultRef.singleRetry));
         assertThat(serviceClients.getBy(noRetries).getClientConfig().getRef(), is(DefaultRef.noRetries));
         assertThat(serviceClients.getBy(DefaultRef.noResiliency).getClientConfig().getRef(), is(DefaultRef.noResiliency));
@@ -53,7 +53,7 @@ public class ServiceClientsTest {
     public void shouldConfigureSingleServiceClient() {
         ServiceClients serviceClients = serviceClients(noResiliency());
 
-        ServiceClient serviceClient = serviceClients.get();
+        ServiceClient serviceClient = serviceClients.getDefault();
         assertThat(serviceClient.getClientConfig().isResilient(), is(false));
     }
 

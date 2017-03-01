@@ -17,6 +17,13 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * A container of {@link ServiceClient} instances that is making it easier to handle multiple clients.
+ * <p>
+ *     Service clients can be accessed by their {@link Ref}. If the ServiceClients container is closed,
+ *     all managed client instances are closed, too.
+ * </p>
+ */
 public class ServiceClients implements AutoCloseable {
 
     private static final Logger LOG = getLogger(ServiceClients.class);
@@ -125,7 +132,7 @@ public class ServiceClients implements AutoCloseable {
      *
      * @return ServiceClient
      */
-    public ServiceClient get() {
+    public ServiceClient getDefault() {
         return serviceClients.get(defaultRef);
     }
 
