@@ -15,6 +15,7 @@ import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 import static de.otto.rx.composer.client.DefaultRef.noRetries;
+import static de.otto.rx.composer.client.DefaultRef.singleRetry;
 import static de.otto.rx.composer.client.HttpServiceClient.noResiliencyClient;
 import static de.otto.rx.composer.client.HttpServiceClient.noRetriesClient;
 import static de.otto.rx.composer.client.HttpServiceClient.singleRetryClient;
@@ -202,7 +203,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
             final Page page = consistsOf(
                     fragment(X,
                             withSingle(
-                                    contentFrom(clients.getDefault(), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                    contentFrom(clients.getBy(singleRetry), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
                                             fallbackTo(contentFrom(clients.getBy(noRetries), driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
                                     )
                             )

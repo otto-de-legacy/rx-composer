@@ -28,7 +28,6 @@ public class ServiceClients implements AutoCloseable {
 
     private static final Logger LOG = getLogger(ServiceClients.class);
 
-    private final String defaultRef;
     private final ImmutableMap<String, ServiceClient> serviceClients;
 
     /**
@@ -51,9 +50,8 @@ public class ServiceClients implements AutoCloseable {
     }
 
     /**
-     * Creates a ServiceClients instance configured like {@link #defaultClients()}, but with a different
-     * {@code defaultClientConfig}. The defaultClientConfig can either be one of the default configs, or some
-     * other ClientConfig.
+     * Creates a ServiceClients instance configured like {@link #defaultClients()}, but with one or more additional
+     * client configurations.
      *
      * <p>
      *     For every ClientConfig, a {@link ServiceClient} is created (and {@link ServiceClient#close() closed} again,
@@ -64,24 +62,28 @@ public class ServiceClients implements AutoCloseable {
      *     The created instance should be {@link #close() closed} on shutdown to release resources properly.
      * </p>
      *
-     * @param defaultClientConfig ClientConfig used by default
+     * @param clientConfig additional ClientConfig
+     * @param more optionally more ClientConfigs
      * @return ServiceClients
      */
-    public static ServiceClients defaultClientsWith(final ClientConfig defaultClientConfig) {
+    public static ServiceClients defaultClientsWith(final ClientConfig clientConfig, final ClientConfig... more) {
         final Map<Ref, ServiceClient> map = new HashMap<>();
         asList(singleRetry(), noRetries(), noResiliency()).forEach(config -> map.put(config.getRef(), clientFor(config)));
+        if (more != null) {
+            stream(more).forEach(config->map.put(config.getRef(), clientFor(config)));
+        }
         // add defaultClientConfig if it's not already in the standard configurations:
         if (stream(DefaultRef.values())
                 .map(Enum::name)
-                .noneMatch(n->n.equals(defaultClientConfig.getRef().name()))) {
-            map.put(defaultClientConfig.getRef(), clientFor(defaultClientConfig));
+                .noneMatch(n->n.equals(clientConfig.getRef().name()))) {
+            map.put(clientConfig.getRef(), clientFor(clientConfig));
         }
 
-        return new ServiceClients(defaultClientConfig.getRef(), map);
+        return new ServiceClients(map);
     }
 
     /**
-     * Creates a ServiceClients instance with a default ClientConfig and zero or more additional ClientConfigs.
+     * Creates a ServiceClients instance that is managing a number of ClientConfigs.
      *
      * <p>
      *     Every configured ClientConfig must have a unique {@link ClientConfig#getRef() key}, otherwise an exception
@@ -97,18 +99,16 @@ public class ServiceClients implements AutoCloseable {
      *     The created instance should be {@link #close() closed} on shutdown to release resources properly.
      * </p>
      *
-     * @param defaultClientConfig ClientConfig used by default
-     * @param clientConfigs other ClientConfigs
+     * @param clientConfig some client configuration
+     * @param more optionally more client configurations
      * @return ServiceClients
      */
-    public static ServiceClients serviceClients(final ClientConfig defaultClientConfig,
-                                                final ClientConfig... clientConfigs) {
+    public static ServiceClients serviceClients(final ClientConfig clientConfig, final ClientConfig... more) {
+        checkNotNull(clientConfig, "Parameter must not be null");
         final ImmutableMap.Builder<Ref, ServiceClient> builder = builder();
-        builder.put(defaultClientConfig.getRef(), clientFor(defaultClientConfig));
-        if (clientConfigs != null) {
-            stream(clientConfigs).forEach(config -> builder.put(config.getRef(), clientFor(config)));
-        }
-        return new ServiceClients(defaultClientConfig.getRef(), builder.build());
+        builder.put(clientConfig.getRef(), clientFor(clientConfig));
+        stream(more).forEach(config -> builder.put(config.getRef(), clientFor(config)));
+        return new ServiceClients(builder.build());
     }
 
     /**
@@ -128,15 +128,6 @@ public class ServiceClients implements AutoCloseable {
     }
 
     /**
-     * Returns the default ServiceClient
-     *
-     * @return ServiceClient
-     */
-    public ServiceClient getDefault() {
-        return serviceClients.get(defaultRef);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * This implementation closes all {@link ServiceClient} instances created by the serviceClients.
@@ -153,9 +144,7 @@ public class ServiceClients implements AutoCloseable {
         });
     }
 
-    private ServiceClients(final Ref defaultKey,
-                           final Map<Ref, ServiceClient> serviceClients) {
-        this.defaultRef = checkNotNull(defaultKey).name();
+    private ServiceClients(final Map<Ref, ServiceClient> serviceClients) {
         this.serviceClients = checkNotNull(serviceClients).entrySet().stream().collect(toImmutableMap((e)->e.getKey().name(), Map.Entry::getValue));
     }
 
