@@ -9,9 +9,11 @@ import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
 
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.content.ContentMatcher.contentMatcher;
 import static java.util.Comparator.comparingInt;
 import static rx.Observable.just;
@@ -23,7 +25,8 @@ public final class ContentProviders {
     private ContentProviders() {}
 
     /**
-     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to fetch the content
+     * from the specified {@code url}.
      *
      * @param serviceClient ServiceClient used to get content
      * @param url the URL of the requested service
@@ -37,7 +40,9 @@ public final class ContentProviders {
     }
 
     /**
-     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to fetch the content
+     * from the specified {@code url}, falling back to the content returned by the {@code fallback} provider, if
+     * the primary content is not available.
      *
      * @param serviceClient ServiceClient used to get content
      * @param url the URL of the requested service
@@ -53,7 +58,8 @@ public final class ContentProviders {
     }
 
     /**
-     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to fetch the content
+     * from an URL that is created from {@code uriTemplate} and {@link Parameters}.
      *
      * @param serviceClient ServiceClient used to get content
      * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
@@ -69,7 +75,8 @@ public final class ContentProviders {
     }
 
     /**
-     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to GET the content.
+     * Creates a {@link HttpContentProvider} that is using the specified {@code serviceClient} to fetch the content
+     * from an URL that is created from {@code uriTemplate} and {@link Parameters}.
      *
      * @param serviceClient ServiceClient used to get content
      * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
@@ -93,7 +100,17 @@ public final class ContentProviders {
      * </p>
      * <pre><code>
      *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
-     *          fallbackTo(contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN))
+     *          fallbackTo(
+     *              contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN)
+     *          )
+     *     )
+     * </code></pre>
+     * <p>
+     *     which is exactly equivalent to:
+     * </p>
+     * <pre><code>
+     *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
+     *          contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN)
      *     )
      * </code></pre>
      *
@@ -112,14 +129,24 @@ public final class ContentProviders {
      * </p>
      * <pre><code>
      *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
-     *          fallbackTo(Observable.just(someFallbackContent()))
+     *          fallbackTo(
+     *              Observable.just(someFallbackContent())
+     *          )
+     *     )
+     * </code></pre>
+     * <p>
+     *     which is exactly equivalent to:
+     * </p>
+     * <pre><code>
+     *     contentFrom(client, "http://example.com/someContent", TEXT_PLAIN,
+     *          Observable.just(someFallbackContent())
      *     )
      * </code></pre>
      *
      * @param observable the observable content used as fallback
      * @return ContentProvider
      */
-    public static ContentProvider fallbackTo(final rx.Observable<Content> observable) {
+    public static ContentProvider fallbackTo(final Observable<Content> observable) {
         return (position, parameters) -> observable;
     }
 
@@ -163,7 +190,8 @@ public final class ContentProviders {
     }
 
     /**
-     * Fetch the quickest {@link Content#isAvailable() available and non-empty} content from the given ContentProviders.
+     * Fetch the {@link Content#isAvailable() available and non-empty} content from the quickest-responding
+     * ContentProviders.
      * <p>
      *     This method can be used to implement a "Fan Out and Quickest Wins" pattern, if there
      *     are multiple possible providers and 'best performance' is most important.
@@ -219,7 +247,21 @@ public final class ContentProviders {
 
     /**
      * Fetch contents from all the given providers for a single position. The {@link Content} returned by this
-     * provider is a composite Content, withAll of all single Contents from the providers in the same order as
+     * provider is a composite Content, consisting of all single Contents from the providers in the same order as
+     * specified.
+     *
+     * @param contentProviders the providers used to generate the composite Content. The ordering of the content
+     *                         providers is used to order the composite contents.
+     * @return ContentProvider
+     */
+    public static ContentProvider withAll(final ContentProvider... contentProviders) {
+        checkNotNull(contentProviders, "Parameter must not be null");
+        return withAll(ImmutableList.copyOf(contentProviders));
+    }
+
+    /**
+     * Fetch contents from all the given providers for a single position. The {@link Content} returned by this
+     * provider is a composite Content, consisting of all single Contents from the providers in the same order as
      * specified.
      *
      * @param contentProviders the providers used to generate the composite Content. The ordering of the content
@@ -236,7 +278,7 @@ public final class ContentProviders {
 
     /**
      * Fetch all contents matching the given predicate from all the given providers for a single position.
-     * The {@link Content} returned by this provider is a composite Content, withAll of all single Contents
+     * The {@link Content} returned by this provider is a composite Content, consisting of all single Contents
      * from the providers in the same order as specified.
      *
      * @param predicate the predicate used to match the contents
