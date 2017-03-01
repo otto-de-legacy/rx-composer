@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.builder;
 import static de.otto.rx.composer.client.ClientConfig.noResiliency;
 import static de.otto.rx.composer.client.ClientConfig.noRetries;
 import static de.otto.rx.composer.client.ClientConfig.singleRetry;
@@ -95,7 +96,7 @@ public class ServiceClients implements AutoCloseable {
      */
     public static ServiceClients serviceClients(final ClientConfig defaultClientConfig,
                                                 final ClientConfig... clientConfigs) {
-        final ImmutableMap.Builder<Ref, ServiceClient> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Ref, ServiceClient> builder = builder();
         builder.put(defaultClientConfig.getRef(), clientFor(defaultClientConfig));
         if (clientConfigs != null) {
             stream(clientConfigs).forEach(config -> builder.put(config.getRef(), clientFor(config)));

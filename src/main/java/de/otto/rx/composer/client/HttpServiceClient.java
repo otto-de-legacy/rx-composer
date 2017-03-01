@@ -20,7 +20,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class HttpServiceClient implements ServiceClient {
 
-    private static final int DEFAULT_HTTP_THREADPOOL_SIZE = 8;
+    private static final int DEFAULT_HTTP_THREADPOOL_SIZE = 100;
 
     private static final Logger LOG = getLogger(HttpServiceClient.class);
 
