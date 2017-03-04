@@ -10,6 +10,6 @@ public class SomethingElseController {
     @RequestMapping(path = "/somethingElse", produces = "text/html")
     @ResponseBody
     public String serveSomethingElse() {
-        return "<h1>Service B</h1>";
+        return "<h1>Some other content</h1>";
     }
 }

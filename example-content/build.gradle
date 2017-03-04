@@ -15,8 +15,11 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
 jar {
-    baseName = 'example-aggregator'
+    baseName = 'example-content'
 }
+
+ext['thymeleaf.version'] = '3.0.2.RELEASE'
+ext['thymeleaf-layout-dialect.version'] = '2.2.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -26,9 +29,9 @@ repositories {
 }
 
 dependencies {
-    //compile rootProject
     compile rootProject
-    compile('org.springframework.boot:spring-boot-starter:1.4.2.RELEASE')
-    compile('org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE')
-    compile('org.jsoup:jsoup:1.8.3')
+    compile project(":thymeleaf")
+
+    compile libraries.thymeleaf
+    compile libraries.springBoot
 }

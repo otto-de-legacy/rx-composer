@@ -3,25 +3,19 @@ package de.otto.rx.composer.example;
 import de.otto.rx.composer.client.Ref;
 import de.otto.rx.composer.client.ServiceClients;
 import de.otto.rx.composer.content.Contents;
-import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.page.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PreDestroy;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
-import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.client.ClientConfig.noRetries;
 import static de.otto.rx.composer.client.ServiceClients.serviceClients;
-import static de.otto.rx.composer.content.AbcPosition.A;
-import static de.otto.rx.composer.content.AbcPosition.B;
-import static de.otto.rx.composer.content.AbcPosition.C;
-import static de.otto.rx.composer.content.AbcPosition.D;
+import static de.otto.rx.composer.content.AbcPosition.*;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
-import static de.otto.rx.composer.content.Parameters.parameters;
 import static de.otto.rx.composer.example.ContentController.Services.*;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
@@ -40,7 +34,7 @@ public class ContentController {
     enum Services implements Ref {
         serviceA, serviceB, serviceC, serviceD, serviceE, serviceF
     }
-    private final ServiceClients client = serviceClients(
+    private final ServiceClients clients = serviceClients(
             noRetries(serviceA, 5000, 500),
             noRetries(serviceB, 5000, 400),
             noRetries(serviceC, 5000, 1000),
@@ -51,47 +45,42 @@ public class ContentController {
 
     @PreDestroy
     public void shutdown() throws Exception {
-        client.close();
+        clients.close();
     }
 
-    @RequestMapping(path = "/", produces = "text/html")
-    @ResponseBody
-    public String getContent(final @RequestParam(required = false) String name) {
+    @RequestMapping("/")
+    public ModelAndView getContent(final @RequestParam(defaultValue = "false") boolean debugMode) {
         final Page page = somePage();
-        final Parameters parameters = name != null
-                ? parameters(of("name", name))
-                : emptyParameters();
-        final Contents contents = page.fetchWith(parameters);
-        return "<html>"
-                + "<body>"
-                + "<div id=A>" + contents.getBody(A) + "</div>"
-                + "<div id=B>" + contents.getBody(B) + "</div>"
-                + "</body></html>";
+        final Contents contents = page.fetchWith(emptyParameters());
+        ModelAndView modelAndView = new ModelAndView("content");
+        modelAndView.addObject("contents", contents);
+        modelAndView.addObject("debugMode", debugMode);
+        return modelAndView;
     }
 
     private Page somePage() {
         return consistsOf(
                 fragment(A, withAll(
-                        contentFrom(client.getBy(serviceA), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceA), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceA), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceA), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
+                        contentFrom(clients.getBy(serviceA), fromTemplate("http://localhost:8080/hello?name=Rx-Composer"), TEXT_HTML),
+                        contentFrom(clients.getBy(serviceA), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
                 ),
-                fragment(B, withAll(
-                        contentFrom(client.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
+                fragment(B, withSingle(
+                        contentFrom(clients.getBy(serviceE), "http://localhost:8080/somethingElse", TEXT_HTML))
                 ),
                 fragment(C, withAll(
-                        contentFrom(client.getBy(serviceC), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceD), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceE), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
-                        contentFrom(client.getBy(serviceF), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
+                        contentFrom(clients.getBy(serviceF), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
                 ),
                 fragment(D, withSingle(
-                        contentFrom(client.getBy(serviceF), "http://localhost:8080/somethingElse", TEXT_HTML)))
+                        contentFrom(clients.getBy(serviceD), "http://localhost:8080/somethingElse", TEXT_HTML))
+                ),
+                fragment(E, withAll(
+                        contentFrom(clients.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
+                        contentFrom(clients.getBy(serviceC), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
+                        contentFrom(clients.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
+                ),
+                fragment(F, withSingle(
+                        contentFrom(clients.getBy(serviceF), "http://localhost:8080/somethingElse", TEXT_HTML))
+                )
         );
     }
 }
