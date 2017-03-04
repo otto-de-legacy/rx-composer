@@ -1,4 +1,5 @@
-include 'example-content'
-include 'thymeleaf'
-
 rootProject.name = 'rx-composer'
+
+include 'composer-core'
+include 'composer-thymeleaf'
+include 'example-content'

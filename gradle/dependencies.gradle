@@ -28,8 +28,5 @@ ext.libraries = [
                 'org.springframework.boot:spring-boot-starter:1.4.2.RELEASE',
                 'org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE',
                 'org.springframework.boot:spring-boot-starter-thymeleaf:1.4.2.RELEASE'
-                //,
-                //'org.thymeleaf:thymeleaf-spring4:3.0.2.RELEASE',
-                //'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.2.0'
         ]
 ]

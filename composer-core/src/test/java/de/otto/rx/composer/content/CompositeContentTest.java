@@ -7,7 +7,6 @@ import org.junit.Test;
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

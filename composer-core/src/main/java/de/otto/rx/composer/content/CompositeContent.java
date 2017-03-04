@@ -7,7 +7,6 @@ import java.util.StringJoiner;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static java.time.LocalDateTime.now;
 

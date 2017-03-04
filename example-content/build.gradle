@@ -21,16 +21,9 @@ jar {
 ext['thymeleaf.version'] = '3.0.2.RELEASE'
 ext['thymeleaf-layout-dialect.version'] = '2.2.0'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile rootProject
-    compile project(":thymeleaf")
+    compile project(":composer-core")
+    compile project(":composer-thymeleaf")
 
     compile libraries.thymeleaf
     compile libraries.springBoot

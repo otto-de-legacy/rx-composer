@@ -1,166 +1,29 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'signing'
-apply plugin: 'maven'
-apply from: 'dependencies.gradle'
+apply from: 'gradle/dependencies.gradle'
+apply from: "gradle/root/idea.gradle"
+apply from: "gradle/root/eclipse.gradle"
 
-version='0.1.0-SNAPSHOT'
-group='de.otto'
+subprojects {
 
-repositories {
-    mavenCentral()
-}
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    apply plugin: 'project-report'
 
-dependencies {
-    compile libraries.logging
-    compile libraries.guava
-    compile libraries.uritemplates
-    compile libraries.hystrix
-    compile libraries.rx
+    version='0.1.0-SNAPSHOT'
+    group='de.otto.rx-composer'
 
-    testCompile libraries.test
-}
-
-test {
-    println()
-    afterSuite { desc, result ->
-        if (!desc.parent) { // will match the outermost suite
-            println "Test Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-        }
-    }
-}
-
-idea.project {
-    jdkName = "1.8"
-    languageLevel = "1.8"
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from 'build/docs/javadoc'
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-artifacts {
-    archives jar
-    archives sourcesJar
-    archives javadocJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-task askForVersionNumber << {
-    def console = System.console()
-    def enteredVersion
-    if (console) {
-        version = trimSnapshot(version)
-        enteredVersion = console.readLine('\n\u001B[92m\u001B[1mWhich version do you want to release?\u001B[0m \u001B[2m[' + version + ']\u001B[0m ')
-        if (!enteredVersion.isEmpty()) {
-            version = enteredVersion
-        }
-        bumpVersionInGradleFile(version)
-    } else {
-        logger.error "Cannot get console."
-    }
-}
-
-def bumpVersionInGradleFile(String theVersion) {
-    def myFile = new File('build.gradle')
-    def output = ""
-    myFile.eachLine { line ->
-        output += line.replaceAll('^version\\s*=\\s*.*$', "version='" + theVersion + "'")
-        output += "\n"
-    }
-    def outFile = new File("build.gradle")
-    outFile.write(output)
-}
-
-def incrementVersion(String theVersion) {
-    def versionArray = theVersion.split("\\.")
-    def major = versionArray[0].toInteger()
-    def minor = versionArray[1].toInteger() + 1
-    def patch = 0
-
-    return major + "." + minor + "." + patch;
-}
-
-def trimSnapshot(String theVersion) {
-    if (theVersion.endsWith("-SNAPSHOT")) {
-        return theVersion.substring(0, theVersion.length()-9)
-    } else {
-        return theVersion;
-    }
-}
-
-
-task commitNewVersion << {
-    println(["git", "add", "build.gradle"].execute().text.trim())
-    println(["git", "commit", "-m", "bump version to " + version].execute().text.trim())
-    bumpVersionInGradleFile(incrementVersion(version) + "-SNAPSHOT")
-    println(["git", "add", "build.gradle"].execute().text.trim())
-    println(["git", "commit", "-m", "bump version to next snapshot"].execute().text.trim())
-
-}
-
-task doRelease {
-    dependsOn askForVersionNumber, uploadArchives, commitNewVersion
-}
-
-doRelease << {
-
-}
-
-uploadArchives {
     repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-
-            pom.project {
-                name 'rx-composer'
-                packaging 'jar'
-                description 'A library to aggregate content from several microservices based on content configurations.'
-                url 'https://github.com/otto-de/rx-composer'
-
-                scm {
-                    url 'scm:git@github.com:otto-de/rx-composer.git'
-                    connection 'scm:git@github.com:otto-de/rx-composer.git'
-                    developerConnection 'scm:git@github.com:otto-de/rx-compose.git'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'gsteinacker'
-                        name 'Guido Steinacker'
-                    }
-                }
-            }
-        }
+        mavenCentral()
+        mavenLocal()
+        maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
-}
 
-commitNewVersion.shouldRunAfter uploadArchives
+    task allDeps(type: DependencyReportTask) {}
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    apply from: "${rootDir}/gradle/idea.gradle"
+    apply from: "${rootDir}/gradle/compile.gradle"
+    apply from: "${rootDir}/gradle/test.gradle"
+    apply from: "${rootDir}/gradle/maven.gradle"
+    apply from: "${rootDir}/gradle/signing.gradle"
+
 }

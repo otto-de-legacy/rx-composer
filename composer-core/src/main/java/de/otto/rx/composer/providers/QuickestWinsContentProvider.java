@@ -1,15 +1,17 @@
 package de.otto.rx.composer.providers;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.content.ContentMatcher;
+import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.content.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import java.util.stream.Collectors;
 
-import static de.otto.rx.composer.content.ErrorContent.*;
-import static rx.Observable.just;
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
 import static rx.Observable.merge;
 
 /**

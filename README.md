@@ -53,8 +53,6 @@ defaults like this:
 
 ```
 
-
-
 ### Fetching two contents for a single page in parallel:
        
             // Specify what to fetch:
