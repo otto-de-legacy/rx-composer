@@ -35,14 +35,14 @@ public final class Contents {
 
         public Contents build() {
             return new Contents(
-                uniqueIndex(results, Content::getPosition)
+                uniqueIndex(results, (Content c) -> c.getPosition().name())
             );
         }
     }
 
-    private final ImmutableMap<Position, Content> results;
+    private final ImmutableMap<String, Content> results;
 
-    private Contents(final ImmutableMap<Position, Content> results) {
+    private Contents(final ImmutableMap<String, Content> results) {
         this.results = results;
     }
 
@@ -68,7 +68,7 @@ public final class Contents {
      * @return possibly empty content
      */
     public Content get(final Position position) {
-        final Content content = results.get(position);
+        final Content content = results.get(position.name());
         return content != null ? content : emptyContent(position);
     }
 

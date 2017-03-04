@@ -38,6 +38,32 @@ public class ContentsTest {
     }
 
     @Test
+    public void shouldGetContentByPosition() {
+        // given
+        final Contents builder = contentsBuilder()
+                .add(someContent("some content"))
+                .build();
+        // when
+        final Content content = builder.get(A);
+        // then
+        assertThat(content.isAvailable(), is(true));
+        assertThat(content.getBody(), is("some content"));
+    }
+
+    @Test
+    public void shouldGetContentByOtherPositionWithSameName() {
+        // given
+        final Contents builder = contentsBuilder()
+                .add(someContent("some content"))
+                .build();
+        // when
+        final Content content = builder.get(() -> "A");
+        // then
+        assertThat(content.isAvailable(), is(true));
+        assertThat(content.getBody(), is("some content"));
+    }
+
+    @Test
     public void shouldGetEmptyContentAsFallback() {
         // given
         final Contents.Builder builder = contentsBuilder();
