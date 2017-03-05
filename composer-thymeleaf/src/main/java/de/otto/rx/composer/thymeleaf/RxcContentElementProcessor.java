@@ -25,7 +25,7 @@ public class RxcContentElementProcessor extends AbstractElementTagProcessor {
     private static final Logger LOG = getLogger(RxcContentElementProcessor.class);
 
     public RxcContentElementProcessor() {
-        super(HTML, "rxc", "content", true, "position", false, 1000);
+        super(HTML, "rxc", "fragment", true, "position", false, 1000);
     }
 
     @Override

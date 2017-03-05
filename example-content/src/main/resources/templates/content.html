@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:rxc="https://github.com/otto-de/rx-composer/rxc.xsd"
+      xmlns:rxc="https://github.com/otto-de/rx-composer"
       lang="en">
 
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-        <title>RxComposer Example</title>
+    <title>RxComposer Example</title>
 
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
@@ -17,110 +17,115 @@
         <!-- Optional theme -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
 
-        <style>
-            body { padding-top: 70px; }
-        </style>
-
-    </head>
+    <style>
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
 
 <body>
 
-    <nav class="navbar navbar-default navbar-fixed-top" th:fragment="navigation">
-        <div class="container">
-            <div class="navbar-header" th:fragment="header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" th:href="@{/}">RxComposer Example</a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <!--
+<nav class="navbar navbar-default navbar-fixed-top" th:fragment="navigation">
+    <div class="container">
+        <div class="navbar-header" th:fragment="header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" th:href="@{/}">RxComposer Example</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <!--
                 <ul class="nav navbar-nav">
                     <li>
                         <a th:href="@{/}"></a>
                     </li>
                 </ul>
                 -->
-            </div><!--/.nav-collapse -->
-        </div>
-    </nav>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
 
-    <div class="container">
+<div class="container">
 
-        <div class="jumbotron">
-            <h1 class="display-3">Hello, world!</h1>
-            <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-            <hr class="my-4">
-            <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-            <p class="lead">
-                <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-            </p>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel A</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="A" />
-                    </div>
+    <div class="jumbotron">
+        <h1 class="display-3">Hello, world!</h1>
+        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to
+            featured content or information.</p>
+        <hr class="my-4">
+        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+        </p>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel A</h3>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel B</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="B" />
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel C</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="C" />
-                    </div>
+                <div class="panel-body">
+                    <rxc:fragment position="A"/>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel D</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="D" />
-                    </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel B</h3>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel E</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="E" />
-                    </div>
+                <div class="panel-body">
+                    <rxc:fragment position="B"/>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Panel F</h3>
-                    </div>
-                    <div class="panel-body">
-                        <rxc:content position="F" />
-                    </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel C</h3>
+                </div>
+                <div class="panel-body">
+                    <rxc:fragment position="C"/>
                 </div>
             </div>
         </div>
-    </div> <!-- /container -->
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel D</h3>
+                </div>
+                <div class="panel-body">
+                    <rxc:fragment position="D"/>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel E</h3>
+                </div>
+                <div class="panel-body">
+                    <rxc:fragment position="E"/>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Panel F</h3>
+                </div>
+                <div class="panel-body">
+                    <rxc:fragment position="F"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- /container -->
 
 
-    <span th:fragment="footer">
+<span th:fragment="footer">
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+                crossorigin="anonymous"></script>
     </span>
 
 </body>
