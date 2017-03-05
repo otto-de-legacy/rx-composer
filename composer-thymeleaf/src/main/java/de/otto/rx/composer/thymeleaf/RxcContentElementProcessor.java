@@ -9,6 +9,7 @@ import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 
+import static java.lang.Boolean.TRUE;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.thymeleaf.templatemode.TemplateMode.HTML;
 
@@ -23,20 +24,22 @@ public class RxcContentElementProcessor extends AbstractElementTagProcessor {
 
     private static final Logger LOG = getLogger(RxcContentElementProcessor.class);
 
-    protected RxcContentElementProcessor() {
+    public RxcContentElementProcessor() {
         super(HTML, "rxc", "content", true, "position", false, 1000);
     }
 
     @Override
-    protected void doProcess(ITemplateContext context, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
+    protected void doProcess(final ITemplateContext context,
+                             final IProcessableElementTag tag,
+                             final IElementTagStructureHandler structureHandler) {
         final Position pos = () -> tag.getAttributeValue("position");
 
         // wahrscheinlich sollte man das noch umbauen; die Variable muss ja nicht immer "contents" heißen...
         final Contents contents = (Contents) context.getVariable("contents");
         final Content content = contents.get(pos);
 
-        final boolean debugMode = (Boolean) context.getVariable("debugMode");
-        if (debugMode) {
+        final Object debugMode = context.getVariable("debugMode");
+        if (TRUE.equals(debugMode)) {
             // hier könnte man noch weitere Debug-Informationen ausgeben, einen Rahmen zeichnen, etc.
             structureHandler.replaceWith("<b>DEBUG...</b>\n" + content.getBody(),false);
         } else {

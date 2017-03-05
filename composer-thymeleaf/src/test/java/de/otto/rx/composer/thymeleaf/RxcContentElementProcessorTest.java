@@ -1,131 +1,77 @@
 package de.otto.rx.composer.thymeleaf;
 
+import de.otto.rx.composer.content.*;
+import org.junit.Test;
+import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.model.IProcessableElementTag;
+import org.thymeleaf.processor.element.IElementTagStructureHandler;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+
+import static de.otto.rx.composer.content.AbcPosition.A;
+import static de.otto.rx.composer.content.Contents.contentsBuilder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 public class RxcContentElementProcessorTest {
 
-    /*
     @Test
-    public void shouldResolveEsiInclude() throws IOException {
-        Fetch fetch = s -> withResponse(200, "test");
+    public void shouldReturnContent() throws IOException {
+        Contents contents = contentsBuilder()
+                .add(someContent(A))
+                .build();
+
+        final ITemplateContext context = mock(ITemplateContext.class);
+        //when(context.getVariable("debugMode")).thenReturn(FALSE);
+        when(context.getVariable("contents")).thenReturn(contents);
+
+        final IProcessableElementTag tag = mock(IProcessableElementTag.class);
+        when(tag.getAttributeValue("position")).thenReturn("A");
+
+
+        final IElementTagStructureHandler structureHandler = mock(IElementTagStructureHandler.class);
 
         //when
-        final String html = processor(fetch).fetch("someSrc", "template", CONTINUE_ON_ERROR);
+        new RxcContentElementProcessor().doProcess(context, tag, structureHandler);
 
         //then
-        assertThat(html, is("<!-- <esi:include src=\"someSrc\"> -->test<!-- </esi:include> -->"));
+        verify(structureHandler).replaceWith("Some Content", false);
     }
 
-    @Test
-    public void shouldHandleHttp404() throws IOException {
-        Fetch fetch = fetchWith404();
+    private Content someContent(final Position position) {
+        return new SingleContent() {
+            @Override
+            public String getSource() {
+                return position.name();
+            }
 
-        //when
-        final String html = processor(fetch).fetch("someSrc", "template", CONTINUE_ON_ERROR);
+            @Override
+            public Position getPosition() {
+                return position;
+            }
 
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"someSrc\"> --><!-- </esi:include> -->"));
-    }
+            @Override
+            public boolean isAvailable() {
+                return true;
+            }
 
-    @Test
-    public void shouldHttp404WithError() throws IOException {
-        Fetch fetch = fetchWith404();
+            @Override
+            public String getBody() {
+                return "Some Content";
+            }
 
-        //when
-        final String html = processor(fetch).fetch("someSrc", "template", NO_CONTINUE_ON_ERROR);
+            @Override
+            public Headers getHeaders() {
+                return Headers.emptyHeaders();
+            }
 
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"someSrc\"> -->404: some status<!-- </esi:include> -->"));
-    }
+            @Override
+            public LocalDateTime getCreated() {
+                return LocalDateTime.now();
+            }
 
-    @Test
-    public void shouldFailOnUnknownStatusCode() throws IOException {
-        Fetch fetch = s -> withResponse(333, "kaputt");
-
-        //when
-        final String html = processor(fetch).fetch("redirect", "template", CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"redirect\"> --><!-- </esi:include> -->"));
-    }
-
-    @Test
-    public void shouldFailOnUnknownStatusCodeWithError() throws IOException {
-        Fetch fetch = s -> withResponse(333, "kaputt");
-
-        //when
-        final String html = processor(fetch).fetch("redirect", "template", NO_CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"redirect\"> -->333: some status<!-- </esi:include> -->"));
-    }
-
-
-    @Test
-    public void shouldHandleExceptionInFetchFunction() throws IOException {
-        Fetch fetch = s -> {
-            throw new IllegalStateException("error");
         };
-
-        //when
-        final String html = processor(fetch).fetch("redirect", "template", CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"redirect\"> --><!-- </esi:include> -->"));
     }
-
-    @Test
-    public void shouldHandleExceptionInFetchFunctionWithError() throws IOException {
-        Fetch fetch = s -> {
-            throw new IllegalStateException("error");
-        };
-
-        //when
-        final String html = processor(fetch).fetch("redirect", "template", NO_CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"redirect\"> -->error<!-- </esi:include> -->"));
-    }
-
-    @Test
-    public void shouldReplaceRelativePathWithAbsolutePath() throws Exception {
-        Fetch fetch = src -> withResponse(200, src);
-
-        //when
-        final String html = processor(fetch).fetch("/relative", "template", NO_CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"/relative\"> -->https://www.otto.de/relative<!-- </esi:include> -->"));
-    }
-
-    @Test
-    public void shouldNotReplaceRelativePathWhenHostnameIsEmpty() throws Exception {
-        Fetch fetch = src -> withResponse(200, src);
-
-        //when
-        final String html = processor(fetch, null).fetch("/relative", "template", NO_CONTINUE_ON_ERROR);
-
-        //then
-        assertThat(html, is("<!-- <esi:include src=\"/relative\"> -->/relative<!-- </esi:include> -->"));
-    }
-
-    private Fetch fetchWith404() {
-        return s -> withResponse(404, "irgendwas");
-    }
-
-    private EsiIncludeElementProcessor processor(Fetch fetch) {
-        return processor(fetch, "https://www.otto.de");
-    }
-
-    private EsiIncludeElementProcessor processor(Fetch fetch, String hostname) {
-        return new EsiIncludeElementProcessor(fetch, hostname);
-    }
-
-    private Response withResponse(int statusCode, String responseBody) {
-        Response response = mock(Response.class);
-        when(response.getResponseBody()).thenReturn(responseBody);
-        when(response.getStatusCode()).thenReturn(statusCode);
-        when(response.getStatusText()).thenReturn("some status");
-        return response;
-    }
-
-    */
 }
