@@ -1,6 +1,5 @@
-package de.otto.rx.composer.example;
+package de.otto.rx.composer.thymeleaf;
 
-import de.otto.rx.composer.thymeleaf.RxComposerDialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
