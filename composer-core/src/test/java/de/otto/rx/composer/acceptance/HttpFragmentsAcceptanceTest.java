@@ -3,6 +3,7 @@ package de.otto.rx.composer.acceptance;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Contents;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.page.Page;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +38,7 @@ public class HttpFragmentsAcceptanceTest {
 
         try (final ServiceClient serviceClient = noResiliencyClient()) {
             contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
-                    .getContent(() -> "warmup", emptyParameters())
+                    .getContent(() -> "warmup", new RequestContext(), emptyParameters())
                     .toBlocking()
                     .first();
         }

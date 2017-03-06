@@ -4,6 +4,7 @@ import de.otto.rx.composer.client.ClientConfig;
 import de.otto.rx.composer.client.HttpServiceClient;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.context.RequestContext;
 import org.glassfish.jersey.message.internal.Statuses;
 import org.junit.Test;
 import rx.observables.BlockingObservable;
@@ -37,7 +38,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final Content content = contentProvider.getContent(X, emptyParameters()).toBlocking().single();
+        final Content content = contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking().single();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
@@ -51,7 +52,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test?foo=bar");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, fromTemplate("/test{?foo}"), TEXT_PLAIN);
-        final Content content = contentProvider.getContent(X, parameters(of("foo", "bar"))).toBlocking().single();
+        final Content content = contentProvider.getContent(X, new RequestContext(), parameters(of("foo", "bar"))).toBlocking().single();
         // then
         verify(mockClient).get("/test?foo=bar", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
@@ -65,7 +66,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final Iterator<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking().getIterator();
+        final Iterator<Content> content = contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking().getIterator();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.hasNext(), is(false));
@@ -78,7 +79,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final BlockingObservable<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking();
+        final BlockingObservable<Content> content = contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         content.single();
@@ -91,7 +92,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final BlockingObservable<Content> content = contentProvider.getContent(X, emptyParameters()).toBlocking();
+        final BlockingObservable<Content> content = contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.getIterator().hasNext(), is(false));
@@ -107,7 +108,7 @@ public class HttpContentProviderTest {
         }));
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        contentProvider.getContent(X, emptyParameters()).toBlocking().single();
+        contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking().single();
     }
 
     @Test(expected = RuntimeException.class)
@@ -120,7 +121,7 @@ public class HttpContentProviderTest {
         }));
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        contentProvider.getContent(X, emptyParameters()).toBlocking().single();
+        contentProvider.getContent(X, new RequestContext(), emptyParameters()).toBlocking().single();
     }
 
     private Response someResponse(final int status, final String body) {

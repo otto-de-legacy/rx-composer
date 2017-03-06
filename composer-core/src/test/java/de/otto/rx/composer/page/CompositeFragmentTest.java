@@ -5,6 +5,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.content.SingleContent;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 
@@ -27,32 +28,34 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteInitialContentProvider() {
         // given
+        final RequestContext context = new RequestContext();
         final ContentProvider initial = mock(ContentProvider.class);
-        when(initial.getContent(A, emptyParameters())).thenReturn(just(mock(Content.class)));
+        when(initial.getContent(A, context, emptyParameters())).thenReturn(just(mock(Content.class)));
         final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
         // when
-        fragment.fetchWith(emptyParameters());
+        fragment.fetchWith(context, emptyParameters());
         // then
-        verify(initial).getContent(A, emptyParameters());
+        verify(initial).getContent(A, context, emptyParameters());
     }
 
     @Test
     public void shouldExecuteNestedFragment() {
         // given
+        final RequestContext context = new RequestContext();
         final ContentProvider fetchInitial = mock(ContentProvider.class);
-        when(fetchInitial.getContent(A, emptyParameters())).thenReturn(just(someContent(A)));
+        when(fetchInitial.getContent(A, context, emptyParameters())).thenReturn(just(someContent(A)));
         // and
         final Fragment nestedFragment = mock(Fragment.class);
         when(nestedFragment.getPosition()).thenReturn(B);
-        when(nestedFragment.fetchWith(emptyParameters())).thenReturn(just(someContent(B)));
+        when(nestedFragment.fetchWith(context, emptyParameters())).thenReturn(just(someContent(B)));
         // and
         final Fragment compositeFragment = Fragments.fragment(A, fetchInitial, followedBy((c) -> emptyParameters(), nestedFragment));
         // when
-        ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(emptyParameters()).toBlocking().toIterable());
+        ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(context, emptyParameters()).toBlocking().toIterable());
 
         // then
         assertThat(contents, hasSize(2));
-        verify(nestedFragment).fetchWith(emptyParameters());
+        verify(nestedFragment).fetchWith(context, emptyParameters());
     }
 
     private Content someContent(final Position position) {

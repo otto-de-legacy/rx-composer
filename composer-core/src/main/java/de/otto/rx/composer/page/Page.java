@@ -5,8 +5,11 @@ import com.google.common.collect.ImmutableList.Builder;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Scheduler;
+import rx.schedulers.Schedulers;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -96,7 +99,7 @@ public final class Page {
         final CountDownLatch latch = new CountDownLatch(1);
         final Contents.Builder contents = contentsBuilder();
         from(fragments)
-                .flatMap((fragment) -> fragment.fetchWith(params))
+                .flatMap((fragment) -> fragment.fetchWith(new RequestContext(), params))
                 .subscribe(
                         (c) -> {
                             LOG.trace("Got Content for {}", c.getPosition());

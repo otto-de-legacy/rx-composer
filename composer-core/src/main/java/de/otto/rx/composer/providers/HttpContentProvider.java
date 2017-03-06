@@ -7,6 +7,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.context.RequestContext;
 import org.slf4j.Logger;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -26,7 +27,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * A ContentProvider that is fetching content using HTTP GET.
  * <p>
  *     Both full URLs and UriTemplates are supported. UriTemplates are expanded using
- *     the {@link Parameters} when {@link #getContent(Position, Parameters) getting content}.
+ *     the {@link Parameters} when {@link #getContent(Position, RequestContext, Parameters) getting content}.
  * </p>
  */
 final class HttpContentProvider implements ContentProvider {
@@ -71,6 +72,7 @@ final class HttpContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
+                                          final RequestContext context,
                                           final Parameters parameters) {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
@@ -78,8 +80,9 @@ final class HttpContentProvider implements ContentProvider {
         final Observable<Content> contentObservable = serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
+                .doOnSubscribe(() -> context.traceSubscribe(position, url))
                 .doOnNext(response -> {
-                    LOG.trace("Got next content for position {} from {}", position, url);
+                    context.traceNext(position, url, response);
                     if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
                         /*
                         Throw Exception so the circuit breaker is able to open the circuit,
@@ -95,17 +98,16 @@ final class HttpContentProvider implements ContentProvider {
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
         if (clientConfig.isResilient()) {
-
             final Observable<Content> observable = from(
                     contentObservable.retry(clientConfig.getRetries()),
-                    fallback != null ? fallback.getContent(position, parameters) : null,
+                    fallback != null ? fallback.getContent(position, context, parameters) : null,
                     clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
-                    .doOnError(t -> LOG.error("Caught Exception from CircuitBreaker: for position {}: {} ({})", position, t.getCause().getMessage(), t.getMessage()))
+                    .doOnError(t -> context.traceCircuitBreakerException(position, t))
                     .filter(Content::isAvailable);
         } else {
             return contentObservable
-                    .doOnError(t -> LOG.error("Error fetching content {} for position {}: {}", url, position, t.getMessage()))
+                    .doOnError(t -> context.traceError(position, url, t))
                     .filter(Content::isAvailable);
         }
     }

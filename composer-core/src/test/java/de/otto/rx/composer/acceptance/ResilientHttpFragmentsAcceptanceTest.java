@@ -4,6 +4,7 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.client.ServiceClients;
 import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.page.Page;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,7 +48,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
 
         try (final ServiceClient serviceClient = noResiliencyClient()) {
             contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
-                    .getContent(() -> "warmup", emptyParameters())
+                    .getContent(() -> "warmup", new RequestContext(), emptyParameters())
                     .toBlocking()
                     .first();
         }
@@ -229,7 +230,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     fragment(X,
                             withSingle(
                                     contentFrom(serviceClient, driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
-                                            fallbackTo((position, parameters) -> just(someContent(position, "Some Fallback")))
+                                            fallbackTo((position, ctx, parameters) -> just(someContent(position, "Some Fallback")))
                                     )
                             )
                     )
@@ -258,7 +259,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     fragment(X,
                             withSingle(
                                     contentFrom(serviceClient, driver.getBaseUrl() + "/someFlakyContent", TEXT_PLAIN,
-                                            fallbackTo((position, parameters) -> just(someContent(position, "Some Fallback")))
+                                            fallbackTo((position, ctx, parameters) -> just(someContent(position, "Some Fallback")))
                                     )
                             )
                     )

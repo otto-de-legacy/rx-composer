@@ -2,6 +2,7 @@ package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 import rx.Observable;
@@ -50,16 +51,17 @@ public class FragmentsTest {
     @Test
     public void shouldExecuteFragment() {
         // given
+        final RequestContext context = new RequestContext();
         final Content mockContent = mock(Content.class);
         when(mockContent.isAvailable()).thenReturn(true);
         when(mockContent.getBody()).thenReturn("Foo");
         // and
         final ContentProvider mockProvider = mock(ContentProvider.class);
-        when(mockProvider.getContent(X, emptyParameters())).thenReturn(just(mockContent));
+        when(mockProvider.getContent(X, context, emptyParameters())).thenReturn(just(mockContent));
         // and
         final Fragment fragment = fragment(X, mockProvider);
         // when Fragment
-        final Observable<Content> result =  fragment.fetchWith(emptyParameters());
+        final Observable<Content> result =  fragment.fetchWith(context, emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));

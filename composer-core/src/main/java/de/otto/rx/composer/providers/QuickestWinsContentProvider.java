@@ -5,6 +5,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.ContentMatcher;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -12,6 +13,7 @@ import rx.Observable;
 import java.util.stream.Collectors;
 
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
+import static rx.Observable.create;
 import static rx.Observable.merge;
 
 /**
@@ -33,11 +35,12 @@ final class QuickestWinsContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
+                                          final RequestContext context,
                                           final Parameters parameters) {
         final Observable<Content> mergedContent = merge(contentProviders
                 .stream()
                 .map(contentProvider -> contentProvider
-                        .getContent(position, parameters)
+                        .getContent(position, context, parameters)
                         .doOnError(this::traceError)
                         .onErrorReturn((Throwable t) -> errorContent(position, t)))
                 .collect(Collectors.toList()));

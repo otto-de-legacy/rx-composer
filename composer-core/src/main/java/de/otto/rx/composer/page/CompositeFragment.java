@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.context.RequestContext;
 import org.slf4j.Logger;
 import rx.Observable;
 
@@ -63,9 +64,9 @@ class CompositeFragment implements Fragment {
     }
 
     @Override
-    public Observable<Content> fetchWith(final Parameters parameters) {
+    public Observable<Content> fetchWith(final RequestContext context, final Parameters parameters) {
         return first
-                .fetchWith(parameters)
+                .fetchWith(context, parameters)
                 .onErrorReturn(e -> errorContent(first.getPosition(), e))
                 .filter(Content::isAvailable)
                 .flatMap(content -> {
@@ -73,7 +74,7 @@ class CompositeFragment implements Fragment {
                     final List<Observable<Content>> observables = this.continuation.nested
                             .stream()
                             .map(fragment -> fragment
-                                    .fetchWith(nestedParams)
+                                    .fetchWith(context, nestedParams)
                                     .onErrorReturn(e -> errorContent(fragment.getPosition(), e))
                                     .filter(Content::isAvailable)
                             )

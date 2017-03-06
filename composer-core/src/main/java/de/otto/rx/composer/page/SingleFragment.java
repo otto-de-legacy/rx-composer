@@ -4,6 +4,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.ErrorContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +49,21 @@ class SingleFragment implements Fragment {
      * </p>
      */
     @Override
-    public Observable<Content> fetchWith(final Parameters parameters) {
+    public Observable<Content> fetchWith(final RequestContext context, final Parameters parameters) {
         try {
             return contentProvider
-                    .getContent(position, parameters)
-                    .onErrorReturn(e -> errorContent(position, e))
+                    .getContent(position, context, parameters)
+                    .onErrorReturn(e -> {
+                        final ErrorContent errorContent = errorContent(position, e);
+                        context.traceError(errorContent);
+                        return errorContent;
+                    })
                     .filter(Content::isAvailable);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-            return just(errorContent(position, e));
+            final ErrorContent errorContent = errorContent(position, e);
+            context.traceException(errorContent);
+            return just(errorContent);
         }
     }
 

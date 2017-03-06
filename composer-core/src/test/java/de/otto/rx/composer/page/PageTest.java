@@ -2,6 +2,7 @@ package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.context.RequestContext;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,8 +57,8 @@ public class PageTest {
         // when
         page.fetchWith(emptyParameters());
         // then
-        verify(doFirst).fetchWith(any());
-        verify(doSecond).fetchWith(any());
+        verify(doFirst).fetchWith(any(RequestContext.class), any(Parameters.class));
+        verify(doSecond).fetchWith(any(RequestContext.class), any(Parameters.class));
     }
 
     @Test
@@ -64,7 +66,7 @@ public class PageTest {
         // given
         final Fragment doFirst = mock(Fragment.class);
         when(doFirst.getPosition()).thenReturn(X);
-        when(doFirst.fetchWith(emptyParameters())).thenReturn(just(someContent("test", X, "Foo")));
+        when(doFirst.fetchWith(any(RequestContext.class), any(Parameters.class))).thenReturn(just(someContent("test", X, "Foo")));
         // and
         final Page page = Page.consistsOf(
                 doFirst
@@ -80,7 +82,7 @@ public class PageTest {
         // given
         final Fragment doFirst = mock(Fragment.class);
         when(doFirst.getPosition()).thenReturn(X);
-        when(doFirst.fetchWith(emptyParameters())).thenReturn(empty());
+        when(doFirst.fetchWith(any(RequestContext.class), any(Parameters.class))).thenReturn(empty());
         // and
         final Page page = Page.consistsOf(
                 doFirst
@@ -103,8 +105,8 @@ public class PageTest {
         page.fetchWith(emptyParameters());
         page.fetchWith(emptyParameters());
         // then
-        verify(doFirst, times(2)).fetchWith(any());
-        verify(doSecond, times(2)).fetchWith(any());
+        verify(doFirst, times(2)).fetchWith(any(RequestContext.class), any(Parameters.class));
+        verify(doSecond, times(2)).fetchWith(any(RequestContext.class), any(Parameters.class));
     }
 
     @Test
@@ -121,8 +123,8 @@ public class PageTest {
         // when
         page.fetchWith(someParameters);
         // then
-        verify(doFirst).fetchWith(someParameters);
-        verify(doSecond).fetchWith(someParameters);
+        verify(doFirst).fetchWith(any(RequestContext.class), eq(someParameters));
+        verify(doSecond).fetchWith(any(RequestContext.class), eq(someParameters));
     }
 
     private Content someContent(final String source, final Position position, final String text) {

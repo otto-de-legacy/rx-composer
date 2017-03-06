@@ -4,6 +4,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.content.SingleContent;
+import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
 import org.junit.Test;
 import rx.Observable;
@@ -30,9 +31,9 @@ public class SingleFragmentTest {
     @Test
     public void shouldFetchContent() {
         // given
-        final Fragment fragment = fragment(X, (position, parameters) -> just(someContent("Yeah!")));
+        final Fragment fragment = fragment(X, (position, ctx, parameters) -> just(someContent("Yeah!")));
         // when
-        final Observable<Content> result = fragment.fetchWith(emptyParameters());
+        final Observable<Content> result = fragment.fetchWith(new RequestContext(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(true));
@@ -42,9 +43,9 @@ public class SingleFragmentTest {
     @Test
     public void shouldHandleExceptions() {
         // given
-        final Fragment fragment = fragment(X, (position, parameters) -> {throw new IllegalStateException("Bumm!!!");});
+        final Fragment fragment = fragment(X, (position, ctx, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
-        final Observable<Content> result = fragment.fetchWith(emptyParameters());
+        final Observable<Content> result = fragment.fetchWith(new RequestContext(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(false));
