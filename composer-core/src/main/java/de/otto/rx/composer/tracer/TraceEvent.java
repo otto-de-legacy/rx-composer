@@ -2,6 +2,9 @@ package de.otto.rx.composer.tracer;
 
 import de.otto.rx.composer.content.Position;
 
+import static de.otto.rx.composer.tracer.EventType.COMPLETED;
+import static de.otto.rx.composer.tracer.EventType.ERROR;
+import static de.otto.rx.composer.tracer.EventType.STARTED;
 import static java.lang.System.currentTimeMillis;
 
 /**
@@ -14,12 +17,30 @@ public final class TraceEvent {
     private final Position position;
     private final String source;
     private final boolean nonEmptyContent;
+    private final String errorMessage;
 
-    TraceEvent(final EventType type, final Position position, final String source, final boolean nonEmptyContent) {
+    private TraceEvent(final EventType type, final Position position, final String source, final boolean nonEmptyContent, final String errorMessage) {
         this.type = type;
         this.position = position;
         this.source = source;
         this.nonEmptyContent = nonEmptyContent;
+        this.errorMessage = errorMessage;
+    }
+
+    public static TraceEvent fragmentStarted(final Position position, final String source) {
+        return new TraceEvent(STARTED, position, source, false, "");
+    }
+
+    public static TraceEvent fragmentCompleted(final Position position, final String source, final boolean available) {
+        return new TraceEvent(COMPLETED, position, source, available, "");
+    }
+
+    public static TraceEvent error(final Position position, final String source, final Throwable t) {
+        return new TraceEvent(ERROR, position, source, false, t.getMessage());
+    }
+
+    public static TraceEvent exception(final Position position, final Throwable t) {
+        return new TraceEvent(ERROR, position, "", false, t.getMessage());
     }
 
     public final long getTimestamp() {
@@ -42,4 +63,7 @@ public final class TraceEvent {
         return nonEmptyContent;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 }

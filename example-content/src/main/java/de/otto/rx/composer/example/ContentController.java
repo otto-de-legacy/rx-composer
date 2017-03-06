@@ -13,6 +13,7 @@ import javax.annotation.PreDestroy;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static de.otto.rx.composer.client.ClientConfig.noRetries;
+import static de.otto.rx.composer.client.ClientConfig.singleRetry;
 import static de.otto.rx.composer.client.ServiceClients.serviceClients;
 import static de.otto.rx.composer.content.AbcPosition.*;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
@@ -38,7 +39,7 @@ public class ContentController {
             noRetries(serviceA, 5000, 500),
             noRetries(serviceB, 5000, 400),
             noRetries(serviceC, 5000, 1000),
-            noRetries(serviceD, 5000, 480),
+            singleRetry(serviceD, 5000, 480),
             noRetries(serviceE, 5000, 550),
             noRetries(serviceF, 5000, 2000)
     );
@@ -71,7 +72,7 @@ public class ContentController {
                         contentFrom(clients.getBy(serviceF), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
                 ),
                 fragment(D, withSingle(
-                        contentFrom(clients.getBy(serviceD), "http://localhost:8080/somethingElse", TEXT_HTML))
+                        contentFrom(clients.getBy(serviceD), "http://localhost:8080/somethingMissing", TEXT_HTML))
                 ),
                 fragment(E, withAll(
                         contentFrom(clients.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML),
@@ -79,7 +80,7 @@ public class ContentController {
                         contentFrom(clients.getBy(serviceB), fromTemplate("http://localhost:8080/hello{?name}"), TEXT_HTML))
                 ),
                 fragment(F, withSingle(
-                        contentFrom(clients.getBy(serviceF), "http://localhost:8080/somethingElse", TEXT_HTML))
+                        contentFrom(clients.getBy(serviceF), "http://localhost:8080/somethingBroken", TEXT_HTML))
                 )
         );
     }

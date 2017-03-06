@@ -19,6 +19,9 @@ import java.util.Arrays;
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.providers.HystrixObservableContent.from;
+import static de.otto.rx.composer.tracer.TraceEvent.error;
+import static de.otto.rx.composer.tracer.TraceEvent.fragmentCompleted;
+import static de.otto.rx.composer.tracer.TraceEvent.fragmentStarted;
 import static javax.ws.rs.core.MediaType.valueOf;
 import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -72,7 +75,7 @@ final class HttpContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final Tracer context,
+                                          final Tracer tracer,
                                           final Parameters parameters) {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
@@ -80,7 +83,7 @@ final class HttpContentProvider implements ContentProvider {
         final Observable<Content> contentObservable = serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
-                .doOnSubscribe(() -> context.traceFragmentStarted(position, url))
+                .doOnSubscribe(() -> tracer.trace(fragmentStarted(position, url)))
                 .doOnNext(response -> {
 
                     if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
@@ -95,7 +98,7 @@ final class HttpContentProvider implements ContentProvider {
                 })
                 .map(response -> {
                     final Content content = new HttpContent(url, position, response);
-                    context.traceFragmentCompleted(position, url, content.isAvailable());
+                    tracer.trace(fragmentCompleted(position, url, content.isAvailable()));
                     return content;
                 });
 
@@ -104,14 +107,14 @@ final class HttpContentProvider implements ContentProvider {
         if (clientConfig.isResilient()) {
             final Observable<Content> observable = from(
                     contentObservable.retry(clientConfig.getRetries()),
-                    fallback != null ? fallback.getContent(position, context, parameters) : null,
+                    fallback != null ? fallback.getContent(position, tracer, parameters) : null,
                     clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
-                    .doOnError(t -> context.traceCircuitBreakerException(position, url, t))
+                    .doOnError(t -> tracer.trace(error(position, url, t)))
                     .filter(Content::isAvailable);
         } else {
             return contentObservable
-                    .doOnError(t -> context.traceError(position, url, t))
+                    .doOnError(t -> tracer.trace(error(position, url, t)))
                     .filter(Content::isAvailable);
         }
     }

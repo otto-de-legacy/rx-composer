@@ -1,16 +1,11 @@
 package de.otto.rx.composer.tracer;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.ErrorContent;
-import de.otto.rx.composer.content.Position;
 import org.slf4j.Logger;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
-import static de.otto.rx.composer.tracer.EventType.COMPLETED;
-import static de.otto.rx.composer.tracer.EventType.ERROR;
-import static de.otto.rx.composer.tracer.EventType.STARTED;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -24,29 +19,22 @@ public final class Tracer {
     private final ConcurrentLinkedQueue<TraceEvent> events = new ConcurrentLinkedQueue<>();
     private final long startedTimestamp = currentTimeMillis();
 
-    public void traceFragmentStarted(final Position position, final String url) {
-        events.add(new TraceEvent(STARTED, position, url, false));
-        LOG.trace("Start fetching content for position {} from {}", position.name(), url);
-    }
-
-    public void traceFragmentCompleted(final Position position, final String url, final boolean available) {
-        events.add(new TraceEvent(COMPLETED, position, url, available));
-        LOG.trace("Got next {} content for position {} from {} with status {}", available ? "available" : "unavailable", position.name(), url);
-    }
-
-    public void traceError(final ErrorContent errorContent) {
-        events.add(new TraceEvent(ERROR, errorContent.getPosition(), errorContent.getSource(), false));
-        LOG.error("Created ErrorContent for position " + errorContent.getPosition() + ": " + errorContent.getThrowable().getMessage());
-    }
-
-    public void traceError(final Position position, final String url, final Throwable t) {
-        events.add(new TraceEvent(ERROR, position, url, false));
-        LOG.error("Error fetching content {} for position {}: {}", url, position.name(), t.getMessage());
-    }
-
-    public void traceCircuitBreakerException(final Position position, final String url, final Throwable t) {
-        events.add(new TraceEvent(ERROR, position, url, false));
-        LOG.error("Caught Exception from CircuitBreaker: for position {}: {} ({})", position.name(), t.getCause().getMessage(), t.getMessage());
+    public void trace(final TraceEvent event) {
+        events.add(event);
+        switch (event.getType()) {
+            case COMPLETED:
+                LOG.trace("{} fetching {} content for position {} from {}", event.getType(), event.isNonEmptyContent() ? "available" : "unavailable", event.getPosition().name(), event.getSource());
+                break;
+            case ERROR:
+                if (event.getSource().isEmpty()) {
+                    LOG.error("Error fetching content for position: {}", event.getPosition().name());
+                } else {
+                    LOG.error("Error fetching content {} for position {}: {}", event.getSource(), event.getPosition().name(), event.getErrorMessage());
+                }
+                break;
+            default:
+                LOG.trace("{} fetching content for position {} from {}", event.getType(), event.getPosition().name(), event.getSource());
+        }
     }
 
     public ImmutableList<TraceEvent> getEvents() {
@@ -90,6 +78,6 @@ public final class Tracer {
             }
         }
         runtime = currentTimeMillis() - startedTimestamp;
-        LOG.info("Request Stats: requested: {} with content: {} empty: {} errors: {} slowest: {} ({}ms) avg: {}ms total runtime: {}ms", numRequested, numNonEmpty, numEmpty, numErrors, slowestFragment, slowestNonEmptyMillis, avgNonEmptyMillis, runtime);
+        LOG.info("Request Stats: requested: {}, with content: {}, empty: {}, errors: {}, slowest: {} ({}ms), avg: {}ms, total runtime: {}ms", numRequested, numNonEmpty, numEmpty, numErrors, slowestFragment, slowestNonEmptyMillis, avgNonEmptyMillis, runtime);
     }
 }
