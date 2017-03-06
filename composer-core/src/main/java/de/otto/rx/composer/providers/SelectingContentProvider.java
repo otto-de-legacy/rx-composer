@@ -2,7 +2,7 @@ package de.otto.rx.composer.providers;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.*;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -58,7 +58,7 @@ final class SelectingContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final RequestContext context,
+                                          final Tracer context,
                                           final Parameters parameters) {
         final AtomicInteger subIndex = new AtomicInteger();
         final Observable<IndexedContent> mergedContent = merge(contentProviders

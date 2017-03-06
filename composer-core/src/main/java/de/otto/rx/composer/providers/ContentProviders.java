@@ -7,7 +7,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.IndexedContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -64,7 +64,7 @@ public final class ContentProviders {
      *
      * @param serviceClient ServiceClient used to get content
      * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
-     *                    param of {@link ContentProvider#getContent(Position, RequestContext, Parameters)} is used to fill the
+     *                    param of {@link ContentProvider#getContent(Position, Tracer, Parameters)} is used to fill the
      *                    template variables.
      * @param accept media type of the accepted content.
      * @return ContentProvider
@@ -81,7 +81,7 @@ public final class ContentProviders {
      *
      * @param serviceClient ServiceClient used to get content
      * @param uriTemplate the URI template used to create the service URL. The {@link de.otto.rx.composer.content.Parameters}
-     *                    param of {@link ContentProvider#getContent(Position, RequestContext, Parameters)} is used to fill the
+     *                    param of {@link ContentProvider#getContent(Position, Tracer, Parameters)} is used to fill the
      *                    template variables.
      * @param accept media type of the accepted content.
      * @param fallback ContentProvider used as a fallback, if execution is failing with an exception of HTTP server error.

@@ -2,7 +2,7 @@ package de.otto.rx.composer.providers;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.*;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 import rx.Observable;
 
@@ -33,7 +33,7 @@ public class QuickestWinsContentProviderTest {
                 (position, ctx, parameters) -> just(new TestContent("Second", X, "Yeah!"))
         ));
         // when
-        final Observable<Content> result = fetchQuickest.getContent(X, new RequestContext(), emptyParameters());
+        final Observable<Content> result = fetchQuickest.getContent(X, new Tracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
@@ -47,7 +47,7 @@ public class QuickestWinsContentProviderTest {
                 (position, ctx, parameters) -> just(new TestContent("Second", X, ""))
         ));
         // when
-        final Observable<Content> result = fetchQuickest.getContent(X, new RequestContext(), emptyParameters());
+        final Observable<Content> result = fetchQuickest.getContent(X, new Tracer(), emptyParameters());
         // then
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
@@ -61,7 +61,7 @@ public class QuickestWinsContentProviderTest {
                 (position, ctx, parameters) -> just(new TestContent("Second", X, "Yeah!"))
         ));
         // when
-        final Observable<Content> result = fetchQuickest.getContent(X, new RequestContext(), emptyParameters());
+        final Observable<Content> result = fetchQuickest.getContent(X, new Tracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
@@ -75,7 +75,7 @@ public class QuickestWinsContentProviderTest {
                 someContentProviderThrowing(new IllegalStateException("Bumm!!!"))
         ));
         // when
-        final Observable<Content> result = fetchQuickest.getContent(X, new RequestContext(), emptyParameters());
+        final Observable<Content> result = fetchQuickest.getContent(X, new Tracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().singleOrDefault(null);
         assertThat(content, is(nullValue()));
@@ -128,7 +128,7 @@ public class QuickestWinsContentProviderTest {
 
     private ContentProvider someContentProviderThrowing(final Exception e) {
         final ContentProvider delegate = mock(ContentProvider.class);
-        when(delegate.getContent(any(Position.class), any(RequestContext.class), any(Parameters.class))).thenReturn(fromCallable(() -> {
+        when(delegate.getContent(any(Position.class), any(Tracer.class), any(Parameters.class))).thenReturn(fromCallable(() -> {
             throw e;
         }));
         return delegate;

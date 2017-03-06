@@ -5,11 +5,9 @@ import com.google.common.collect.ImmutableList.Builder;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Scheduler;
-import rx.schedulers.Schedulers;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -94,25 +92,16 @@ public final class Page {
      * @return available Contents
      */
     public Contents fetchWith(final Parameters params) {
-        LOG.trace("Started execution");
+        final Tracer tracer = new Tracer();
         // use a latch to await execution of all fragments:
         final CountDownLatch latch = new CountDownLatch(1);
         final Contents.Builder contents = contentsBuilder();
         from(fragments)
-                .flatMap((fragment) -> fragment.fetchWith(new RequestContext(), params))
+                .flatMap((fragment) -> fragment.fetchWith(tracer, params))
                 .subscribe(
-                        (c) -> {
-                            LOG.trace("Got Content for {}", c.getPosition());
-                            contents.add(c);
-                        },
-                        (t) -> {
-                            LOG.error(t.getMessage(), t);
-                        },
-                        () -> {
-                            LOG.trace("Completed execution");
-                            // doOnComplete: all contents are collected - we can proceed now.
-                            latch.countDown();
-                        }
+                        contents::add,
+                        (t) -> LOG.error(t.getMessage(), t),
+                        latch::countDown
                 );
         try {
             // wait for completion of the plan execution:
@@ -120,6 +109,7 @@ public final class Page {
         } catch (final InterruptedException e) {
             LOG.error("Interrupted waiting for Contents: {}", e.getMessage());
         }
+        tracer.gatherStatistics();
         return contents.build();
     }
 

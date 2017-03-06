@@ -7,7 +7,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -27,7 +27,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * A ContentProvider that is fetching content using HTTP GET.
  * <p>
  *     Both full URLs and UriTemplates are supported. UriTemplates are expanded using
- *     the {@link Parameters} when {@link #getContent(Position, RequestContext, Parameters) getting content}.
+ *     the {@link Parameters} when {@link #getContent(Position, Tracer, Parameters) getting content}.
  * </p>
  */
 final class HttpContentProvider implements ContentProvider {
@@ -72,7 +72,7 @@ final class HttpContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final RequestContext context,
+                                          final Tracer context,
                                           final Parameters parameters) {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
@@ -80,9 +80,9 @@ final class HttpContentProvider implements ContentProvider {
         final Observable<Content> contentObservable = serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
-                .doOnSubscribe(() -> context.traceSubscribe(position, url))
+                .doOnSubscribe(() -> context.traceFragmentStarted(position, url))
                 .doOnNext(response -> {
-                    context.traceNext(position, url, response);
+
                     if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
                         /*
                         Throw Exception so the circuit breaker is able to open the circuit,
@@ -93,7 +93,11 @@ final class HttpContentProvider implements ContentProvider {
                         throw new ServerErrorException(response);
                     }
                 })
-                .map(response -> (Content) new HttpContent(url, position, response));
+                .map(response -> {
+                    final Content content = new HttpContent(url, position, response);
+                    context.traceFragmentCompleted(position, url, content.isAvailable());
+                    return content;
+                });
 
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
@@ -103,7 +107,7 @@ final class HttpContentProvider implements ContentProvider {
                     fallback != null ? fallback.getContent(position, context, parameters) : null,
                     clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
-                    .doOnError(t -> context.traceCircuitBreakerException(position, t))
+                    .doOnError(t -> context.traceCircuitBreakerException(position, url, t))
                     .filter(Content::isAvailable);
         } else {
             return contentObservable

@@ -5,8 +5,8 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.content.SingleContent;
-import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
+import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteInitialContentProvider() {
         // given
-        final RequestContext context = new RequestContext();
+        final Tracer context = new Tracer();
         final ContentProvider initial = mock(ContentProvider.class);
         when(initial.getContent(A, context, emptyParameters())).thenReturn(just(mock(Content.class)));
         final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
@@ -41,7 +41,7 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteNestedFragment() {
         // given
-        final RequestContext context = new RequestContext();
+        final Tracer context = new Tracer();
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         when(fetchInitial.getContent(A, context, emptyParameters())).thenReturn(just(someContent(A)));
         // and

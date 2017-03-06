@@ -21,7 +21,7 @@ public final class EmptyContent extends SingleContent {
     private EmptyContent(final Position position, final String source) {
         this.position = position;
         this.source = source;
-        LOG.info("Created EmptyContent for position {} from config {}", position, source);
+        LOG.info("Created EmptyContent for position {} from config {}", position.name(), source);
     }
 
     public static EmptyContent emptyContent(final Position position) {

@@ -20,7 +20,6 @@ public final class ErrorContent extends SingleContent {
     private ErrorContent(final Position position, final Throwable e) {
         this.position = position;
         this.e = e;
-        LOG.error("Created ErrorContent for position " + position + ": " + e.getMessage());
     }
 
     public static ErrorContent errorContent(final Position position, final Throwable e) {
@@ -97,4 +96,7 @@ public final class ErrorContent extends SingleContent {
         return created;
     }
 
+    public Throwable getThrowable() {
+        return e;
+    }
 }

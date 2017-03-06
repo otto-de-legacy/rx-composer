@@ -2,8 +2,8 @@ package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.providers.ContentProvider;
+import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 import rx.Observable;
 
@@ -51,7 +51,7 @@ public class FragmentsTest {
     @Test
     public void shouldExecuteFragment() {
         // given
-        final RequestContext context = new RequestContext();
+        final Tracer context = new Tracer();
         final Content mockContent = mock(Content.class);
         when(mockContent.isAvailable()).thenReturn(true);
         when(mockContent.getBody()).thenReturn("Foo");

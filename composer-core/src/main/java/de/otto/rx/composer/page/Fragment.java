@@ -3,7 +3,7 @@ package de.otto.rx.composer.page;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import rx.Observable;
 
 /**
@@ -22,7 +22,7 @@ public interface Fragment {
      * @param parameters parameters provided when fetching the {@link Page}
      * @return Observable content for the Fragment's position.
      */
-    Observable<Content> fetchWith(RequestContext context, Parameters parameters);
+    Observable<Content> fetchWith(Tracer context, Parameters parameters);
 
     /**
      *

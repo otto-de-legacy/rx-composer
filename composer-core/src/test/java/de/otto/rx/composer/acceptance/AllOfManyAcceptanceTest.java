@@ -4,8 +4,8 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.CompositeContent;
 import de.otto.rx.composer.content.Contents;
-import de.otto.rx.composer.context.RequestContext;
 import de.otto.rx.composer.page.Page;
+import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class AllOfManyAcceptanceTest {
 
         try (final ServiceClient serviceClient = noResiliencyClient()) {
             contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
-                    .getContent(() -> "warmup", new RequestContext(), emptyParameters())
+                    .getContent(() -> "warmup", new Tracer(), emptyParameters())
                     .toBlocking()
                     .first();
         }

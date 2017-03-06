@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import rx.Observable;
 
@@ -64,7 +64,7 @@ class CompositeFragment implements Fragment {
     }
 
     @Override
-    public Observable<Content> fetchWith(final RequestContext context, final Parameters parameters) {
+    public Observable<Content> fetchWith(final Tracer context, final Parameters parameters) {
         return first
                 .fetchWith(context, parameters)
                 .onErrorReturn(e -> errorContent(first.getPosition(), e))

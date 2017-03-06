@@ -36,7 +36,6 @@ public final class HttpContent extends SingleContent {
         this.body = response.readEntity(String.class);
         this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
         this.headers = of(response.getStringHeaders());
-        LOG.trace("{} content pos={} status={} config={}", available ? "Available" : "Unavailable", position, response.getStatus(), source);
     }
 
     /**

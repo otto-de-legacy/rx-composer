@@ -5,7 +5,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.ContentMatcher;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.context.RequestContext;
+import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -13,7 +13,6 @@ import rx.Observable;
 import java.util.stream.Collectors;
 
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
-import static rx.Observable.create;
 import static rx.Observable.merge;
 
 /**
@@ -35,7 +34,7 @@ final class QuickestWinsContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final RequestContext context,
+                                          final Tracer context,
                                           final Parameters parameters) {
         final Observable<Content> mergedContent = merge(contentProviders
                 .stream()
@@ -56,7 +55,7 @@ final class QuickestWinsContentProvider implements ContentProvider {
         LOG.error(t.getMessage(), t);
     }
 
-    private void traceSelectQuickest(Position position) {
+    private void traceSelectQuickest(final Position position) {
         LOG.trace("Selecting quickest content for {} from {} providers", position, contentProviders.size());
     }
 
