@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
+import static de.otto.rx.composer.tracer.Stats.statsBuilder;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -17,7 +18,7 @@ public final class Tracer {
     private static final Logger LOG = getLogger(Tracer.class);
 
     private final ConcurrentLinkedQueue<TraceEvent> events = new ConcurrentLinkedQueue<>();
-    private final long startedTimestamp = currentTimeMillis();
+    private final long startedTs = currentTimeMillis();
 
     public void trace(final TraceEvent event) {
         events.add(event);
@@ -44,43 +45,39 @@ public final class Tracer {
         return copyOf(events);
     }
 
-    public void gatherStatistics() {
-        int numRequested = 0;
-        int numEmpty = 0;
-        int numErrors = 0;
-        int numNonEmpty = 0;
+    public Stats gatherStatistics() {
+        Stats.StatsBuilder stats = statsBuilder();
+        stats.startedTs = startedTs;
+
         long sumNonEmptyMillis = 0;
-        long avgNonEmptyMillis = 0;
-        long slowestNonEmptyMillis = 0;
-        long runtime = 0;
-        String slowestFragment = "";
+
         for (final TraceEvent event : events) {
             switch (event.getType()) {
                 case STARTED:
-                    ++numRequested;
+                    ++stats.numRequested;
                     break;
                 case COMPLETED:
                     if (event.isNonEmptyContent()) {
-                        ++numNonEmpty;
-                        long fragmentRuntime = event.getTimestamp() - startedTimestamp;
+                        ++stats.numNonEmpty;
+                        long fragmentRuntime = event.getTimestamp() - startedTs;
                         sumNonEmptyMillis += fragmentRuntime;
-                        if (fragmentRuntime > slowestNonEmptyMillis) {
-                            slowestFragment = event.getPosition().name() + " from " + event.getSource();
-                            slowestNonEmptyMillis = fragmentRuntime;
+                        if (fragmentRuntime > stats.slowestNonEmptyMillis) {
+                            stats.slowestFragment = event.getPosition().name();
+                            stats.slowestNonEmptyMillis = fragmentRuntime;
                         }
-                        avgNonEmptyMillis = sumNonEmptyMillis / numNonEmpty;
+                        stats.avgNonEmptyMillis = sumNonEmptyMillis / stats.numNonEmpty;
                     } else {
-                        ++numEmpty;
+                        ++stats.numEmpty;
                     }
                     break;
                 case ERROR:
-                    ++numErrors;
+                    ++stats.numErrors;
                     break;
                 default:
                     break;
             }
         }
-        runtime = currentTimeMillis() - startedTimestamp;
-        LOG.info("Request Stats: requested: {}, with content: {}, empty: {}, errors: {}, slowest: {} ({}ms), avg: {}ms, total runtime: {}ms", numRequested, numNonEmpty, numEmpty, numErrors, slowestFragment, slowestNonEmptyMillis, avgNonEmptyMillis, runtime);
+        stats.runtime = currentTimeMillis() - startedTs;
+        return stats.build();
     }
 }

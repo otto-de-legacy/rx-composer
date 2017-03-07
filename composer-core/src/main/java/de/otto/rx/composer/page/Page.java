@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.tracer.Stats;
 import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,8 +110,11 @@ public final class Page {
         } catch (final InterruptedException e) {
             LOG.error("Interrupted waiting for Contents: {}", e.getMessage());
         }
-        tracer.gatherStatistics();
-        return contents.build();
+        final Stats statistics = tracer.gatherStatistics();
+        LOG.info(statistics.toString());
+        return contents
+                .setStats(statistics)
+                .build();
     }
 
     ImmutableList<Fragment> getFragments() {

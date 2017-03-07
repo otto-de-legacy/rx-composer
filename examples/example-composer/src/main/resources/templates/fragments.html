@@ -9,9 +9,9 @@
     <div th:fragment="fragment(position)">
         <rxc:fragment th:if="${!debugMode}" position="${position}" />
         <th:block th:if="${debugMode}" th:with="content = ${contents.get(position)}">
-                <div style="border-style: solid; border-color: red">
-                    <rxc:fragment position="${position}" />
-                    <ul style="border-top-style: solid; color: red; font-size: x-small">
+                <div style="border-style: solid; border-width: thin; border-color: red">
+                    <rxc:fragment position="${position}">No Content</rxc:fragment>
+                    <ul style="border-top-style: solid; border-top-width: thin; border-color: red; color: red; font-size: small">
                         <li>Source: <span th:text="${content.getSource()}"></span></li>
                         <li th:if="${content.isComposite()}"># Contents: <span th:text="${content.asComposite().getContents().size()}"></span></li>
                         <li th:if="${content.isComposite()}">Avg. Runtime: <span th:text="${content.getAvgRuntime()}"></span>ms</li>
@@ -20,4 +20,51 @@
                 </div>
         </th:block>
     </div>
+
+
+
+    <!--
+    Example for a Thymeleaf fragment that is supporting a debugMode variable to optionally render some statistics
+    about the performance of the whole page.
+
+    If debugMode is false, nothing is rendered into the page.
+    -->
+    <div th:fragment="statistics">
+
+        <div th:if="${debugMode}" th:with="stats = ${contents.getStats()}" class="panel panel-default" style="border-style: solid; border-width: thin; border-color: red; color: red; font-size: small">
+            <div class="panel-heading">
+                <h3 class="panel-title">Page Stats</h3>
+            </div>
+            <!-- Using th:include to include fragment A using Thymeleaf fragments: -->
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <ul>
+                            <li># requested: <span th:text="${stats.numRequested}"></span></li>
+                            <li># returned: <span th:text="${stats.numNonEmpty}"></span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2">
+                        <ul>
+                            <li># empty: <span th:text="${stats.numEmpty}"></span></li>
+                            <li># errors: <span th:text="${stats.numErrors}"></span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <ul>
+                            <li>Avg non-empty runtime: <span th:text="${stats.avgNonEmptyMillis}"></span>ms</li>
+                            <li>Max non-empty runtime: <span th:text="${stats.maxNonEmptyMillis}"></span>ms (<span th:text="${stats.slowestFragment}"></span>)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <ul>
+                            <li>Total runtime w/o rendering: <span th:text="${stats.runtime}"></span>ms</li>
+                            <li>Total runtime w/ rendering: <span th:text="${stats.totalRuntime}"></span>ms</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </html>

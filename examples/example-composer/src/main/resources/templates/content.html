@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:rxc="https://github.com/otto-de/rx-composer" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
     <meta charset="utf-8"/>
@@ -62,7 +62,7 @@
                     <h3 class="panel-title">Panel C</h3>
                 </div>
                 <div class="panel-body">
-                    <rxc:fragment position="C"/>
+                    <div th:replace="fragments :: fragment('C')"></div>
                 </div>
             </div>
         </div>
@@ -88,11 +88,12 @@
                     <h3 class="panel-title">Panel F</h3>
                 </div>
                 <div class="panel-body">
-                    <rxc:fragment position="F"/>
+                    <div th:replace="fragments :: fragment('F')"></div>
                 </div>
             </div>
         </div>
     </div>
+    <div th:replace="fragments :: statistics"></div>
 </div> <!-- /container -->
 
 

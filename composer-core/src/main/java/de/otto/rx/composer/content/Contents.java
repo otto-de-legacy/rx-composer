@@ -3,6 +3,7 @@ package de.otto.rx.composer.content;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import de.otto.rx.composer.page.Page;
+import de.otto.rx.composer.tracer.Stats;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,6 +20,7 @@ public final class Contents {
     public static class Builder {
 
         private final Queue<Content> results = new ConcurrentLinkedQueue<>();
+        private Stats stats;
 
         /**
          * Add a content item to the collection of contents if content is available.
@@ -33,19 +35,25 @@ public final class Contents {
             return this;
         }
 
+        public Builder setStats(Stats stats) {
+            this.stats = stats;
+            return this;
+        }
+
         public Contents build() {
             return new Contents(
-                    results.stream().map(Content::getStartedTs).min(Long::compareTo).orElse(System.currentTimeMillis()),
+                    stats,
                     uniqueIndex(results, (Content c) -> c.getPosition().name())
             );
         }
+
     }
 
-    private final long startedTs;
+    private final Stats stats;
     private final ImmutableMap<String, Content> results;
 
-    private Contents(final long startedTs, final ImmutableMap<String, Content> results) {
-        this.startedTs = startedTs;
+    private Contents(final Stats stats, final ImmutableMap<String, Content> results) {
+        this.stats = stats != null ? stats : Stats.emptyStats();
         this.results = results;
     }
 
@@ -72,12 +80,12 @@ public final class Contents {
      */
     public Content get(final Position position) {
         final Content content = results.get(position.name());
-        return content != null ? content : missingContent(position, startedTs);
+        return content != null ? content : missingContent(position, stats.getStartedTs());
     }
 
     public Content get(final String position) {
         final Content content = results.get(position);
-        return content != null ? content : missingContent(() -> position, startedTs);
+        return content != null ? content : missingContent(() -> position, stats.getStartedTs());
     }
 
     /**
@@ -89,6 +97,15 @@ public final class Contents {
      */
     public String getBody(final Position position) {
         return get(position).getBody();
+    }
+
+    /**
+     * Returns execution-time statistics of the whole page.
+     *
+     * @return Stats
+     */
+    public Stats getStats() {
+        return stats;
     }
 
 }
