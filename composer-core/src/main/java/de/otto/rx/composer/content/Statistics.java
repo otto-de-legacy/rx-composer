@@ -1,13 +1,13 @@
-package de.otto.rx.composer.tracer;
+package de.otto.rx.composer.content;
 
 import org.slf4j.Logger;
 
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class Stats {
+public class Statistics {
 
-    private static final Logger LOG = getLogger(Stats.class);
+    private static final Logger LOG = getLogger(Statistics.class);
 
     private final long startedTs;
     private final int numRequested;
@@ -19,9 +19,9 @@ public class Stats {
     private final long runtime;
     private final String slowestFragment;
 
-    Stats(final long startedTs, final int numRequested, final int numEmpty, final int numErrors,
-          final int numNonEmpty, final long avgNonEmptyMillis, final long slowestNonEmptyMillis,
-          final long runtime, final String slowestFragment) {
+    Statistics(final long startedTs, final int numRequested, final int numEmpty, final int numErrors,
+               final int numNonEmpty, final long avgNonEmptyMillis, final long slowestNonEmptyMillis,
+               final long runtime, final String slowestFragment) {
         this.startedTs = startedTs;
         this.numRequested = numRequested;
         this.numEmpty = numEmpty;
@@ -96,26 +96,26 @@ public class Stats {
         return new StatsBuilder();
     }
 
-    public static Stats emptyStats() {
+    public static Statistics emptyStats() {
         return new StatsBuilder().build();
     }
 
     public static class StatsBuilder {
-        long startedTs = currentTimeMillis();
-        int numRequested = 0;
-        int numEmpty = 0;
-        int numErrors = 0;
-        int numNonEmpty = 0;
-        long avgNonEmptyMillis = 0;
-        long slowestNonEmptyMillis = 0;
-        long runtime = 0;
-        String slowestFragment = "";
+        public long startedTs = currentTimeMillis();
+        public int numRequested = 0;
+        public int numEmpty = 0;
+        public int numErrors = 0;
+        public int numNonEmpty = 0;
+        public long avgNonEmptyMillis = 0;
+        public long slowestNonEmptyMillis = 0;
+        public long runtime = 0;
+        public String slowestFragment = "";
 
         private StatsBuilder() {
         }
 
-        public Stats build() {
-            return new Stats(startedTs, numRequested, numEmpty, numErrors, numNonEmpty, avgNonEmptyMillis, slowestNonEmptyMillis, runtime, slowestFragment);
+        public Statistics build() {
+            return new Statistics(startedTs, numRequested, numEmpty, numErrors, numNonEmpty, avgNonEmptyMillis, slowestNonEmptyMillis, runtime, slowestFragment);
         }
     }
 

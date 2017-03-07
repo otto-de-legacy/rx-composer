@@ -1,12 +1,13 @@
 package de.otto.rx.composer.tracer;
 
 import com.google.common.collect.ImmutableList;
+import de.otto.rx.composer.content.Statistics;
 import org.slf4j.Logger;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
-import static de.otto.rx.composer.tracer.Stats.statsBuilder;
+import static de.otto.rx.composer.content.Statistics.statsBuilder;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -45,8 +46,8 @@ public final class Tracer {
         return copyOf(events);
     }
 
-    public Stats gatherStatistics() {
-        Stats.StatsBuilder stats = statsBuilder();
+    public Statistics gatherStatistics() {
+        Statistics.StatsBuilder stats = statsBuilder();
         stats.startedTs = startedTs;
 
         long sumNonEmptyMillis = 0;

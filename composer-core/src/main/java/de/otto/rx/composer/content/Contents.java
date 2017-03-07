@@ -3,7 +3,6 @@ package de.otto.rx.composer.content;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import de.otto.rx.composer.page.Page;
-import de.otto.rx.composer.tracer.Stats;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,7 +19,7 @@ public final class Contents {
     public static class Builder {
 
         private final Queue<Content> results = new ConcurrentLinkedQueue<>();
-        private Stats stats;
+        private Statistics stats;
 
         /**
          * Add a content item to the collection of contents if content is available.
@@ -35,7 +34,7 @@ public final class Contents {
             return this;
         }
 
-        public Builder setStats(Stats stats) {
+        public Builder setStats(Statistics stats) {
             this.stats = stats;
             return this;
         }
@@ -49,11 +48,11 @@ public final class Contents {
 
     }
 
-    private final Stats stats;
+    private final Statistics stats;
     private final ImmutableMap<String, Content> results;
 
-    private Contents(final Stats stats, final ImmutableMap<String, Content> results) {
-        this.stats = stats != null ? stats : Stats.emptyStats();
+    private Contents(final Statistics stats, final ImmutableMap<String, Content> results) {
+        this.stats = stats != null ? stats : Statistics.emptyStats();
         this.results = results;
     }
 
@@ -104,7 +103,7 @@ public final class Contents {
      *
      * @return Stats
      */
-    public Stats getStats() {
+    public Statistics getStats() {
         return stats;
     }
 
