@@ -7,12 +7,10 @@
     you could also render the content using th:utext="${contents.getBody(position)}
     -->
     <div th:fragment="fragment(position)">
-        <th:block th:if="${!debugMode}">
-            <rxc:fragment position="${position}" />
-        </th:block>
+        <rxc:fragment th:if="${!debugMode}" position="${position}" />
         <th:block th:if="${debugMode}" th:with="content = ${contents.get(position)}">
                 <div style="border-style: solid; border-color: red">
-                    <div th:utext="${content.getBody()}"></div>
+                    <rxc:fragment position="${position}" />
                     <ul style="border-top-style: solid; color: red; font-size: x-small">
                         <li>Source: <span th:text="${content.getSource()}"></span></li>
                         <li th:if="${content.isComposite()}"># Contents: <span th:text="${content.asComposite().getContents().size()}"></span></li>

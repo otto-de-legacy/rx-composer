@@ -72,7 +72,7 @@ public class AllOfManyAcceptanceTest {
             assertThat(content.getContents(), hasSize(2));
             assertThat(content.getContents().get(0).getBody(), is("Hello"));
             assertThat(content.getContents().get(1).getBody(), is("World"));
-            assertThat(content.getBody(), is("Hello\nWorld"));
+            assertThat(content.getBody(), is("HelloWorld"));
         }
     }
 
@@ -99,7 +99,7 @@ public class AllOfManyAcceptanceTest {
             assertThat(result.get(X).isComposite(), is(true));
             final CompositeContent content = result.get(X).asComposite();
             assertThat(content.getContents(), hasSize(2));
-            assertThat(content.getBody(), is("Hello\nWorld"));
+            assertThat(content.getBody(), is("HelloWorld"));
         }
     }
 
@@ -151,7 +151,7 @@ public class AllOfManyAcceptanceTest {
 
             final CompositeContent content = result.get(X).asComposite();
             assertThat(content.getContents(), hasSize(2));
-            assertThat(content.getBody(), is("World\nWorld"));
+            assertThat(content.getBody(), is("WorldWorld"));
         }
     }
 

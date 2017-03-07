@@ -23,7 +23,7 @@ public final class Tracer {
         events.add(event);
         switch (event.getType()) {
             case COMPLETED:
-                LOG.trace("{} fetching {} content for position {} from {}", event.getType(), event.isNonEmptyContent() ? "available" : "unavailable", event.getPosition().name(), event.getSource());
+                LOG.trace("{} fetching {} content for position {} from {}", event.getType(), event.isNonEmptyContent() ? "AVAILABLE" : "UNAVAILABLE", event.getPosition().name(), event.getSource());
                 break;
             case ERROR:
                 if (event.getSource().isEmpty()) {

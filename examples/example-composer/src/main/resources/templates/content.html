@@ -62,8 +62,7 @@
                     <h3 class="panel-title">Panel C</h3>
                 </div>
                 <div class="panel-body">
-                    <!-- Using rxc:fragment with attribute from to specify the contents variable and insert the fragment: -->
-                    <rxc:fragment from="${contents}" position="C"/>
+                    <rxc:fragment position="C"/>
                 </div>
             </div>
         </div>
@@ -73,8 +72,7 @@
                     <h3 class="panel-title">Panel D</h3>
                 </div>
                 <div class="panel-body">
-                    <!-- Using rxc:fragment with contents as default variable of the Contentsand insert the fragment: -->
-                    <rxc:fragment position="D"/>
+                    <div th:replace="fragments :: fragment('D')"></div>
                 </div>
             </div>
             <div class="panel panel-default">
@@ -82,7 +80,7 @@
                     <h3 class="panel-title">Panel E</h3>
                 </div>
                 <div class="panel-body">
-                    <rxc:fragment position="E"/>
+                    <div th:replace="fragments :: fragment('E')"></div>
                 </div>
             </div>
             <div class="panel panel-default">

@@ -39,7 +39,7 @@ public class CompositeContentTest {
     @Test
     public void shouldAppendBodies() {
         final Content content = someCompositeContent(someContent("First Body"), someContent("Second Body"));
-        assertThat(content.getBody(), is("First Body\nSecond Body"));
+        assertThat(content.getBody(), is("First BodySecond Body"));
     }
 
     @Test

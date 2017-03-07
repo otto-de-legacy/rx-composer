@@ -49,11 +49,14 @@ public class RxcFragmentElementProcessor extends AbstractElementTagProcessor {
     static Position getPosition(final ITemplateContext context,
                                 final IProcessableElementTag tag) {
         String position = tag.getAttributeValue("position");
-        final IEngineConfiguration configuration = context.getConfiguration();
-        final IStandardExpressionParser parser = getExpressionParser(configuration);
-        final IStandardExpression expression = parser.parseExpression(context, position);
-        return () -> expression.execute(context).toString();
-
+        try {
+            final IEngineConfiguration configuration = context.getConfiguration();
+            final IStandardExpressionParser parser = getExpressionParser(configuration);
+            final IStandardExpression expression = parser.parseExpression(context, position);
+            return () -> expression.execute(context).toString();
+        } catch (final Exception e) {
+            return () -> position;
+        }
     }
 
     static Contents getContents(final ITemplateContext context,

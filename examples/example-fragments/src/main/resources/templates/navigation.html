@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+    <nav class="navbar navbar-default navbar-fixed-top" th:fragment="navigation">
+        <div class="container">
+            <div class="navbar-header" th:fragment="header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" th:href="@{/}">RxComposer Example</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a th:href="@{/}">Normal Mode</a></li>
+                        <li><a th:href="@{/?debugMode=true}">Debug Mode</a></li>
+                    </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+</html>
+

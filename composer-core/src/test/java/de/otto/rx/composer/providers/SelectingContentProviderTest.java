@@ -53,7 +53,7 @@ public class SelectingContentProviderTest {
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.isComposite(), is(true));
-        assertThat(content.getBody(), is("Foo\nBar"));
+        assertThat(content.getBody(), is("FooBar"));
     }
 
     @Test

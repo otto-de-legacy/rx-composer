@@ -1,0 +1,30 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = 'example-content'
+}
+
+ext['thymeleaf.version'] = '3.0.2.RELEASE'
+ext['thymeleaf-layout-dialect.version'] = '2.2.0'
+
+dependencies {
+    compile project(":composer-core")
+    compile project(":composer-thymeleaf")
+
+    compile libraries.thymeleaf
+    compile libraries.springBoot
+}
