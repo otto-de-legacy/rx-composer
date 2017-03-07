@@ -61,6 +61,7 @@ final class SelectingContentProvider implements ContentProvider {
                                           final Tracer context,
                                           final Parameters parameters) {
         final AtomicInteger subIndex = new AtomicInteger();
+        final long startedTs = System.currentTimeMillis();
         final Observable<IndexedContent> mergedContent = merge(contentProviders
                 .stream()
                 .map(contentProvider -> {
@@ -69,7 +70,7 @@ final class SelectingContentProvider implements ContentProvider {
                             .getContent(position, context, parameters)
                             .map(content -> indexed(content, pos))
                             .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
-                            .onErrorReturn(throwable -> indexed(errorContent(position, throwable), pos));
+                            .onErrorReturn(throwable -> indexed(errorContent(position, throwable, startedTs), pos));
                 })
                 .collect(toList()));
         return mergedContent

@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
-import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -18,12 +17,12 @@ public class CompositeContentTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToCreateCompositeWithOneContent() {
-        someCompositeContent(emptyHeaders(), someContent(A));
+        someCompositeContent(someContent(A));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToCreateCompositeWithContentForDifferentPositions() {
-        someCompositeContent(emptyHeaders(), someContent(A), someContent(A), someContent(B));
+        someCompositeContent(someContent(A), someContent(A), someContent(B));
     }
 
     @Test(expected = NullPointerException.class)
@@ -33,19 +32,19 @@ public class CompositeContentTest {
 
     @Test
     public void shouldAppendSources() {
-        final Content content = someCompositeContent(emptyHeaders(), someContent("First Source"), someContent("Second Source"));
+        final Content content = someCompositeContent(someContent("First Source"), someContent("Second Source"));
         assertThat(content.getSource(), is("First Source,Second Source"));
     }
 
     @Test
     public void shouldAppendBodies() {
-        final Content content = someCompositeContent(emptyHeaders(), someContent("First Body"), someContent("Second Body"));
+        final Content content = someCompositeContent(someContent("First Body"), someContent("Second Body"));
         assertThat(content.getBody(), is("First Body\nSecond Body"));
     }
 
     @Test
     public void shouldConvertToCompositeContent() {
-        final Content content = someCompositeContent(emptyHeaders(), someContent(A), someContent(A));
+        final Content content = someCompositeContent(someContent(A), someContent(A));
         assertThat(content.isComposite(), is(true));
         assertThat(content.asComposite(), is(notNullValue()));
         assertThat(content.asComposite().getContents(), hasSize(2));
@@ -53,12 +52,12 @@ public class CompositeContentTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldFailToConvertToSingleContent() {
-        final Content content = someCompositeContent(emptyHeaders(), someContent(A), someContent(A));
+        final Content content = someCompositeContent(someContent(A), someContent(A));
         content.asSingle();
     }
 
-    private Content someCompositeContent(final Headers headers, final Content... contents) {
-        return CompositeContent.compositeContent(headers, ImmutableList.copyOf(contents));
+    private Content someCompositeContent(final Content... contents) {
+        return CompositeContent.compositeContent(ImmutableList.copyOf(contents));
     }
 
     private Content someContent(final Position position) {

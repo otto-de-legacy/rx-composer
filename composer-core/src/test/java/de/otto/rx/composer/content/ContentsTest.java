@@ -3,8 +3,6 @@ package de.otto.rx.composer.content;
 
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
@@ -78,7 +76,7 @@ public class ContentsTest {
     public void shouldGetEmptyContentOnError() {
         // given
         final Contents.Builder builder = contentsBuilder();
-        builder.add(errorContent(A, new IllegalStateException("test")));
+        builder.add(errorContent(A, new IllegalStateException("test"), 0L));
         // when
         final Content content = builder.build().get(A);
         // then
@@ -115,8 +113,13 @@ public class ContentsTest {
             }
 
             @Override
-            public LocalDateTime getCreated() {
-                return LocalDateTime.now();
+            public long getStartedTs() {
+                return 0L;
+            }
+
+            @Override
+            public long getCompletedTs() {
+                return 0L;
             }
 
         };

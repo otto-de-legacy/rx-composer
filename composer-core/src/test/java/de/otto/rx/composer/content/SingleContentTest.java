@@ -3,11 +3,8 @@ package de.otto.rx.composer.content;
 
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -55,8 +52,13 @@ public class SingleContentTest {
             }
 
             @Override
-            public LocalDateTime getCreated() {
-                return now();
+            public long getStartedTs() {
+                return 0L;
+            }
+
+            @Override
+            public long getCompletedTs() {
+                return 0L;
             }
         };
     }

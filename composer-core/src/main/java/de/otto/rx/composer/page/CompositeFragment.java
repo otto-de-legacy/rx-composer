@@ -64,18 +64,19 @@ class CompositeFragment implements Fragment {
     }
 
     @Override
-    public Observable<Content> fetchWith(final Tracer context, final Parameters parameters) {
+    public Observable<Content> fetchWith(final Tracer tracer, final Parameters parameters) {
+        final long startedTs = System.currentTimeMillis();
         return first
-                .fetchWith(context, parameters)
-                .onErrorReturn(e -> errorContent(first.getPosition(), e))
+                .fetchWith(tracer, parameters)
+                .onErrorReturn(e -> errorContent(first.getPosition(), e, startedTs))
                 .filter(Content::isAvailable)
                 .flatMap(content -> {
                     final Parameters nestedParams = parameters.with(continuation.paramExtractor.apply(content));
                     final List<Observable<Content>> observables = this.continuation.nested
                             .stream()
                             .map(fragment -> fragment
-                                    .fetchWith(context, nestedParams)
-                                    .onErrorReturn(e -> errorContent(fragment.getPosition(), e))
+                                    .fetchWith(tracer, nestedParams)
+                                    .onErrorReturn(e -> errorContent(fragment.getPosition(), e, startedTs))
                                     .filter(Content::isAvailable)
                             )
                             .collect(toList());

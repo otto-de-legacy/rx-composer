@@ -10,8 +10,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-
 import static com.github.restdriver.clientdriver.ClientDriverRequest.Method.GET;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
@@ -354,8 +352,13 @@ public class ResilientHttpFragmentsAcceptanceTest {
             }
 
             @Override
-            public LocalDateTime getCreated() {
-                return LocalDateTime.now();
+            public long getStartedTs() {
+                return 0;
+            }
+
+            @Override
+            public long getCompletedTs() {
+                return 0;
             }
 
         };

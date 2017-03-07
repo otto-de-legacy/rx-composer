@@ -1,25 +1,21 @@
 package de.otto.rx.composer.content;
 
 import de.otto.rx.composer.page.Page;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static de.otto.rx.composer.content.Headers.of;
-import static java.time.LocalDateTime.now;
 
 public final class HttpContent extends SingleContent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HttpContent.class);
 
     private final String source;
     private final Position position;
     private final String body;
     private final Headers headers;
     private final boolean available;
-    private final LocalDateTime created = now();
+    private final long startedTs;
+    private final long completedTs = System.currentTimeMillis();
 
     /**
      * Create a HttpContent element, representing {@link Content} retrieved from a (micro)service.
@@ -30,12 +26,14 @@ public final class HttpContent extends SingleContent {
      */
     public HttpContent(final String source,
                        final Position position,
-                       final Response response) {
+                       final Response response,
+                       final long startedTs) {
         this.source = source;
         this.position = position;
         this.body = response.readEntity(String.class);
         this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
         this.headers = of(response.getStringHeaders());
+        this.startedTs = startedTs;
     }
 
     /**
@@ -94,53 +92,53 @@ public final class HttpContent extends SingleContent {
         return headers;
     }
 
+    @Override
+    public long getStartedTs() {
+        return startedTs;
+    }
+
     /**
      * The creation time stamp of the content element.
      * <p>
      *     Primarily used for logging purposes.
      * </p>
      *
-     * @return created ts
+     * @return completedTs ts
      */
     @Override
-    public LocalDateTime getCreated() {
-        return created;
+    public long getCompletedTs() {
+        return completedTs;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         HttpContent that = (HttpContent) o;
-
-        if (available != that.available) return false;
-        if (source != null ? !source.equals(that.source) : that.source != null) return false;
-        if (position != null ? !position.equals(that.position) : that.position != null) return false;
-        if (body != null ? !body.equals(that.body) : that.body != null) return false;
-        if (headers != null ? !headers.equals(that.headers) : that.headers != null) return false;
-        return created != null ? created.equals(that.created) : that.created == null;
+        return available == that.available &&
+                startedTs == that.startedTs &&
+                completedTs == that.completedTs &&
+                Objects.equals(source, that.source) &&
+                Objects.equals(position, that.position) &&
+                Objects.equals(body, that.body) &&
+                Objects.equals(headers, that.headers);
     }
 
     @Override
     public int hashCode() {
-        int result = source != null ? source.hashCode() : 0;
-        result = 31 * result + (position != null ? position.hashCode() : 0);
-        result = 31 * result + (body != null ? body.hashCode() : 0);
-        result = 31 * result + (headers != null ? headers.hashCode() : 0);
-        result = 31 * result + (available ? 1 : 0);
-        result = 31 * result + (created != null ? created.hashCode() : 0);
-        return result;
+        return Objects.hash(source, position, body, headers, available, startedTs, completedTs);
     }
 
     @Override
     public String toString() {
         return "HttpContent{" +
-                "position=" + position +
+                "source='" + source + '\'' +
+                ", position=" + position +
                 ", body='" + body + '\'' +
-                ", available=" + available+
                 ", headers=" + headers +
-                ", created=" + created +
+                ", available=" + available +
+                ", startedTs=" + startedTs +
+                ", completedTs=" + completedTs +
                 '}';
     }
 }

@@ -5,25 +5,24 @@ import de.otto.rx.composer.providers.ContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
 
 public final class ErrorContent extends SingleContent {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorContent.class);
 
     private final Position position;
     private final Throwable e;
-    private LocalDateTime created = now();
+    private final long startedTs;
+    private final long completedTs = System.currentTimeMillis();
 
-    private ErrorContent(final Position position, final Throwable e) {
+    private ErrorContent(final Position position, final Throwable e, final long startedTs) {
+        this.startedTs = startedTs;
         this.position = position;
         this.e = e;
     }
 
-    public static ErrorContent errorContent(final Position position, final Throwable e) {
-        return new ErrorContent(position, e);
+    public static ErrorContent errorContent(final Position position, final Throwable e, final long startedTs) {
+        return new ErrorContent(position, e, startedTs);
     }
 
     /**
@@ -83,17 +82,14 @@ public final class ErrorContent extends SingleContent {
         return emptyHeaders();
     }
 
-    /**
-     * The creation time stamp of the content element.
-     * <p>
-     * Primarily used for logging purposes.
-     * </p>
-     *
-     * @return created ts
-     */
     @Override
-    public LocalDateTime getCreated() {
-        return created;
+    public long getStartedTs() {
+        return startedTs;
+    }
+
+    @Override
+    public long getCompletedTs() {
+        return completedTs;
     }
 
     public Throwable getThrowable() {

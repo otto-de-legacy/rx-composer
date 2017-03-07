@@ -3,8 +3,6 @@ package de.otto.rx.composer.content;
 import de.otto.rx.composer.page.Page;
 import de.otto.rx.composer.providers.ContentProvider;
 
-import java.time.LocalDateTime;
-
 /**
  * IndexedContent is {@link Content} with an additional index or position in
  * a list of contents. It is used by ContentProviders 
@@ -86,17 +84,14 @@ public final class IndexedContent implements Content {
         return content.getHeaders();
     }
 
-    /**
-     * The creation time stamp of the content element.
-     * <p>
-     * Primarily used for logging purposes.
-     * </p>
-     *
-     * @return created ts
-     */
     @Override
-    public LocalDateTime getCreated() {
-        return content.getCreated();
+    public long getStartedTs() {
+        return content.getStartedTs();
+    }
+
+    @Override
+    public long getCompletedTs() {
+        return content.getCompletedTs();
     }
 
     /**

@@ -5,15 +5,12 @@ import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-
 import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
-import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -170,8 +167,13 @@ public class PageTest {
         }
 
         @Override
-        public LocalDateTime getCreated() {
-            return now();
+        public long getStartedTs() {
+            return 0L;
+        }
+
+        @Override
+        public long getCompletedTs() {
+            return 0L;
         }
 
     }

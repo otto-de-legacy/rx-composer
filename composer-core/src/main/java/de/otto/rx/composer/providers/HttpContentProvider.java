@@ -7,6 +7,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.tracer.TraceEvent;
 import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import rx.Observable;
@@ -80,10 +81,11 @@ final class HttpContentProvider implements ContentProvider {
         final String url = this.uriTemplate != null
                 ? resolveUrl(parameters)
                 : this.url;
+        final TraceEvent traceEvent = fragmentStarted(position, url);
+        tracer.trace(traceEvent);
         final Observable<Content> contentObservable = serviceClient
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
-                .doOnSubscribe(() -> tracer.trace(fragmentStarted(position, url)))
                 .doOnNext(response -> {
 
                     if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
@@ -97,7 +99,7 @@ final class HttpContentProvider implements ContentProvider {
                     }
                 })
                 .map(response -> {
-                    final Content content = new HttpContent(url, position, response);
+                    final Content content = new HttpContent(url, position, response, traceEvent.getTimestamp());
                     tracer.trace(fragmentCompleted(position, url, content.isAvailable()));
                     return content;
                 });

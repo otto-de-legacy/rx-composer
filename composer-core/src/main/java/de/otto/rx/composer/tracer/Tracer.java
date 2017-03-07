@@ -32,8 +32,11 @@ public final class Tracer {
                     LOG.error("Error fetching content {} for position {}: {}", event.getSource(), event.getPosition().name(), event.getErrorMessage());
                 }
                 break;
-            default:
+            case STARTED:
                 LOG.trace("{} fetching content for position {} from {}", event.getType(), event.getPosition().name(), event.getSource());
+                break;
+            default:
+                throw new IllegalStateException("Unknown EventType " + event.getType());
         }
     }
 

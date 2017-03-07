@@ -9,8 +9,6 @@ import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 import rx.Observable;
 
-import java.time.LocalDateTime;
-
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.fragment;
@@ -80,8 +78,13 @@ public class SingleFragmentTest {
             }
 
             @Override
-            public LocalDateTime getCreated() {
-                return LocalDateTime.now();
+            public long getStartedTs() {
+                return 0L;
+            }
+
+            @Override
+            public long getCompletedTs() {
+                return 0L;
             }
 
         };

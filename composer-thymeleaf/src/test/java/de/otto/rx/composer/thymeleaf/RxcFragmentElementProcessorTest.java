@@ -7,7 +7,6 @@ import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
@@ -15,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RxcContentElementProcessorTest {
+public class RxcFragmentElementProcessorTest {
 
     @Test
     public void shouldReturnContent() throws IOException {
@@ -34,7 +33,7 @@ public class RxcContentElementProcessorTest {
         final IElementTagStructureHandler structureHandler = mock(IElementTagStructureHandler.class);
 
         //when
-        new RxcContentElementProcessor().doProcess(context, tag, structureHandler);
+        new RxcFragmentElementProcessor().doProcess(context, tag, structureHandler);
 
         //then
         verify(structureHandler).replaceWith("Some Content", false);
@@ -68,8 +67,13 @@ public class RxcContentElementProcessorTest {
             }
 
             @Override
-            public LocalDateTime getCreated() {
-                return LocalDateTime.now();
+            public long getStartedTs() {
+                return 0L;
+            }
+
+            @Override
+            public long getCompletedTs() {
+                return 0L;
             }
 
         };

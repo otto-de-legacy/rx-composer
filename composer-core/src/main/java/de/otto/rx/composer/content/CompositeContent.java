@@ -2,13 +2,12 @@ package de.otto.rx.composer.content;
 
 import com.google.common.collect.ImmutableList;
 
-import java.time.LocalDateTime;
 import java.util.StringJoiner;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
+import static java.util.stream.Collectors.joining;
 
 /**
  * A composite withAll of two ore more available {@link Content} items.
@@ -20,25 +19,22 @@ import static java.time.LocalDateTime.now;
  */
 public final class CompositeContent implements Content {
 
-    private final LocalDateTime created = now();
-    private final Headers headers;
+    private final long startedTs;
+    private final long completedTs = System.currentTimeMillis();
+    private final Headers headers = emptyHeaders();
     private final ImmutableList<Content> contents;
 
-    private CompositeContent(final Headers headers, final ImmutableList<Content> contents) {
+    private CompositeContent(final ImmutableList<Content> contents) {
         checkNotNull(headers, "Parameter 'headers' must not be null");
         checkArgument(contents.size() > 1, "A composite must at least have two content items.");
         final Position expectedPosition = contents.get(0).getPosition();
         checkArgument(contents.stream().allMatch(content -> content.getPosition().equals(expectedPosition)), "All contents of a Composite must have the same position");
         this.contents = contents;
-        this.headers = headers;
+        this.startedTs = contents.stream().map(Content::getStartedTs).min(Long::compareTo).get();
     }
 
     public static CompositeContent compositeContent(final ImmutableList<Content> contents) {
-        return new CompositeContent(emptyHeaders(), contents);
-    }
-
-    public static CompositeContent compositeContent(final Headers headers, final ImmutableList<Content> contents) {
-        return new CompositeContent(headers, contents);
+        return new CompositeContent(contents);
     }
 
     /**
@@ -84,16 +80,27 @@ public final class CompositeContent implements Content {
      * An newline char is used to separate the bodies.
      */
     public String getBody() {
-        final StringJoiner joiner = new StringJoiner("\n");
-        contents.forEach(c->joiner.add(c.getBody()));
-        return joiner.toString();
+        return contents.stream().map(Content::getBody).collect(joining());
     }
 
     /**
      * {@inheritDoc}
      */
-    public LocalDateTime getCreated() {
-        return created;
+    public long getStartedTs() {
+        return startedTs;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getCompletedTs() {
+        return completedTs;
+    }
+
+    @Override
+    public long getAvgRuntime() {
+        long sum = contents.stream().mapToLong(Content::getAvgRuntime).sum();
+        return sum / contents.size();
     }
 
     /**

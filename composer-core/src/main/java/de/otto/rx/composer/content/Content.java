@@ -2,8 +2,6 @@ package de.otto.rx.composer.content;
 
 import de.otto.rx.composer.page.Page;
 
-import java.time.LocalDateTime;
-
 /**
  * A Content fragment for a {@link Position} on a page.
  * <p>
@@ -66,6 +64,8 @@ public interface Content {
      */
     Headers getHeaders();
 
+    long getStartedTs();
+
     /**
      * The creation time stamp of the content element.
      * <p>
@@ -74,7 +74,15 @@ public interface Content {
      *
      * @return created ts
      */
-    LocalDateTime getCreated();
+    long getCompletedTs();
+
+    default long getTotalRuntime() {
+        return getCompletedTs()-getStartedTs();
+    }
+
+    default long getAvgRuntime() {
+        return getTotalRuntime();
+    }
 
     /**
      * Returns whether or not this instance is a composite, withAll of more than one valid contents.
@@ -83,7 +91,7 @@ public interface Content {
      */
     default boolean isComposite() {
         return false;
-    };
+    }
 
     /**
      * If this content is a {@link #isComposite() composite}, a {@link CompositeContent} is returned.

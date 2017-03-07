@@ -74,7 +74,7 @@ public class ServiceClients implements AutoCloseable {
         }
         // add defaultClientConfig if it's not already in the standard configurations:
         if (stream(DefaultRef.values())
-                .map(Enum::name)
+                .map(Ref::name)
                 .noneMatch(n->n.equals(clientConfig.getRef().name()))) {
             map.put(clientConfig.getRef(), clientFor(clientConfig));
         }

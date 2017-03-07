@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Maps.uniqueIndex;
-import static de.otto.rx.composer.content.EmptyContent.emptyContent;
+import static de.otto.rx.composer.content.MissingContent.missingContent;
 
 /**
  * Threadsafe container used to gather {@link Content}s when executing a {@link Page}.
@@ -35,14 +35,17 @@ public final class Contents {
 
         public Contents build() {
             return new Contents(
-                uniqueIndex(results, (Content c) -> c.getPosition().name())
+                    results.stream().map(Content::getStartedTs).min(Long::compareTo).orElse(System.currentTimeMillis()),
+                    uniqueIndex(results, (Content c) -> c.getPosition().name())
             );
         }
     }
 
+    private final long startedTs;
     private final ImmutableMap<String, Content> results;
 
-    private Contents(final ImmutableMap<String, Content> results) {
+    private Contents(final long startedTs, final ImmutableMap<String, Content> results) {
+        this.startedTs = startedTs;
         this.results = results;
     }
 
@@ -62,19 +65,24 @@ public final class Contents {
 
     /**
      * Returns the {@link Content} for the specified {@link Position} if it {@link Content#isAvailable() has content},
-     * or {@link EmptyContent empty content} if nothing is available.
+     * or {@link MissingContent empty content} if nothing is available.
      *
      * @param position the content position
      * @return possibly empty content
      */
     public Content get(final Position position) {
         final Content content = results.get(position.name());
-        return content != null ? content : emptyContent(position);
+        return content != null ? content : missingContent(position, startedTs);
+    }
+
+    public Content get(final String position) {
+        final Content content = results.get(position);
+        return content != null ? content : missingContent(() -> position, startedTs);
     }
 
     /**
      * Returns the body of the {@link Content} for the specified {@link Position} if it {@link Content#isAvailable() has content},
-     * or {@link EmptyContent empty content} if nothing is available.
+     * or {@link MissingContent empty content} if nothing is available.
      *
      * @param position the content position
      * @return body or empty string

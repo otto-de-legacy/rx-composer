@@ -5,31 +5,25 @@ import de.otto.rx.composer.providers.ContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
-import static java.time.LocalDateTime.now;
 
-public final class EmptyContent extends SingleContent {
+public final class MissingContent extends SingleContent {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EmptyContent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MissingContent.class);
 
     private final Position position;
-    private final String source;
-    private LocalDateTime created = now();
+    private final long startedTs;
+    private final long completedTs;
 
-    private EmptyContent(final Position position, final String source) {
+    private MissingContent(final Position position, final long ts) {
         this.position = position;
-        this.source = source;
-        LOG.info("Created EmptyContent for position {} from config {}", position.name(), source);
+        this.startedTs = ts;
+        this.completedTs = ts;
+        LOG.info("Created MissingContent for position {}", position.name());
     }
 
-    public static EmptyContent emptyContent(final Position position) {
-        return new EmptyContent(position, position.name());
-    }
-
-    public static EmptyContent emptyContent(final Position position, final String source) {
-        return new EmptyContent(position, source);
+    public static MissingContent missingContent(final Position position, final long ts) {
+        return new MissingContent(position, ts);
     }
 
     /**
@@ -45,7 +39,7 @@ public final class EmptyContent extends SingleContent {
      */
     @Override
     public String getSource() {
-        return source;
+        return "";
     }
 
     /**
@@ -89,17 +83,14 @@ public final class EmptyContent extends SingleContent {
         return emptyHeaders();
     }
 
-    /**
-     * The creation time stamp of the content element.
-     * <p>
-     * Primarily used for logging purposes.
-     * </p>
-     *
-     * @return created ts
-     */
     @Override
-    public LocalDateTime getCreated() {
-        return created;
+    public long getStartedTs() {
+        return startedTs;
+    }
+
+    @Override
+    public long getCompletedTs() {
+        return completedTs;
     }
 
 }

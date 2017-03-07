@@ -5,7 +5,6 @@ import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 import rx.Observable;
 
-import java.time.LocalDateTime;
 import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.of;
@@ -15,7 +14,6 @@ import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.withAll;
 import static de.otto.rx.composer.providers.ContentProviders.withFirst;
 import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
-import static java.time.LocalDateTime.now;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -174,8 +172,13 @@ public class SelectingContentProviderTest {
         }
 
         @Override
-        public LocalDateTime getCreated() {
-            return now();
+        public long getStartedTs() {
+            return 0L;
+        }
+
+        @Override
+        public long getCompletedTs() {
+            return 0L;
         }
 
     }

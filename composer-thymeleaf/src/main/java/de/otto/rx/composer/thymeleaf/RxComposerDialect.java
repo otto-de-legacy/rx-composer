@@ -15,6 +15,6 @@ public class RxComposerDialect extends AbstractProcessorDialect {
 
     @Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
-        return singleton(new RxcContentElementProcessor());
+        return singleton(new RxcFragmentElementProcessor());
     }
 }
