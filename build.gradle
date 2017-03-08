@@ -8,7 +8,7 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'project-report'
 
-    version='0.1.0-SNAPSHOT'
+    version='1.0.0.M1-SNAPSHOT'
     group='de.otto.rx-composer'
 
     repositories {
