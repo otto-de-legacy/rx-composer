@@ -1,4 +1,4 @@
-package de.otto.rx.composer.example;
+package de.otto.rx.composer.example.configuration;
 
 import de.otto.rx.composer.client.Ref;
 import de.otto.rx.composer.client.ServiceClients;
@@ -17,8 +17,8 @@ import static de.otto.rx.composer.client.ClientConfig.singleRetry;
 import static de.otto.rx.composer.client.ServiceClients.serviceClients;
 import static de.otto.rx.composer.content.AbcPosition.*;
 import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
-import static de.otto.rx.composer.example.PageConfiguration.PagePosition.INTRO;
-import static de.otto.rx.composer.example.PageConfiguration.Services.*;
+import static de.otto.rx.composer.example.configuration.PageConfiguration.PagePosition.INTRO;
+import static de.otto.rx.composer.example.configuration.PageConfiguration.Services.*;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
@@ -43,7 +43,7 @@ public class PageConfiguration {
     @PostConstruct
     public void init() {
         clients = serviceClients(
-                noResiliency(introService, 5000, 1000),
+                singleRetry(introService, 5000, 1000),
                 singleRetry(helloService, 5000, 500),
                 noResiliency(somethingElseService, 5000, 400),
                 singleRetry(serviceC, 5000, 1000),

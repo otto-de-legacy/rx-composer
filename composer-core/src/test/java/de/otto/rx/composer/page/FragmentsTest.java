@@ -12,6 +12,7 @@ import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.followedBy;
 import static de.otto.rx.composer.page.Fragments.fragment;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -51,7 +52,7 @@ public class FragmentsTest {
     @Test
     public void shouldExecuteFragment() {
         // given
-        final Tracer context = new Tracer();
+        final Tracer context = noOpTracer();
         final Content mockContent = mock(Content.class);
         when(mockContent.isAvailable()).thenReturn(true);
         when(mockContent.getBody()).thenReturn("Foo");

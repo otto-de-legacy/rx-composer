@@ -5,13 +5,13 @@ import de.otto.rx.composer.content.Headers;
 import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.content.SingleContent;
 import de.otto.rx.composer.providers.ContentProvider;
-import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 import rx.Observable;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.fragment;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -31,7 +31,7 @@ public class SingleFragmentTest {
         // given
         final Fragment fragment = fragment(X, (position, ctx, parameters) -> just(someContent("Yeah!")));
         // when
-        final Observable<Content> result = fragment.fetchWith(new Tracer(), emptyParameters());
+        final Observable<Content> result = fragment.fetchWith(noOpTracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(true));
@@ -43,7 +43,7 @@ public class SingleFragmentTest {
         // given
         final Fragment fragment = fragment(X, (position, ctx, parameters) -> {throw new IllegalStateException("Bumm!!!");});
         // when
-        final Observable<Content> result = fragment.fetchWith(new Tracer(), emptyParameters());
+        final Observable<Content> result = fragment.fetchWith(noOpTracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.isAvailable(), is(false));

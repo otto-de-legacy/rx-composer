@@ -14,6 +14,7 @@ import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.page.Fragments.followedBy;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
@@ -26,7 +27,7 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteInitialContentProvider() {
         // given
-        final Tracer context = new Tracer();
+        final Tracer context = noOpTracer();
         final ContentProvider initial = mock(ContentProvider.class);
         when(initial.getContent(A, context, emptyParameters())).thenReturn(just(mock(Content.class)));
         final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
@@ -39,7 +40,7 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteNestedFragment() {
         // given
-        final Tracer context = new Tracer();
+        final Tracer context = noOpTracer();
         final ContentProvider fetchInitial = mock(ContentProvider.class);
         when(fetchInitial.getContent(A, context, emptyParameters())).thenReturn(just(someContent(A)));
         // and

@@ -4,7 +4,6 @@ import de.otto.rx.composer.client.ClientConfig;
 import de.otto.rx.composer.client.HttpServiceClient;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.tracer.Tracer;
 import org.glassfish.jersey.message.internal.Statuses;
 import org.junit.Test;
 import rx.observables.BlockingObservable;
@@ -19,6 +18,7 @@ import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,7 +38,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final Content content = contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking().single();
+        final Content content = contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking().single();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
@@ -52,7 +52,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test?foo=bar");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, fromTemplate("/test{?foo}"), TEXT_PLAIN);
-        final Content content = contentProvider.getContent(X, new Tracer(), parameters(of("foo", "bar"))).toBlocking().single();
+        final Content content = contentProvider.getContent(X, noOpTracer(), parameters(of("foo", "bar"))).toBlocking().single();
         // then
         verify(mockClient).get("/test?foo=bar", TEXT_PLAIN_TYPE);
         assertThat(content.isAvailable(), is(true));
@@ -66,7 +66,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final Iterator<Content> content = contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking().getIterator();
+        final Iterator<Content> content = contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking().getIterator();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.hasNext(), is(false));
@@ -79,7 +79,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final BlockingObservable<Content> content = contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking();
+        final BlockingObservable<Content> content = contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         content.single();
@@ -92,7 +92,7 @@ public class HttpContentProviderTest {
         final ServiceClient mockClient = someHttpClient(response, "/test");
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        final BlockingObservable<Content> content = contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking();
+        final BlockingObservable<Content> content = contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking();
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.getIterator().hasNext(), is(false));
@@ -108,7 +108,7 @@ public class HttpContentProviderTest {
         }));
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking().single();
+        contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking().single();
     }
 
     @Test(expected = RuntimeException.class)
@@ -121,7 +121,7 @@ public class HttpContentProviderTest {
         }));
         // when
         final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN);
-        contentProvider.getContent(X, new Tracer(), emptyParameters()).toBlocking().single();
+        contentProvider.getContent(X, noOpTracer(), emptyParameters()).toBlocking().single();
     }
 
     private Response someResponse(final int status, final String body) {

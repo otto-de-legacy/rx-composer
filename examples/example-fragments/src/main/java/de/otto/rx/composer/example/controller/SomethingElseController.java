@@ -1,4 +1,4 @@
-package de.otto.rx.composer.example;
+package de.otto.rx.composer.example.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

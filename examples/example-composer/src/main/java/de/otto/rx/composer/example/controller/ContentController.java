@@ -1,4 +1,4 @@
-package de.otto.rx.composer.example;
+package de.otto.rx.composer.example.controller;
 
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;

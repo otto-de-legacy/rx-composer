@@ -93,7 +93,7 @@ final class HttpContentProvider implements ContentProvider {
                         /*
                         Throw Exception so the circuit breaker is able to open the circuit,
                         retry execution or return the fallback value.
-                        Don't do this for CLIENT_ERRORS as this is unlikely to be helful in
+                        Don't do this for CLIENT_ERRORS as this is unlikely to be helpful in
                         most situations.
                          */
                         tracer.trace(error(position, url, "HTTP Server Error: " + response.getStatusInfo().toString()));

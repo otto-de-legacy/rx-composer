@@ -4,7 +4,6 @@ import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.page.Page;
-import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,6 +19,7 @@ import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
 import static de.otto.rx.composer.providers.ContentProviders.withSingle;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -38,7 +38,7 @@ public class HttpFragmentsAcceptanceTest {
 
         try (final ServiceClient serviceClient = noResiliencyClient()) {
             contentFrom(serviceClient, driver.getBaseUrl() + "/warmup", TEXT_PLAIN)
-                    .getContent(() -> "warmup", new Tracer(), emptyParameters())
+                    .getContent(() -> "warmup", noOpTracer(), emptyParameters())
                     .toBlocking()
                     .first();
         }

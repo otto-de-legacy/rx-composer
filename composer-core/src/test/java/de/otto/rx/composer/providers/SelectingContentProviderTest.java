@@ -14,6 +14,7 @@ import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.providers.ContentProviders.withAll;
 import static de.otto.rx.composer.providers.ContentProviders.withFirst;
 import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
+import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -34,7 +35,7 @@ public class SelectingContentProviderTest {
                 (position, context, parameters) -> just(new TestContent(X, "Bar"))
         ));
         // when
-        final Observable<Content> result =  contentProvider.getContent(X, new Tracer(), emptyParameters());
+        final Observable<Content> result =  contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));
@@ -43,7 +44,7 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldFetchAllWithContent() {
         // given
-        final Tracer tracer = new Tracer();
+        final Tracer tracer = noOpTracer();
         final ContentProvider contentProvider = withAll(of(
                 (position, context, parameters) -> just(new TestContent(X, "Foo")),
                 (position, context, parameters) -> just(new TestContent(X, "Bar"))
@@ -67,7 +68,7 @@ public class SelectingContentProviderTest {
                 )
         );
         // when
-        final Observable<Content> result =  contentProvider.getContent(X, new Tracer(), emptyParameters());
+        final Observable<Content> result =  contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Bar"));
@@ -81,7 +82,7 @@ public class SelectingContentProviderTest {
                 (position, context, parameters) -> just(new TestContent(X, "Hello World"))
         ));
         // when
-        final Observable<Content> result = contentProvider.getContent(X, new Tracer(), emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
         final Iterator<Content> content = result.toBlocking().toIterable().iterator();
         assertThat(content.next().getBody(), is("Hello World"));
@@ -96,7 +97,7 @@ public class SelectingContentProviderTest {
                 (position, context, parameters) -> just(new TestContent(X, ""))
         ));
         // when
-        final Observable<Content> result = contentProvider.getContent(X, new Tracer(), emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
         final Iterator<Content> content = result.toBlocking().getIterator();
         assertThat(content.hasNext(), is(false));
@@ -110,7 +111,7 @@ public class SelectingContentProviderTest {
                 (position, context, parameters) -> just(new TestContent(X, "Yeah!"))
         ));
         // when
-        final Observable<Content> result = contentProvider.getContent(X, new Tracer(), emptyParameters());
+        final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Yeah!"));
@@ -119,7 +120,7 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldExecuteFragmentMultipleTimes() {
         // given
-        final Tracer context = new Tracer();
+        final Tracer context = noOpTracer();
         final ContentProvider nestedProvider = mock(ContentProvider.class);
         when(nestedProvider.getContent(X, context, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
         // and

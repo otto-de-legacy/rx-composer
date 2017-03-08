@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.ImmutableList.builder;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
+import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static rx.Observable.from;
 
 /**
@@ -93,7 +94,8 @@ public final class Page {
      * @return available Contents
      */
     public Contents fetchWith(final Parameters params) {
-        final Tracer tracer = new Tracer();
+        final Tracer tracer = loggingStatisticsTracer();
+
         // use a latch to await execution of all fragments:
         final CountDownLatch latch = new CountDownLatch(1);
         final Contents.Builder contents = contentsBuilder();
@@ -110,7 +112,7 @@ public final class Page {
         } catch (final InterruptedException e) {
             LOG.error("Interrupted waiting for Contents: {}", e.getMessage());
         }
-        final Statistics statistics = tracer.gatherStatistics();
+        final Statistics statistics = tracer.getStatistics();
         LOG.info(statistics.toString());
         return contents
                 .setStats(statistics)
