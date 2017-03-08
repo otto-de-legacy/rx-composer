@@ -2,6 +2,7 @@ package de.otto.rx.composer.tracer;
 
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.content.Statistics;
+import de.otto.rx.composer.content.Statistics.StatsBuilder;
 import org.slf4j.Logger;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,21 +22,30 @@ public final class Tracer {
     private final ConcurrentLinkedQueue<TraceEvent> events = new ConcurrentLinkedQueue<>();
     private final long startedTs = currentTimeMillis();
 
+    public Tracer() {
+        LOG.trace("STARTED fetching page");
+    }
     public void trace(final TraceEvent event) {
         events.add(event);
         switch (event.getType()) {
             case COMPLETED:
-                LOG.trace("{} fetching {} content for position {} from {}", event.getType(), event.isNonEmptyContent() ? "AVAILABLE" : "UNAVAILABLE", event.getPosition().name(), event.getSource());
+                LOG.trace("COMPLETED fetching {} content for position {} from {}", event.isNonEmptyContent() ? "AVAILABLE" : "UNAVAILABLE", event.getPosition().name(), event.getSource());
+                break;
+            case FALLBACK_COMPLETED:
+                LOG.trace("COMPLETED fetching {} FALLBACK content for position {} from {}", event.isNonEmptyContent() ? "AVAILABLE" : "UNAVAILABLE", event.getPosition().name(), event.getSource());
                 break;
             case ERROR:
                 if (event.getSource().isEmpty()) {
-                    LOG.error("Error fetching content for position: {}", event.getPosition().name());
+                    LOG.error("ERROR fetching content for position: {}", event.getPosition().name());
                 } else {
-                    LOG.error("Error fetching content {} for position {}: {}", event.getSource(), event.getPosition().name(), event.getErrorMessage());
+                    LOG.error("ERROR fetching content {} for position {}: {}", event.getSource(), event.getPosition().name(), event.getErrorMessage());
                 }
                 break;
             case STARTED:
-                LOG.trace("{} fetching content for position {} from {}", event.getType(), event.getPosition().name(), event.getSource());
+                LOG.trace("STARTED fetching content for position {} from {}", event.getPosition().name(), event.getSource());
+                break;
+            case FALLBACK_STARTED:
+                LOG.info("STARTED fetching FALLBACK content for position {} from {}", event.getPosition().name(), event.getSource());
                 break;
             default:
                 throw new IllegalStateException("Unknown EventType " + event.getType());
@@ -47,29 +57,19 @@ public final class Tracer {
     }
 
     public Statistics gatherStatistics() {
-        Statistics.StatsBuilder stats = statsBuilder();
+        StatsBuilder stats = statsBuilder();
         stats.startedTs = startedTs;
-
-        long sumNonEmptyMillis = 0;
-
         for (final TraceEvent event : events) {
             switch (event.getType()) {
                 case STARTED:
                     ++stats.numRequested;
                     break;
+                case FALLBACK_STARTED:
+                    ++stats.numFallbacksRequested;
+                    break;
+                case FALLBACK_COMPLETED:
                 case COMPLETED:
-                    if (event.isNonEmptyContent()) {
-                        ++stats.numNonEmpty;
-                        long fragmentRuntime = event.getTimestamp() - startedTs;
-                        sumNonEmptyMillis += fragmentRuntime;
-                        if (fragmentRuntime > stats.slowestNonEmptyMillis) {
-                            stats.slowestFragment = event.getPosition().name();
-                            stats.slowestNonEmptyMillis = fragmentRuntime;
-                        }
-                        stats.avgNonEmptyMillis = sumNonEmptyMillis / stats.numNonEmpty;
-                    } else {
-                        ++stats.numEmpty;
-                    }
+                    gatherCompletedStatistics(stats, event);
                     break;
                 case ERROR:
                     ++stats.numErrors;
@@ -80,5 +80,28 @@ public final class Tracer {
         }
         stats.runtime = currentTimeMillis() - startedTs;
         return stats.build();
+    }
+
+    private void gatherCompletedStatistics(final StatsBuilder stats, final TraceEvent event) {
+        if (event.isNonEmptyContent()) {
+            if (event.getType().equals(EventType.COMPLETED)) {
+                ++stats.numNonEmpty;
+            } else {
+                ++stats.numNonEmptyFallbacks;
+            }
+
+            long fragmentRuntime = event.getTimestamp() - startedTs;
+            stats.sumNonEmptyMillis += fragmentRuntime;
+            if (fragmentRuntime > stats.slowestNonEmptyMillis) {
+                stats.slowestFragment = event.getPosition().name();
+                stats.slowestNonEmptyMillis = fragmentRuntime;
+            }
+        } else {
+            ++stats.numEmpty;
+            long fragmentRuntime = event.getTimestamp() - startedTs;
+            if (fragmentRuntime > stats.slowestNonEmptyMillis) {
+                stats.slowestFragment = event.getPosition().name();
+            }
+        }
     }
 }

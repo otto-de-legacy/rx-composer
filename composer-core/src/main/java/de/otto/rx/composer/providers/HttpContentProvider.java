@@ -19,10 +19,8 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static de.otto.rx.composer.providers.HystrixObservableContent.from;
-import static de.otto.rx.composer.tracer.TraceEvent.error;
-import static de.otto.rx.composer.tracer.TraceEvent.fragmentCompleted;
-import static de.otto.rx.composer.tracer.TraceEvent.fragmentStarted;
+import static de.otto.rx.composer.tracer.TraceEvent.*;
+import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
 import static javax.ws.rs.core.MediaType.valueOf;
 import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -32,6 +30,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  * <p>
  *     Both full URLs and UriTemplates are supported. UriTemplates are expanded using
  *     the {@link Parameters} when {@link #getContent(Position, Tracer, Parameters) getting content}.
+ * </p>
+ * <p>
+ *     The HttpContentProvider supports resilient access to other services. Depending on the {@link ServiceClient}
+ *     configuration, timeouts, retries and fallbacks are supported by this implementation.
  * </p>
  */
 final class HttpContentProvider implements ContentProvider {
@@ -48,11 +50,10 @@ final class HttpContentProvider implements ContentProvider {
                         final UriTemplate uriTemplate,
                         final String accept,
                         final ContentProvider fallback) {
-        checkNotNull(uriTemplate, "uriTemplate must not be null.");
-        this.serviceClient = serviceClient;
-        this.uriTemplate = uriTemplate;
+        this.serviceClient = checkNotNull(serviceClient, "serviceClient must not be null.");
+        this.uriTemplate = checkNotNull(uriTemplate, "uriTemplate must not be null.");
         this.url = null;
-        this.accept = valueOf(accept);
+        this.accept = accept != null ? valueOf(accept) : WILDCARD_TYPE;
         if (fallback != null && !serviceClient.getClientConfig().isResilient()) {
             throw new IllegalArgumentException("Unable to configure a fallback with non-resilient service clients.");
         }
@@ -63,11 +64,11 @@ final class HttpContentProvider implements ContentProvider {
                         final String url,
                         final String accept,
                         final ContentProvider fallback) {
-        checkNotNull(url, "url must not be null.");
-        this.serviceClient = serviceClient;
-        this.url = url;
+
+        this.serviceClient = checkNotNull(serviceClient, "serviceClient must not be null.");
+        this.url = checkNotNull(url, "url must not be null.");
         this.uriTemplate = null;
-        this.accept = valueOf(accept);
+        this.accept = accept != null ? valueOf(accept) : WILDCARD_TYPE;
         if (fallback != null && !serviceClient.getClientConfig().isResilient()) {
             throw new IllegalArgumentException("Unable to configure a fallback with non-resilient service clients.");
         }
@@ -95,6 +96,7 @@ final class HttpContentProvider implements ContentProvider {
                         Don't do this for CLIENT_ERRORS as this is unlikely to be helful in
                         most situations.
                          */
+                        tracer.trace(error(position, url, "HTTP Server Error: " + response.getStatusInfo().toString()));
                         throw new ServerErrorException(response);
                     }
                 })
@@ -107,10 +109,11 @@ final class HttpContentProvider implements ContentProvider {
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
         if (clientConfig.isResilient()) {
-            final Observable<Content> observable = from(
-                    contentObservable.retry(clientConfig.getRetries()),
-                    fallback != null ? fallback.getContent(position, tracer, parameters) : null,
-                    clientConfig.getRef(), clientConfig.getReadTimeout());
+            final Observable<Content> observable;
+                observable = HystrixObservableContent.from(
+                        contentObservable.retry(clientConfig.getRetries()),
+                        getFallbackObservable(position, tracer, parameters),
+                        clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
                     .doOnError(t -> tracer.trace(error(position, url, t)))
                     .filter(Content::isAvailable);
@@ -121,11 +124,52 @@ final class HttpContentProvider implements ContentProvider {
         }
     }
 
+    /**
+     * The observable content used as a fallback if the actual content is not available, or null if there is no fallback.
+     * <p>
+     *     The fallback content observable is enhanced by adding proper Tracer callbacks, so we can gather statistics
+     *     about fallbacks as well as other content.
+     * </p>
+     * @param position the fragment position of the observed contents.
+     * @param tracer the Tracer used to trace execution of the fallback
+     * @param parameters parameters used to request fallback content.
+     * @return observable fallback content
+     */
+    private Observable<Content> getFallbackObservable(final Position position,
+                                                      final Tracer tracer,
+                                                      final Parameters parameters) {
+        if (fallback == null) {
+            return null;
+        } else {
+            return fallback
+                    .getContent(position, tracer, parameters)
+                    .doOnSubscribe(() -> tracer.trace(
+                            fallbackFragmentStarted(position)))
+                    .doOnNext(fallbackContent -> tracer.trace(
+                            fallbackFragmentCompleted(position, fallbackContent.getSource(), fallbackContent.isAvailable())))
+                    .doOnError(t -> tracer.trace(
+                            error(position, url, t)));
+        }
+    }
+
+    /**
+     * Expands the {@code uriTemplate} using the given parameters and returns the URI.
+     * <p>
+     *     If the uriTemplate needs more variables than available in the parameters, the URI can not be created. In
+     *     this case, an IllegalArgumentException is thrown and fetching the content will fail.
+     * </p>
+     * @param parameters parameters used to expand the uriTemplate
+     * @return URI
+     * @throws IllegalArgumentException if parameters are missing
+     */
     private String resolveUrl(final Parameters parameters) {
         final String url = uriTemplate.expand(parameters.asImmutableMap());
         final String[] missingTemplateVariables = fromTemplate(url).getVariables();
         if (missingTemplateVariables != null && missingTemplateVariables.length > 0) {
-            throw new IllegalArgumentException("Missing URI template variables in parameters. Unable to resolve " + Arrays.toString(missingTemplateVariables));
+            throw new IllegalArgumentException(
+                    "Missing URI template variables in parameters. " +
+                    "Unable to resolve " + Arrays.toString(missingTemplateVariables)
+            );
         }
         return url;
     }

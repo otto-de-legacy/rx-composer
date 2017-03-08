@@ -18,10 +18,13 @@ public class Statistics {
     private final long maxNonEmptyMillis;
     private final long runtime;
     private final String slowestFragment;
+    private final int numFallbacksRequested;
+    private final int numNonEmptyFallbacks;
 
     Statistics(final long startedTs, final int numRequested, final int numEmpty, final int numErrors,
                final int numNonEmpty, final long avgNonEmptyMillis, final long slowestNonEmptyMillis,
-               final long runtime, final String slowestFragment) {
+               final long runtime, final String slowestFragment, final int numFallbacksRequested,
+               final int numNonEmptyFallbacks) {
         this.startedTs = startedTs;
         this.numRequested = numRequested;
         this.numEmpty = numEmpty;
@@ -31,6 +34,8 @@ public class Statistics {
         this.maxNonEmptyMillis = slowestNonEmptyMillis;
         this.runtime = runtime;
         this.slowestFragment = slowestFragment;
+        this.numFallbacksRequested = numFallbacksRequested;
+        this.numNonEmptyFallbacks = numNonEmptyFallbacks;
     }
 
     public static Statistics emptyStats() {
@@ -81,13 +86,21 @@ public class Statistics {
         return slowestFragment;
     }
 
+    public int getNumFallbacksRequested() {
+        return numFallbacksRequested;
+    }
+
+    public int getNumNonEmptyFallbacks() {
+        return numNonEmptyFallbacks;
+    }
+
     public void logStats() {
         LOG.info(toString());
     }
 
     @Override
     public String toString() {
-        return "Stats{" +
+        return "Statistics{" +
                 "startedTs=" + startedTs +
                 ", numRequested=" + numRequested +
                 ", numEmpty=" + numEmpty +
@@ -97,25 +110,30 @@ public class Statistics {
                 ", maxNonEmptyMillis=" + maxNonEmptyMillis +
                 ", runtime=" + runtime +
                 ", slowestFragment='" + slowestFragment + '\'' +
+                ", numFallbacksRequested=" + numFallbacksRequested +
+                ", numNonEmptyFallbacks=" + numNonEmptyFallbacks +
                 '}';
     }
 
     public static class StatsBuilder {
+        public long sumNonEmptyMillis = 0;
         public long startedTs = currentTimeMillis();
         public int numRequested = 0;
         public int numEmpty = 0;
         public int numErrors = 0;
         public int numNonEmpty = 0;
-        public long avgNonEmptyMillis = 0;
         public long slowestNonEmptyMillis = 0;
         public long runtime = 0;
         public String slowestFragment = "";
+        public int numFallbacksRequested = 0;
+        public int numNonEmptyFallbacks = 0;
 
         private StatsBuilder() {
         }
 
         public Statistics build() {
-            return new Statistics(startedTs, numRequested, numEmpty, numErrors, numNonEmpty, avgNonEmptyMillis, slowestNonEmptyMillis, runtime, slowestFragment);
+            final long avgNonEmptyMillis = numNonEmpty != 0L ? sumNonEmptyMillis / numNonEmpty : 0L;
+            return new Statistics(startedTs, numRequested, numEmpty, numErrors, numNonEmpty, avgNonEmptyMillis, slowestNonEmptyMillis, runtime, slowestFragment, numFallbacksRequested, numNonEmptyFallbacks);
         }
     }
 

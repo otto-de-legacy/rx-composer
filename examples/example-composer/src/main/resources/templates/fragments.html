@@ -38,13 +38,15 @@
             <!-- Using th:include to include fragment A using Thymeleaf fragments: -->
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <ul>
                             <li># requested: <span th:text="${stats.numRequested}"></span></li>
-                            <li># returned: <span th:text="${stats.numNonEmpty}"></span></li>
+                            <li># available: <span th:text="${stats.numNonEmpty}"></span></li>
+                            <li># fallbacks requested: <span th:text="${stats.numFallbacksRequested}"></span></li>
+                            <li># fallbacks available: <span th:text="${stats.numNonEmptyFallbacks}"></span></li>
                         </ul>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <ul>
                             <li># empty: <span th:text="${stats.numEmpty}"></span></li>
                             <li># errors: <span th:text="${stats.numErrors}"></span></li>
@@ -54,10 +56,6 @@
                         <ul>
                             <li>Avg non-empty runtime: <span th:text="${stats.avgNonEmptyMillis}"></span>ms</li>
                             <li>Max non-empty runtime: <span th:text="${stats.maxNonEmptyMillis}"></span>ms (<span th:text="${stats.slowestFragment}"></span>)</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4">
-                        <ul>
                             <li>Total runtime w/o rendering: <span th:text="${stats.runtime}"></span>ms</li>
                             <li>Total runtime w/ rendering: <span th:text="${stats.totalRuntime}"></span>ms</li>
                         </ul>

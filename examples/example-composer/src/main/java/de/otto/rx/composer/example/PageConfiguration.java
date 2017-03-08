@@ -84,7 +84,7 @@ public class PageConfiguration {
                 fragment(F, withSingle(
                         contentFrom(clients.getBy(someBrokenService), "http://localhost:8081/somethingBroken", TEXT_HTML,
                                 fallbackTo(
-                                        staticTextContent("Fallback for http://localhost:8081/somethingBroken", F, "This is a fallback for /somethingBroken"))))
+                                        staticTextContent("Fallback for http://localhost:8081/somethingBroken", F, "This is a staticTextFallback for /somethingBroken"))))
                 )
         );
     }
