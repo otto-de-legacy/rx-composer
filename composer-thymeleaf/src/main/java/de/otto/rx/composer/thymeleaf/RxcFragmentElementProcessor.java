@@ -43,8 +43,13 @@ public class RxcFragmentElementProcessor extends AbstractElementTagProcessor {
                              final IElementTagStructureHandler structureHandler) {
         final Contents contents = getContents(context, tag);
         final Position pos = getPosition(context, tag);
-        structureHandler.replaceWith(contents.get(pos).getBody(), false);
+        if (contents.get(pos).isAvailable()) {
+            structureHandler.replaceWith(contents.get(pos).getBody(), false);
+        } else {
+            structureHandler.removeTags();
+        }
     }
+
 
     static Position getPosition(final ITemplateContext context,
                                 final IProcessableElementTag tag) {

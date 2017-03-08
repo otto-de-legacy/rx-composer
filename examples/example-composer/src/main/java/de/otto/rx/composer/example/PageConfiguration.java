@@ -2,6 +2,7 @@ package de.otto.rx.composer.example;
 
 import de.otto.rx.composer.client.Ref;
 import de.otto.rx.composer.client.ServiceClients;
+import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.page.Page;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,7 @@ import static de.otto.rx.composer.client.ClientConfig.singleRetry;
 import static de.otto.rx.composer.client.ServiceClients.serviceClients;
 import static de.otto.rx.composer.content.AbcPosition.*;
 import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
+import static de.otto.rx.composer.example.PageConfiguration.PagePosition.INTRO;
 import static de.otto.rx.composer.example.PageConfiguration.Services.*;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
@@ -28,8 +30,12 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 @Configuration
 public class PageConfiguration {
 
+    enum PagePosition implements Position {
+        INTRO
+    }
+
     enum Services implements Ref {
-        helloService, somethingElseService, serviceC, someMissingService, someBrokenService
+        introService, helloService, somethingElseService, serviceC, someMissingService, someBrokenService
     }
 
     private ServiceClients clients;
@@ -37,6 +43,7 @@ public class PageConfiguration {
     @PostConstruct
     public void init() {
         clients = serviceClients(
+                noResiliency(introService, 5000, 1000),
                 singleRetry(helloService, 5000, 500),
                 noResiliency(somethingElseService, 5000, 400),
                 singleRetry(serviceC, 5000, 1000),
@@ -53,6 +60,9 @@ public class PageConfiguration {
     @Bean
     public Page page() {
         return consistsOf(
+                fragment(INTRO, withSingle(
+                        contentFrom(clients.getBy(introService), "http://localhost:8081/intro", TEXT_HTML))
+                ),
                 fragment(A, withAll(
                         contentFrom(clients.getBy(helloService), fromTemplate("http://localhost:8081/hello?name=RxComposer"), TEXT_HTML),
                         contentFrom(clients.getBy(helloService), fromTemplate("http://localhost:8081/hello{?name}"), TEXT_HTML))

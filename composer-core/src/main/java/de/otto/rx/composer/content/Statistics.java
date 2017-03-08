@@ -33,6 +33,14 @@ public class Statistics {
         this.slowestFragment = slowestFragment;
     }
 
+    public static Statistics emptyStats() {
+        return new StatsBuilder().build();
+    }
+
+    public static StatsBuilder statsBuilder() {
+        return new StatsBuilder();
+    }
+
     public long getStartedTs() {
         return startedTs;
     }
@@ -90,14 +98,6 @@ public class Statistics {
                 ", runtime=" + runtime +
                 ", slowestFragment='" + slowestFragment + '\'' +
                 '}';
-    }
-
-    public static StatsBuilder statsBuilder() {
-        return new StatsBuilder();
-    }
-
-    public static Statistics emptyStats() {
-        return new StatsBuilder().build();
     }
 
     public static class StatsBuilder {

@@ -6,8 +6,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan("de.otto.rx.composer.example")
 @SpringBootApplication
-public class Server {
+public class FragmentServer {
     public static void main(String[] args) {
-        SpringApplication.run(Server.class, args);
+        SpringApplication.run(FragmentServer.class, args);
     }
 }
