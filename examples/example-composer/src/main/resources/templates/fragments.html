@@ -12,10 +12,23 @@
                 <div style="border-style: solid; border-width: thin; border-color: red">
                     <rxc:fragment position="${position}"><em>No Content available</em></rxc:fragment>
                     <ul style="border-top-style: solid; border-top-width: thin; border-color: red; color: red; font-size: small">
-                        <li>Source: <span th:text="${content.getSource()}"></span></li>
-                        <li th:if="${content.isComposite()}"># Contents: <span th:text="${content.asComposite().getContents().size()}"></span></li>
-                        <li th:if="${content.isComposite()}">Avg. Runtime: <span th:text="${content.getAvgRuntime()}"></span>ms</li>
-                        <li>Total Runtime: <span th:text="${content.getTotalRuntime()}"></span>ms</li>
+                        <th:block th:if="${content.isComposite()}">
+                            <li>Source:
+                                <ul>
+                                    <li th:each="content : ${content.asComposite().getContents()}">
+                                        <span th:text="${content.getSource()}">content source</span>
+                                        <span th:text="' (runtime: ' + ${content.getTotalRuntime()} + 'ms)'">(runtime: 100ms)</span>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li># Contents: <span th:text="${content.asComposite().getContents().size()}"></span></li>
+                            <li>Avg. Runtime: <span th:text="${content.getAvgRuntime()}"></span>ms</li>
+                            <li>Total Runtime: <span th:text="${content.getTotalRuntime()}"></span>ms</li>
+                        </th:block>
+                        <th:block th:if="${!content.isComposite()}">
+                            <li>Source: <span th:text="${content.getSource()}"></span></li>
+                            <li>Total Runtime: <span th:text="${content.getTotalRuntime()}"></span>ms</li>
+                        </th:block>
                     </ul>
                 </div>
         </th:block>
@@ -35,7 +48,6 @@
             <div class="panel-heading">
                 <h3 class="panel-title">Page Stats</h3>
             </div>
-            <!-- Using th:include to include fragment A using Thymeleaf fragments: -->
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-4">
