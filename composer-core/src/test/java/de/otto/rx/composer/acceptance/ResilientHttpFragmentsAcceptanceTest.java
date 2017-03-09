@@ -21,6 +21,7 @@ import static de.otto.rx.composer.client.ServiceClients.defaultClients;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
@@ -326,43 +327,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
     }
 
     private Content someContent(final Position position, final String body) {
-        return new SingleContent() {
-            @Override
-            public String getSource() {
-                return position.name();
-            }
-
-            @Override
-            public Position getPosition() {
-                return position;
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-
-            @Override
-            public String getBody() {
-                return body;
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return Headers.emptyHeaders();
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0;
-            }
-
-        };
+        return staticTextContent(position.name(), position, body);
 
     }
 

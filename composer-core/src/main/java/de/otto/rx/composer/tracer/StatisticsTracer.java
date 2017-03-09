@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static de.otto.rx.composer.content.Statistics.statsBuilder;
+import static de.otto.rx.composer.tracer.EventType.*;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -68,7 +69,7 @@ public final class StatisticsTracer implements Tracer {
 
     private void gatherCompletedStatistics(final StatsBuilder stats, final TraceEvent event) {
         if (event.isNonEmptyContent()) {
-            if (event.getType().equals(EventType.COMPLETED)) {
+            if (event.getType().equals(COMPLETED)) {
                 ++stats.numNonEmpty;
             } else {
                 ++stats.numNonEmptyFallbacks;

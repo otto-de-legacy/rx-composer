@@ -1,10 +1,7 @@
 package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.Headers;
-import de.otto.rx.composer.content.Position;
-import de.otto.rx.composer.content.SingleContent;
+import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.providers.ContentProvider;
 import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
@@ -13,6 +10,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.AbcPosition.B;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
+import static de.otto.rx.composer.content.StaticTextContent.*;
 import static de.otto.rx.composer.page.Fragments.followedBy;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,44 +56,7 @@ public class CompositeFragmentTest {
     }
 
     private Content someContent(final Position position) {
-        return new SingleContent() {
-            @Override
-            public String getSource() {
-                return position.name();
-            }
-
-            @Override
-            public Position getPosition() {
-                return position;
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-
-            @Override
-            public String getBody() {
-                return "Yes!";
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return Headers.emptyHeaders();
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0L;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0L;
-            }
-
-        };
-
+        return staticTextContent(position.name(), position, "Yes!");
     }
 
 }

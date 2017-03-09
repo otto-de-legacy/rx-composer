@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,42 +41,6 @@ public class RxcFragmentElementProcessorTest {
     }
 
     private Content someContent(final Position position) {
-        return new SingleContent() {
-            @Override
-            public String getSource() {
-                return position.name();
-            }
-
-            @Override
-            public Position getPosition() {
-                return position;
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-
-            @Override
-            public String getBody() {
-                return "Some Content";
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return Headers.emptyHeaders();
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0L;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0L;
-            }
-
-        };
+        return staticTextContent(position.name(), position, "Some Content");
     }
 }

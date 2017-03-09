@@ -10,6 +10,7 @@ import rx.Observable;
 
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.page.Fragments.fragment;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,43 +52,7 @@ public class SingleFragmentTest {
     }
 
     private Content someContent(final String body) {
-        return new SingleContent() {
-            @Override
-            public String getSource() {
-                return body;
-            }
-
-            @Override
-            public Position getPosition() {
-                return X;
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-
-            @Override
-            public String getBody() {
-                return body;
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return Headers.emptyHeaders();
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0L;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0L;
-            }
-
-        };
+        return staticTextContent(body, X, body);
     }
 
 

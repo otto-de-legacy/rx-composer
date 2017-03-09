@@ -1,16 +1,19 @@
 package de.otto.rx.composer.page;
 
 import com.google.common.collect.ImmutableList;
-import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.content.Contents;
+import de.otto.rx.composer.content.Parameters;
+import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.tracer.Tracer;
 import org.junit.Test;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.AbcPosition.Y;
-import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -126,56 +129,7 @@ public class PageTest {
     }
 
     private Content someContent(final String source, final Position position, final String text) {
-        return new TestContent(source, position, text);
+        return staticTextContent(source, position, text);
     }
 
-    private static final class TestContent extends SingleContent {
-        private final String source;
-        private final String text;
-        private final Position position;
-
-        TestContent(final String source,
-                    final Position position,
-                    final String text) {
-            this.source = source;
-            this.position = position;
-            this.text = text;
-        }
-
-        @Override
-        public String getSource() {
-            return source;
-        }
-
-        @Override
-        public Position getPosition() {
-            return position;
-        }
-
-        @Override
-        public boolean isAvailable() {
-            return !text.isEmpty();
-        }
-
-        @Override
-        public String getBody() {
-            return text;
-        }
-
-        @Override
-        public Headers getHeaders() {
-            return emptyHeaders();
-        }
-
-        @Override
-        public long getStartedTs() {
-            return 0L;
-        }
-
-        @Override
-        public long getCompletedTs() {
-            return 0L;
-        }
-
-    }
 }

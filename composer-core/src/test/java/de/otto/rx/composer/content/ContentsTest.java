@@ -6,6 +6,7 @@ import org.junit.Test;
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -86,42 +87,8 @@ public class ContentsTest {
     }
 
     private Content someContent(final String body) {
-        return new SingleContent() {
-            @Override
-            public String getSource() {
-                return body;
-            }
-
-            @Override
-            public Position getPosition() {
-                return A;
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return !body.isEmpty();
-            }
-
-            @Override
-            public String getBody() {
-                return body;
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return Headers.of(null);
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0L;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0L;
-            }
-
-        };
+        return staticTextContent(
+                body, A, body
+        );
     }
 }

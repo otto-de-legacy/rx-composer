@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static de.otto.rx.composer.content.AbcPosition.A;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -25,42 +26,7 @@ public class SingleContentTest {
     }
 
     private Content someSingleContent() {
-        return new SingleContent() {
-            @Override
-            public Position getPosition() {
-                return A;
-            }
-
-            @Override
-            public String getSource() {
-                return "Foo";
-            }
-
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-
-            @Override
-            public String getBody() {
-                return "Bar";
-            }
-
-            @Override
-            public Headers getHeaders() {
-                return emptyHeaders();
-            }
-
-            @Override
-            public long getStartedTs() {
-                return 0L;
-            }
-
-            @Override
-            public long getCompletedTs() {
-                return 0L;
-            }
-        };
+        return staticTextContent("Foo", A, "Bar");
     }
 
 }

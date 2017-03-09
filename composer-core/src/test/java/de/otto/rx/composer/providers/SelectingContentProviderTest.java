@@ -11,6 +11,7 @@ import static com.google.common.collect.ImmutableList.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.providers.ContentProviders.withAll;
 import static de.otto.rx.composer.providers.ContentProviders.withFirst;
 import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
@@ -31,8 +32,8 @@ public class SelectingContentProviderTest {
     public void shouldFetchFirstWithContent() {
         // given
         final ContentProvider contentProvider = withFirst(of(
-                (position, context, parameters) -> just(new TestContent(X, "Foo")),
-                (position, context, parameters) -> just(new TestContent(X, "Bar"))
+                (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                (position, context, parameters) -> just(staticTextContent("", X, "Bar"))
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, noOpTracer(), emptyParameters());
@@ -46,8 +47,8 @@ public class SelectingContentProviderTest {
         // given
         final Tracer tracer = noOpTracer();
         final ContentProvider contentProvider = withAll(of(
-                (position, context, parameters) -> just(new TestContent(X, "Foo")),
-                (position, context, parameters) -> just(new TestContent(X, "Bar"))
+                (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                (position, context, parameters) -> just(staticTextContent("", X, "Bar"))
         ));
         // when
         final Observable<Content> result =  contentProvider.getContent(X, tracer, emptyParameters());
@@ -63,8 +64,8 @@ public class SelectingContentProviderTest {
         final ContentProvider contentProvider = withFirstMatching(
                 (content) -> content.getBody().contains("a"),
                 of(
-                        (position, context, parameters) -> just(new TestContent(X, "Foo")),
-                        (position, context, parameters) -> just(new TestContent(X, "Bar"))
+                        (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                        (position, context, parameters) -> just(staticTextContent("", X, "Bar"))
                 )
         );
         // when
@@ -78,8 +79,8 @@ public class SelectingContentProviderTest {
     public void shouldSelectFirstNotEmpty() {
         // given
         final ContentProvider contentProvider = withFirst(of(
-                (position, context, parameters) -> just(new TestContent(X, "")),
-                (position, context, parameters) -> just(new TestContent(X, "Hello World"))
+                (position, context, parameters) -> just(staticTextContent("", X, "")),
+                (position, context, parameters) -> just(staticTextContent("", X, "Hello World"))
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
@@ -93,8 +94,8 @@ public class SelectingContentProviderTest {
     public void shouldHandleEmptyContents() {
         // given
         final ContentProvider contentProvider = withFirst(of(
-                (position, context, parameters) -> just(new TestContent(X, "")),
-                (position, context, parameters) -> just(new TestContent(X, ""))
+                (position, context, parameters) -> just(staticTextContent("", X, "")),
+                (position, context, parameters) -> just(staticTextContent("", X, ""))
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
@@ -108,7 +109,7 @@ public class SelectingContentProviderTest {
         // given
         final ContentProvider contentProvider = withFirst(of(
                 someContentProviderThrowing(new IllegalStateException("Bumm!!!")),
-                (position, context, parameters) -> just(new TestContent(X, "Yeah!"))
+                (position, context, parameters) -> just(staticTextContent("", X, "Yeah!"))
         ));
         // when
         final Observable<Content> result = contentProvider.getContent(X, noOpTracer(), emptyParameters());
@@ -122,11 +123,11 @@ public class SelectingContentProviderTest {
         // given
         final Tracer tracer = noOpTracer();
         final ContentProvider nestedProvider = mock(ContentProvider.class);
-        when(nestedProvider.getContent(X, tracer, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
+        when(nestedProvider.getContent(X, tracer, emptyParameters())).thenReturn(just(staticTextContent("", X, "Foo")));
         // and
         final ContentProvider fetchFirstProvider = withFirst(of(
                 nestedProvider,
-                (position, requestContext, parameters) -> just(new TestContent(X, "Bar"))
+                (position, requestContext, parameters) -> just(staticTextContent("", X, "Bar"))
         ));
         // when
         fetchFirstProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
@@ -135,53 +136,6 @@ public class SelectingContentProviderTest {
         // then
         assertThat(content.getBody(), is("Foo"));
         verify(nestedProvider, times(3)).getContent(X, tracer, emptyParameters());
-    }
-
-    private static final class TestContent extends SingleContent {
-        private final String text;
-        private AbcPosition position;
-
-        TestContent(final AbcPosition position,
-                    final String text) {
-            this.position = position;
-            this.text = text;
-        }
-
-        @Override
-        public String getSource() {
-            return text;
-        }
-
-        @Override
-        public Position getPosition() {
-            return position;
-        }
-
-        @Override
-        public boolean isAvailable() {
-            return !text.isEmpty();
-        }
-
-        @Override
-        public String getBody() {
-            return text;
-        }
-
-        @Override
-        public Headers getHeaders() {
-            return emptyHeaders();
-        }
-
-        @Override
-        public long getStartedTs() {
-            return 0L;
-        }
-
-        @Override
-        public long getCompletedTs() {
-            return 0L;
-        }
-
     }
 
     private ContentProvider someContentProviderThrowing(final Exception e) {
