@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import static de.otto.rx.composer.content.ErrorContent.errorContent;
-import static de.otto.rx.composer.tracer.TraceEvent.error;
 import static de.otto.rx.composer.tracer.TraceEvent.exception;
 import static rx.Observable.just;
 
@@ -58,7 +57,7 @@ class SingleFragment implements Fragment {
                     .getContent(position, tracer, parameters)
                     .onErrorReturn(e -> {
                         final ErrorContent errorContent = errorContent(position, e, startedTs);
-                        tracer.trace(error(position, "", e));
+                        tracer.trace(exception(position, "", e));
                         return errorContent;
                     })
                     .filter(Content::isAvailable);

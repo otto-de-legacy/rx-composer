@@ -6,7 +6,7 @@ import de.otto.rx.composer.content.Statistics;
 import de.otto.rx.composer.page.Page;
 
 /**
- * Traces and gathers information about {@link de.otto.rx.composer.page.Page#fetchWith(Parameters) fetching}
+ * Traces and gathers information about {@link de.otto.rx.composer.page.Page#fetchWith(Parameters, Tracer)}  fetching}
  * a single {@link Page}.
  */
 public interface Tracer {

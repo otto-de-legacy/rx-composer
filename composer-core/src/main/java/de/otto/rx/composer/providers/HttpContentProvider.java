@@ -115,11 +115,11 @@ final class HttpContentProvider implements ContentProvider {
                         getFallbackObservable(position, tracer, parameters),
                         clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
-                    .doOnError(t -> tracer.trace(error(position, url, t)))
+                    .doOnError(t -> tracer.trace(exception(position, url, t)))
                     .filter(Content::isAvailable);
         } else {
             return contentObservable
-                    .doOnError(t -> tracer.trace(error(position, url, t)))
+                    .doOnError(t -> tracer.trace(exception(position, url, t)))
                     .filter(Content::isAvailable);
         }
     }
@@ -148,7 +148,7 @@ final class HttpContentProvider implements ContentProvider {
                     .doOnNext(fallbackContent -> tracer.trace(
                             fallbackFragmentCompleted(position, fallbackContent.getSource(), fallbackContent.isAvailable())))
                     .doOnError(t -> tracer.trace(
-                            error(position, url, t)));
+                            exception(position, url, t)));
         }
     }
 

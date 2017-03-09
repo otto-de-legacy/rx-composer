@@ -17,7 +17,11 @@ public final class TraceEvent {
     private final boolean nonEmptyContent;
     private final String errorMessage;
 
-    private TraceEvent(final EventType type, final Position position, final String source, final boolean nonEmptyContent, final String errorMessage) {
+    private TraceEvent(final EventType type,
+                       final Position position,
+                       final String source,
+                       final boolean nonEmptyContent,
+                       final String errorMessage) {
         this.type = type;
         this.position = position;
         this.source = source;
@@ -41,16 +45,16 @@ public final class TraceEvent {
         return new TraceEvent(FALLBACK_COMPLETED, position, source, available, "");
     }
 
-    public static TraceEvent error(final Position position, final String source, final Throwable t) {
-        return new TraceEvent(ERROR, position, source, false, t.getMessage());
-    }
-
     public static TraceEvent error(final Position position, final String source, final String reason) {
         return new TraceEvent(ERROR, position, source, false, reason);
     }
 
     public static TraceEvent exception(final Position position, final Throwable t) {
         return new TraceEvent(ERROR, position, "", false, t.getMessage());
+    }
+
+    public static TraceEvent exception(final Position position, final String source, final Throwable t) {
+        return new TraceEvent(ERROR, position, source, false, t.getMessage());
     }
 
     public final long getTimestamp() {
