@@ -23,6 +23,7 @@ subprojects {
     apply from: "${rootDir}/gradle/idea.gradle"
     apply from: "${rootDir}/gradle/compile.gradle"
     apply from: "${rootDir}/gradle/test.gradle"
+    apply from: "${rootDir}/gradle/jacoco.gradle"
     apply from: "${rootDir}/gradle/maven.gradle"
     apply from: "${rootDir}/gradle/signing.gradle"
 
