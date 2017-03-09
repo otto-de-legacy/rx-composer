@@ -120,21 +120,21 @@ public class SelectingContentProviderTest {
     @Test
     public void shouldExecuteFragmentMultipleTimes() {
         // given
-        final Tracer context = noOpTracer();
+        final Tracer tracer = noOpTracer();
         final ContentProvider nestedProvider = mock(ContentProvider.class);
-        when(nestedProvider.getContent(X, context, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
+        when(nestedProvider.getContent(X, tracer, emptyParameters())).thenReturn(just(new TestContent(X, "Foo")));
         // and
         final ContentProvider fetchFirstProvider = withFirst(of(
                 nestedProvider,
                 (position, requestContext, parameters) -> just(new TestContent(X, "Bar"))
         ));
         // when
-        fetchFirstProvider.getContent(X, context, emptyParameters()).toBlocking().single();
-        fetchFirstProvider.getContent(X, context, emptyParameters()).toBlocking().single();
-        final Content content = fetchFirstProvider.getContent(X, context, emptyParameters()).toBlocking().single();
+        fetchFirstProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
+        fetchFirstProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
+        final Content content = fetchFirstProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
         // then
         assertThat(content.getBody(), is("Foo"));
-        verify(nestedProvider, times(3)).getContent(X, context, emptyParameters());
+        verify(nestedProvider, times(3)).getContent(X, tracer, emptyParameters());
     }
 
     private static final class TestContent extends SingleContent {

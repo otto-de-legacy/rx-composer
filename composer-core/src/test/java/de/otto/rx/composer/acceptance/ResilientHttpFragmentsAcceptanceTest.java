@@ -27,6 +27,7 @@ import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
 import static de.otto.rx.composer.providers.ContentProviders.fallbackTo;
 import static de.otto.rx.composer.providers.ContentProviders.withSingle;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
+import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -74,7 +75,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(2));
             assertThat(result.get(X).getBody(), is("Hello"));
             assertThat(result.get(Y).getBody(), is("World"));
@@ -103,7 +104,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
@@ -132,7 +133,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
@@ -159,7 +160,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(true));
             assertThat(result.get(X).getBody(), is("Some Content"));
@@ -182,7 +183,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(0));
             assertThat(result.get(X).isAvailable(), is(false));
         }
@@ -209,7 +210,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(true));
             assertThat(result.get(X).getBody(), is("Fallback Content"));
@@ -234,7 +235,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(true));
             assertThat(result.get(X).getBody(), is("Some Fallback"));
@@ -263,7 +264,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(true));
             assertThat(result.get(X).getBody(), is("Some Content"));
@@ -289,7 +290,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(false));
             assertThat(result.get(Y).getBody(), is("World"));
@@ -314,7 +315,7 @@ public class ResilientHttpFragmentsAcceptanceTest {
                     )
             );
             for (int i = 0; i < 150; i++) {
-                page.fetchWith(emptyParameters());
+                page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             }
 
             /*assertThat(result.getAll(), hasSize(1));

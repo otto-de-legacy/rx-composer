@@ -27,34 +27,34 @@ public class CompositeFragmentTest {
     @Test
     public void shouldExecuteInitialContentProvider() {
         // given
-        final Tracer context = noOpTracer();
+        final Tracer tracer = noOpTracer();
         final ContentProvider initial = mock(ContentProvider.class);
-        when(initial.getContent(A, context, emptyParameters())).thenReturn(just(mock(Content.class)));
+        when(initial.getContent(A, tracer, emptyParameters())).thenReturn(just(mock(Content.class)));
         final Fragment fragment = Fragments.fragment(A, initial, followedBy((c) -> emptyParameters(), mock(Fragment.class)));
         // when
-        fragment.fetchWith(context, emptyParameters());
+        fragment.fetchWith(tracer, emptyParameters());
         // then
-        verify(initial).getContent(A, context, emptyParameters());
+        verify(initial).getContent(A, tracer, emptyParameters());
     }
 
     @Test
     public void shouldExecuteNestedFragment() {
         // given
-        final Tracer context = noOpTracer();
+        final Tracer tracer = noOpTracer();
         final ContentProvider fetchInitial = mock(ContentProvider.class);
-        when(fetchInitial.getContent(A, context, emptyParameters())).thenReturn(just(someContent(A)));
+        when(fetchInitial.getContent(A, tracer, emptyParameters())).thenReturn(just(someContent(A)));
         // and
         final Fragment nestedFragment = mock(Fragment.class);
         when(nestedFragment.getPosition()).thenReturn(B);
-        when(nestedFragment.fetchWith(context, emptyParameters())).thenReturn(just(someContent(B)));
+        when(nestedFragment.fetchWith(tracer, emptyParameters())).thenReturn(just(someContent(B)));
         // and
         final Fragment compositeFragment = Fragments.fragment(A, fetchInitial, followedBy((c) -> emptyParameters(), nestedFragment));
         // when
-        ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(context, emptyParameters()).toBlocking().toIterable());
+        ImmutableList<Content> contents = copyOf(compositeFragment.fetchWith(tracer, emptyParameters()).toBlocking().toIterable());
 
         // then
         assertThat(contents, hasSize(2));
-        verify(nestedFragment).fetchWith(context, emptyParameters());
+        verify(nestedFragment).fetchWith(tracer, emptyParameters());
     }
 
     private Content someContent(final Position position) {

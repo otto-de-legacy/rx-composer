@@ -34,13 +34,13 @@ final class QuickestWinsContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final Tracer context,
+                                          final Tracer tracer,
                                           final Parameters parameters) {
         final long startedTs = System.currentTimeMillis();
         final Observable<Content> mergedContent = merge(contentProviders
                 .stream()
                 .map(contentProvider -> contentProvider
-                        .getContent(position, context, parameters)
+                        .getContent(position, tracer, parameters)
                         .doOnError(this::traceError)
                         .onErrorReturn((Throwable t) -> errorContent(position, t, startedTs)))
                 .collect(Collectors.toList()));

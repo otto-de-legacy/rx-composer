@@ -18,11 +18,11 @@ public interface Fragment {
     /**
      * Fetch the observable Content for the Fragment.
      *
-     * @param context the current request context
+     * @param tracer the current request context
      * @param parameters parameters provided when fetching the {@link Page}
      * @return Observable content for the Fragment's position.
      */
-    Observable<Content> fetchWith(Tracer context, Parameters parameters);
+    Observable<Content> fetchWith(Tracer tracer, Parameters parameters);
 
     /**
      *

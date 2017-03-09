@@ -6,6 +6,7 @@ import de.otto.rx.composer.content.Content;
 import de.otto.rx.composer.content.Contents;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Statistics;
+import de.otto.rx.composer.tracer.TraceEvent;
 import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.ImmutableList.builder;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
-import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static rx.Observable.from;
 
 /**
@@ -91,10 +91,10 @@ public final class Page {
     /**
      * Executes the fragments of the plan concurrently and returns the {@link Content#isAvailable() available} {@link Contents}.
      * @param params Parameters used to fetch the content
+     * @param tracer the Tracer used to process {@link TraceEvent trace events}.
      * @return available Contents
      */
-    public Contents fetchWith(final Parameters params) {
-        final Tracer tracer = loggingStatisticsTracer();
+    public Contents fetchWith(final Parameters params, final Tracer tracer) {
 
         // use a latch to await execution of all fragments:
         final CountDownLatch latch = new CountDownLatch(1);

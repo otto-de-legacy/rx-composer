@@ -23,9 +23,9 @@ public interface ContentProvider {
      * </p>
      *
      * @param position the Position of the observed content inside the {@link Page}.
-     * @param context the current request context.
+     * @param tracer the current request context.
      * @param parameters Parameters used by the ContentProvider to fetch the Content.
      * @return Observable emitting nothing, or a single Content item.
      */
-    Observable<Content> getContent(final Position position, final Tracer context, final Parameters parameters);
+    Observable<Content> getContent(final Position position, final Tracer tracer, final Parameters parameters);
 }

@@ -21,6 +21,7 @@ import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
 import static de.otto.rx.composer.providers.ContentProviders.withQuickest;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
+import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,7 +66,7 @@ public class QuickestWinsAcceptanceTest {
                     )
             ));
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).getBody(), is("World"));
         }
@@ -89,7 +90,7 @@ public class QuickestWinsAcceptanceTest {
                     )
             ));
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).getBody(), is("World"));
         }
@@ -113,7 +114,7 @@ public class QuickestWinsAcceptanceTest {
                     )
             ));
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(0));
         }
     }

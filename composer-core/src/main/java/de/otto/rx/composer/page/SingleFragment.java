@@ -51,19 +51,19 @@ class SingleFragment implements Fragment {
      * </p>
      */
     @Override
-    public Observable<Content> fetchWith(final Tracer context, final Parameters parameters) {
+    public Observable<Content> fetchWith(final Tracer tracer, final Parameters parameters) {
         final long startedTs = System.currentTimeMillis();
         try {
             return contentProvider
-                    .getContent(position, context, parameters)
+                    .getContent(position, tracer, parameters)
                     .onErrorReturn(e -> {
                         final ErrorContent errorContent = errorContent(position, e, startedTs);
-                        context.trace(error(position, "", e));
+                        tracer.trace(error(position, "", e));
                         return errorContent;
                     })
                     .filter(Content::isAvailable);
         } catch (final Exception e) {
-            context.trace(exception(position, e));
+            tracer.trace(exception(position, e));
             return just(errorContent(position, e, startedTs));
         }
     }

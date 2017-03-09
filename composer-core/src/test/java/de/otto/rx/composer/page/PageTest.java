@@ -11,6 +11,7 @@ import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
+import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -52,7 +53,7 @@ public class PageTest {
                         doFirst, doSecond
         );
         // when
-        page.fetchWith(emptyParameters());
+        page.fetchWith(emptyParameters(), loggingStatisticsTracer());
         // then
         verify(doFirst).fetchWith(any(Tracer.class), any(Parameters.class));
         verify(doSecond).fetchWith(any(Tracer.class), any(Parameters.class));
@@ -69,7 +70,7 @@ public class PageTest {
                 doFirst
         );
         // when
-        final Contents contents = page.fetchWith(emptyParameters());
+        final Contents contents = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
         // then
         assertThat(contents.getBody(X), is("Foo"));
     }
@@ -85,7 +86,7 @@ public class PageTest {
                 doFirst
         );
         // when
-        final Contents contents = page.fetchWith(emptyParameters());
+        final Contents contents = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
         // then
         assertThat(contents.get(X).isAvailable(), is(false));
     }
@@ -99,8 +100,8 @@ public class PageTest {
                         doFirst, doSecond
         );
         // when
-        page.fetchWith(emptyParameters());
-        page.fetchWith(emptyParameters());
+        page.fetchWith(emptyParameters(), loggingStatisticsTracer());
+        page.fetchWith(emptyParameters(), loggingStatisticsTracer());
         // then
         verify(doFirst, times(2)).fetchWith(any(Tracer.class), any(Parameters.class));
         verify(doSecond, times(2)).fetchWith(any(Tracer.class), any(Parameters.class));
@@ -118,7 +119,7 @@ public class PageTest {
                 doFirst, doSecond
         );
         // when
-        page.fetchWith(someParameters);
+        page.fetchWith(someParameters, loggingStatisticsTracer());
         // then
         verify(doFirst).fetchWith(any(Tracer.class), eq(someParameters));
         verify(doSecond).fetchWith(any(Tracer.class), eq(someParameters));

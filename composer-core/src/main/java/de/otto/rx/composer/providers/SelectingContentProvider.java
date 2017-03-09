@@ -58,7 +58,7 @@ final class SelectingContentProvider implements ContentProvider {
 
     @Override
     public Observable<Content> getContent(final Position position,
-                                          final Tracer context,
+                                          final Tracer tracer,
                                           final Parameters parameters) {
         final AtomicInteger subIndex = new AtomicInteger();
         final long startedTs = System.currentTimeMillis();
@@ -67,7 +67,7 @@ final class SelectingContentProvider implements ContentProvider {
                 .map(contentProvider -> {
                     final int pos = subIndex.getAndIncrement();
                     return contentProvider
-                            .getContent(position, context, parameters)
+                            .getContent(position, tracer, parameters)
                             .map(content -> indexed(content, pos))
                             .doOnError(throwable -> LOG.error(throwable.getMessage(), throwable))
                             .onErrorReturn(throwable -> indexed(errorContent(position, throwable, startedTs), pos));

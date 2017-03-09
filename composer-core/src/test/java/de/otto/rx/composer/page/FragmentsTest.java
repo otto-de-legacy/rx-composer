@@ -52,17 +52,17 @@ public class FragmentsTest {
     @Test
     public void shouldExecuteFragment() {
         // given
-        final Tracer context = noOpTracer();
+        final Tracer tracer = noOpTracer();
         final Content mockContent = mock(Content.class);
         when(mockContent.isAvailable()).thenReturn(true);
         when(mockContent.getBody()).thenReturn("Foo");
         // and
         final ContentProvider mockProvider = mock(ContentProvider.class);
-        when(mockProvider.getContent(X, context, emptyParameters())).thenReturn(just(mockContent));
+        when(mockProvider.getContent(X, tracer, emptyParameters())).thenReturn(just(mockContent));
         // and
         final Fragment fragment = fragment(X, mockProvider);
         // when Fragment
-        final Observable<Content> result =  fragment.fetchWith(context, emptyParameters());
+        final Observable<Content> result =  fragment.fetchWith(tracer, emptyParameters());
         // then
         final Content content = result.toBlocking().single();
         assertThat(content.getBody(), is("Foo"));

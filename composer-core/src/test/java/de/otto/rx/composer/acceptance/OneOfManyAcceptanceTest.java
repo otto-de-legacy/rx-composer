@@ -21,6 +21,7 @@ import static de.otto.rx.composer.page.Page.consistsOf;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
 import static de.otto.rx.composer.providers.ContentProviders.withFirst;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
+import static de.otto.rx.composer.tracer.TracerBuilder.loggingStatisticsTracer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,7 +65,7 @@ public class OneOfManyAcceptanceTest {
                     )
             ));
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).getBody(), is("Hello"));
         }
@@ -87,7 +88,7 @@ public class OneOfManyAcceptanceTest {
                             contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
                     )
             ));
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).getBody(), is("World"));
         }
@@ -111,7 +112,7 @@ public class OneOfManyAcceptanceTest {
                     )
             ));
 
-            final Contents result = page.fetchWith(emptyParameters());
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.getBody(X), is("World"));
         }
