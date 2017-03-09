@@ -4,7 +4,7 @@ A DSL for reactive composition of content from different microservices using RxJ
 
 ## Status
 
-[![Next Selected Stories](https://badge.waffle.io/otto-de/rx-composer.svg?label=Ready&title=Selected)](http://waffle.io/otto-de/rx-composer)
+[![Next Selected Stories](https://badge.waffle.io/otto-de/rx-composer.svg?label=Ready&title=Next)](http://waffle.io/otto-de/rx-composer)
 [![Active Stories](https://badge.waffle.io/otto-de/rx-composer.svg?label=In%20Progress&title=Doing)](http://waffle.io/otto-de/rx-composer)
 
 [![build](https://travis-ci.org/otto-de/rx-composer.svg?branch=master)](https://travis-ci.org/otto-de/rx-composer?branch=master)
