@@ -252,39 +252,34 @@ number of factory methods, to build these providers:
 This is the most important provider. It is accessing remote services using HTTP to GET content using a service-client.
 It can be created using the following factory methods.
 
-
+This method is used to fetch content from a URL, accepting some media type.
+The service client is encapsulating the HTTP client used to get the content.
 ```java
-    // This method is used to fetch content from a URL, accepting some media type.
-    // The service client is encapsulating the HTTP client used to get the content.
-
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept) {...}
 ```
 
+Many times, the URL must be constructed from an uri template, using the parameters
+of the page request or some application properties:
 ```java
-    // Many times, the URL must be constructed from an uri template, using the parameters
-    // of the page request or some application properties:
-
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept) {...}
 ```
 
+If fetching the content fails, you might want to try some fallback to get different
+contents (from a cached value, a different service or some "default" stuff). In this
+case, the ServiceClient is required to be resilient.
 ```java
-    // If fetching the content fails, you might want to try some fallback to get different
-    // contents (from a cached value, a different service or some "default" stuff). In this
-    // case, the ServiceClient is required to be resilient.
-
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final String url,
                                               final String accept,
                                               final ContentProvider fallback) {...}
 ```
 
+Again supporting uri templates, this time with a fallback.
 ``` java
-    // Again supporting uri templates, this time with a fallback.
-
     public static ContentProvider contentFrom(final ServiceClient serviceClient,
                                               final UriTemplate uriTemplate,
                                               final String accept,
