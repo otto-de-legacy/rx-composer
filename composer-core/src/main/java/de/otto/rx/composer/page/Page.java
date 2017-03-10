@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CountDownLatch;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.builder;
 import static de.otto.rx.composer.content.Contents.contentsBuilder;
 import static rx.Observable.from;
@@ -67,7 +68,24 @@ public final class Page {
     }
 
     /**
-     * Create a Plan using one ore more {@link Fragment}s.
+     * Create a Page using one ore more {@link Fragment}s.
+     * <p>
+     *     Fragments can be created using the factory methods of {@link Fragments}.
+     * </p>
+     * <p>
+     *     The returned Plan <em>MUST NOT</em> not be executed concurrently. You should build a new Plan for every request,
+     *     otherwise you will see unpredictable results.
+     * </p>
+     * @param fragments the non-empty list of fragments
+     * @return Page
+     */
+    public static Page consistsOf(final ImmutableList<Fragment> fragments) {
+        checkArgument(!fragments.isEmpty(), "The list of fragments must not be empty");
+        return new Page(fragments);
+    }
+
+    /**
+     * Create a Page using one ore more {@link Fragment}s.
      * <p>
      *     Fragments can be created using the factory methods of {@link Fragments}.
      * </p>
@@ -77,7 +95,7 @@ public final class Page {
      * </p>
      * @param firstFragment the first fragment to fetchWith
      * @param moreFragments optionally more fragments
-     * @return execution Plan
+     * @return Page
      */
     public static Page consistsOf(final Fragment firstFragment, final Fragment... moreFragments) {
         final Builder<Fragment> fragments = builder();
@@ -89,7 +107,8 @@ public final class Page {
     }
 
     /**
-     * Executes the fragments of the plan concurrently and returns the {@link Content#isAvailable() available} {@link Contents}.
+     * Concurrently fetches the fragments of the page and returns the {@link Content#isAvailable() available} {@link Contents}.
+     *
      * @param params Parameters used to fetch the content
      * @param tracer the Tracer used to process {@link TraceEvent trace events}.
      * @return available Contents

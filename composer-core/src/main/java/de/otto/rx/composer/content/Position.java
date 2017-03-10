@@ -1,7 +1,7 @@
 package de.otto.rx.composer.content;
 
 /**
- * A position in a plan.
+ * The position of a {@link de.otto.rx.composer.page.Page page} {@link de.otto.rx.composer.page.Fragment fragment}.
  * <p>
  *     Example usage:
  * </p>
