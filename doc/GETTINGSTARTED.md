@@ -68,4 +68,4 @@ If you want to build RX-Composer using Gradle, you might want to use the include
 If you do not want to use the provided gradle wrapper, please make sure
 that you are using an up-to-date version of Gradle (>= 2.12.0).
 
-Also see [CONTRIBUTING.md](CONTRIBUTING.md if you wish to submit pull requests.
+Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
