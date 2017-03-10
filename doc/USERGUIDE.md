@@ -144,7 +144,7 @@ fragments of a page.
 
 ### Page
 
-A page object is an immutable (and therefore thread-safe and reusable) collection of the page [fragments](#fragments).
+A page object is an immutable (and therefore thread-safe and reusable) collection of the page [fragments](#fragment).
 You can build a page object using the static factory method `Page.consistsOf(...)`:
 
 ```java
