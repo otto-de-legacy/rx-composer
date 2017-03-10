@@ -233,7 +233,7 @@ single method:
 
 The method gets three parameters:
 
-1. *Position*: This is the [position](#position) of the fragment where the resulting [content](#content) is placed.
+1. *Position*: This is the [position](#fragment) of the fragment where the resulting [content](#content) is placed.
 2. *Tracer*: Similar to a logger, a [tracer](#tracer) can be used to gather information about the execution of a page.
 Because debugging a multithreaded and/or async program is really difficult, the tracer might be really important,
 if fetching content is not working as expected.
