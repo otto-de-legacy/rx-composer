@@ -43,82 +43,81 @@ content in a reactive way, using RxJava in the implementation.
 
 ## Examples
 
-### Fetching two contents for a single page in parallel:
-       
-            // Specify what to fetch:
-            final Page page = consistsOf(
-                    fragment(
-                            X,
-                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", "text/html"))
-                    ),
-                    fragment(
-                            Y,
-                            withSingle(contentFrom(serviceClient, "http://example.com/someOtherContent", "text/html"))
-                    )
-            );
-            // Fetch contents of the page:
-            final Contents result = page.fetchWith(emptyParameters());
+### Fetching two contents for a single page in parallel
 
-### Fetching content with a fallback to some static content on error:
+The general pattern for a rx-composer server is to describe the contents to be fetched, then execute the page and
+process the resulting contents.
 
-Using a ServiceClient like `noRetries()` or `singleRetry`, it is possible to configure a fallback, if retrieving content
-from the primary ContentProvider fails because of timeouts, exceptions or HTTP server errors:
+In the first example, we want to fetch two HTTP resources for fragements "X" and "Y":
 
-```java
-            final Page page = consistsOf(
-                    fragment(X,
-                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
-                                    fallbackTo((position, parameters) -> just(fallbackContent(position, "Some Fallback Content"))))
+     // Setup some ServiceClient:
+     final ServiceClient serviceClient = HttpServiceClient.singleRetryClient();
+
+     // Specify what to fetch:
+     final Page page = consistsOf(
+             fragment(
+                     X,
+                     withSingle(
+                            contentFrom(serviceClient, "http://example.com/someContent", "text/html")
+                     )
+             ),
+             fragment(
+                     Y,
+                     withSingle(
+                            contentFrom(serviceClient, "http://example.com/someOtherContent", "text/html")
+                     )
+             )
+     );
+
+     // Fetch contents of the page:
+     final Contents result = page.fetchWith(emptyParameters());
+
+     // now we can process the results:
+     System.out.println("X: " + result.getBody(X);
+     System.out.println("Y: " + result.getBody(Y);
+
+Both contents will be requested in parallel. The time to fetch both contents will only be a little slower than the
+slowest response - instead of the sum of both response times.
+
+Because we are using the `singleRetryClient`, we already have some build-in resiliency:
+* The client is is using some default timeouts (for example, it is using a read-timeout of 500ms).
+* A Hystrix Circuit-Breaker is used, so using the client will fail-fast, if 50% of all requests are failing.
+* If fetching the resource fails because of a timeout, exception or HTTP server error, the request is
+retried once.
+
+### Fetching content with a fallback to some static content on error
+
+ Using a ServiceClient like `noRetries()` or `singleRetry`, it is possible to configure a fallback, if retrieving
+ content from the primary ContentProvider fails because of timeouts, exceptions or HTTP server errors.
+
+ ```java
+     final Page page = consistsOf(
+             fragment(X,
+                     withSingle(
+                            contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
+                                    fallbackTo(staticTextContent(position, "<p>Some Fallback Content</p>"))
                             )
-                    )
-            );
+                     )
+             )
+     );
 
-```
+ ```
 
-The `fallbackTo` methods accepts all kinds of ContentProviders. The following example is falling back to a different
-service, using a differently configured ServiceClient:
+ The `fallbackTo` methods accepts all kinds of ContentProviders. The following example is falling back to a different
+ service, using a differently configured ServiceClient:
 
-```java
-            ...
-                    contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
-                            fallbackTo(contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN))
-                    )
-            ...
+ ```java
+     ...
+             contentFrom(serviceClient, "http://example.com/someContent", TEXT_PLAIN,
+                     fallbackTo(contentFrom(fallbackClient, "http://example.com/someFallbackContent", TEXT_PLAIN))
+             )
+     ...
 
-```
+ ```
 
-### Fetching the first content that is not empty:
+### More Examples
 
-            // Specify what to fetch:
-            final Page page = consistsOf(
-                    fragment(X, withFirst(of(
-                            contentFrom(serviceClient, "http://example.com/someContent", "text/html"),
-                            contentFrom(serviceClient, "http://example.com/someOtherContent", "text/html"))
-                    )
-            ));
-
-            // Fetch contents of the page:
-            final Contents result = page.fetchWith(emptyParameters());
-
-### Fetch contents using the results of an initial call to a microservice:
-
-            final Page page = consistsOf(
-                    fragment(
-                            X,
-                            withSingle(contentFrom(serviceClient, "http://example.com/someContent", "text/plain")),
-                            followedBy(
-                                    (final Content content) -> parameters(of("param", content.getBody())),
-                                    fragment(
-                                            Y,
-                                            withSingle(contentFrom(serviceClient, fromTemplate("http://example.com/someOtherContent{?param}"), TEXT_PLAIN))
-                                    ),
-                                    fragment(
-                                            Z,
-                                            withSingle(contentFrom(serviceClient, fromTemplate("http://example.com/someDifferentContent{?param}"), TEXT_PLAIN))
-                                    )
-                            )
-                    )
-            );
+...about how to use `rx-composer` can be found in the [user guide](./doc/USERGUIDE.md).
 
 ## Features
 
@@ -147,15 +146,15 @@ The `docs` folder contains some documentation about the project:
 1. **Change Log:** Information about the lasted changes, release notes, and so on can be found in the
 [change log](CHANGELOG.md).
 
-2. **Getting Started:** The [Getting Started](./docs/GETTINGSTARTED.md) guide contains information about how to include
+2. **Getting Started:** The [Getting Started](./doc/GETTINGSTARTED.md) guide contains information about how to include
 rx-composer into your project, about build it, and so on.
 
 3. **Examples:** A working example is also contained in this project. It consists of two Spring Boot server modules and
-is described [here](./docs/EXAMPLES.md).
+is described [here](./doc/EXAMPLES.md).
 
-4. **User Guide:** If you are looking for some deeper insights, the [User Guide](./docs/USERGUIDE.md) might be the
+4. **User Guide:** If you are looking for some deeper insights, the [User Guide](./doc/USERGUIDE.md) might be the
 right place to look.
 
-5. **Contributing:** You would like to contribute? Great! Please have a look [here](./docs/CONTRIBUTING.md) for
+5. **Contributing:** You would like to contribute? Great! Please have a look [here](./doc/CONTRIBUTING.md) for
 information about how to do it.
 
