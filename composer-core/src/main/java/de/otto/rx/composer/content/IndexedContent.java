@@ -94,6 +94,16 @@ public final class IndexedContent implements Content {
         return content.getCompletedTs();
     }
 
+    @Override
+    public long getAvgRuntime() {
+        return content.getAvgRuntime();
+    }
+
+    @Override
+    public long getTotalRuntime() {
+        return content.getTotalRuntime();
+    }
+
     /**
      * Returns whether or not this instance is a composite, withAll of more than one valid contents.
      *
@@ -112,6 +122,25 @@ public final class IndexedContent implements Content {
     @Override
     public SingleContent asSingle() {
         return content.asSingle();
+    }
+
+    /**
+     * @return true, if the content is an error content, false otherwise.
+     */
+    @Override
+    public boolean isErrorContent() {
+        return content.isErrorContent();
+    }
+
+    /**
+     * If this content is an {@link #isErrorContent()}  error content}, {@link ErrorContent} is returned.
+     *
+     * @return ErrorContent
+     * @throws IllegalStateException if this is not an error content.
+     */
+    @Override
+    public ErrorContent asErrorContent() {
+        return content.asErrorContent();
     }
 
     public int getIndex() {

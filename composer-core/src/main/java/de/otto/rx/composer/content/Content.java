@@ -85,6 +85,24 @@ public interface Content {
     }
 
     /**
+     *
+     * @return true, if the content is an error content, false otherwise.
+     */
+    default boolean isErrorContent() {
+        return false;
+    }
+
+    /**
+     * If this content is an {@link #isErrorContent()}  error content}, {@link ErrorContent} is returned.
+     *
+     * @return ErrorContent
+     * @throws IllegalStateException if this is not an error content.
+     */
+    default ErrorContent asErrorContent() {
+        throw new IllegalArgumentException("Not an ErrorContent");
+    }
+
+    /**
      * Returns whether or not this instance is a composite, withAll of more than one valid contents.
      *
      * @return boolean
@@ -95,6 +113,7 @@ public interface Content {
 
     /**
      * If this content is a {@link #isComposite() composite}, a {@link CompositeContent} is returned.
+     *
      * @return CompositeContent
      * @throws IllegalStateException if this is not a composite content.
      */

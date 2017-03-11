@@ -4,7 +4,6 @@ import com.damnhandy.uri.template.UriTemplate;
 import de.otto.rx.composer.client.ClientConfig;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.HttpContent;
 import de.otto.rx.composer.content.Parameters;
 import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.tracer.TraceEvent;
@@ -19,6 +18,7 @@ import java.util.Arrays;
 
 import static com.damnhandy.uri.template.UriTemplate.fromTemplate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static de.otto.rx.composer.content.HttpContent.httpContent;
 import static de.otto.rx.composer.tracer.TraceEvent.*;
 import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
 import static javax.ws.rs.core.MediaType.valueOf;
@@ -101,7 +101,7 @@ final class HttpContentProvider implements ContentProvider {
                     }
                 })
                 .map(response -> {
-                    final Content content = new HttpContent(url, position, response, traceEvent.getTimestamp());
+                    final Content content = httpContent(url, position, response, traceEvent.getTimestamp());
                     tracer.trace(fragmentCompleted(position, url, content.isAvailable()));
                     return content;
                 });

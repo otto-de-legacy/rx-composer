@@ -5,7 +5,10 @@ import de.otto.rx.composer.page.Page;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
 
+import static de.otto.rx.composer.content.ErrorContent.errorContent;
+import static de.otto.rx.composer.content.ErrorContent.httpErrorContent;
 import static de.otto.rx.composer.content.Headers.of;
+import static java.lang.String.format;
 
 public final class HttpContent extends SingleContent {
 
@@ -24,16 +27,52 @@ public final class HttpContent extends SingleContent {
      * @param position The content position inside of the {@link Page}.
      * @param response The HTTP response returned from a different (micro)service.
      */
-    public HttpContent(final String source,
-                       final Position position,
-                       final Response response,
-                       final long startedTs) {
+    private HttpContent(final String source,
+                        final Position position,
+                        final Response response,
+                        final long startedTs) {
         this.source = source;
         this.position = position;
         this.body = response.readEntity(String.class);
         this.available = response.getStatus() < 300 && body != null && !body.isEmpty();
         this.headers = of(response.getStringHeaders());
         this.startedTs = startedTs;
+    }
+
+    /**
+     * Create a Content element, representing {@link Content} retrieved from a (micro)service.
+     * <p>
+     *     Depending on the HTTP response status, an ErrorContent or HttpContent instance is created.
+     * </p>
+     *
+     * @param source The URI of the requested service
+     * @param position The content position inside of the {@link Page}.
+     * @param response The HTTP response returned from a different (micro)service.
+     */
+    public static Content httpContent(final String source,
+                                      final Position position,
+                                      final Response response,
+                                      final long startedTs) {
+        final Content content;
+        switch (response.getStatusInfo().getFamily()) {
+            case CLIENT_ERROR:
+            case SERVER_ERROR:
+                content = httpErrorContent(source, position, response, startedTs);
+                break;
+            case OTHER:
+            case INFORMATIONAL:
+            case REDIRECTION:
+                content = errorContent(
+                        source,
+                        position,
+                        format("Unexpected HTTP response code %s: %s", response.getStatusInfo().getStatusCode(), response.getStatusInfo().getReasonPhrase()),
+                        startedTs);
+                break;
+            default:
+                content = new HttpContent(source, position, response, startedTs);
+                break;
+        }
+        return content;
     }
 
     /**
