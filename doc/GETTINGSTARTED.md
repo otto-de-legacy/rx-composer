@@ -31,7 +31,7 @@ In order to use these libraries, you have to add them as a compile time dependen
 
 ```
  dependencies {
-     compile("de.otto.rx-composer:composer-core:1.0.0.M1-SNAPSHOT")
+     compile("de.otto.rx-composer:composer-core:1.0.0.M1")
  }
 ```
 
@@ -39,8 +39,8 @@ or
 
 ```
  dependencies {
-     compile("de.otto.rx-composer:composer-core:1.0.0.M1-SNAPSHOT")
-     compile("de.otto.rx-composer:composer-thymeleaf:1.0.0.M1-SNAPSHOT")
+     compile("de.otto.rx-composer:composer-core:1.0.0.M1")
+     compile("de.otto.rx-composer:composer-thymeleaf:1.0.0.M1")
  }
 ```
 
