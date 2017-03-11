@@ -137,4 +137,13 @@ public final class CompositeContent implements Content {
         return contents;
     }
 
+    @Override
+    public String toString() {
+        return "CompositeContent{" +
+                "startedTs=" + startedTs +
+                ", completedTs=" + completedTs +
+                ", headers=" + headers +
+                ", contents=" + contents +
+                '}';
+    }
 }

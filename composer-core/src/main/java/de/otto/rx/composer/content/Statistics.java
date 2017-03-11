@@ -117,7 +117,7 @@ public class Statistics {
 
     public static class StatsBuilder {
         public long sumNonEmptyMillis = 0;
-        public long startedTs = currentTimeMillis();
+        public long startedTs = 0;
         public int numRequested = 0;
         public int numEmpty = 0;
         public int numErrors = 0;

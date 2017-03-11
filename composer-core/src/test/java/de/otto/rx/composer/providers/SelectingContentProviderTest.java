@@ -9,10 +9,12 @@ import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
+import static de.otto.rx.composer.content.AbcPosition.Y;
 import static de.otto.rx.composer.content.Headers.emptyHeaders;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.providers.ContentProviders.withAll;
+import static de.otto.rx.composer.providers.ContentProviders.withAllMatching;
 import static de.otto.rx.composer.providers.ContentProviders.withFirst;
 import static de.otto.rx.composer.providers.ContentProviders.withFirstMatching;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
@@ -43,6 +45,35 @@ public class SelectingContentProviderTest {
     }
 
     @Test
+    public void shouldFetchFirstMatchingPredicate() {
+        // given
+        final ContentProvider contentProvider = withFirstMatching(
+                (content) -> content.getBody().contains("a"),
+                of(
+                        (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                        (position, context, parameters) -> just(staticTextContent("", X, "Bar"))
+                )
+        );
+        // when
+        final Observable<Content> result =  contentProvider.getContent(X, noOpTracer(), emptyParameters());
+        // then
+        final Content content = result.toBlocking().single();
+        assertThat(content.getBody(), is("Bar"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailToFetchAllWithDifferentPosition() {
+        // given
+        final Tracer tracer = noOpTracer();
+        final ContentProvider contentProvider = withAll(of(
+                (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                (position, context, parameters) -> just(staticTextContent("", Y, "Bar"))
+        ));
+        // when
+        contentProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
+    }
+
+    @Test
     public void shouldFetchAllWithContent() {
         // given
         final Tracer tracer = noOpTracer();
@@ -58,12 +89,28 @@ public class SelectingContentProviderTest {
         assertThat(content.getBody(), is("FooBar"));
     }
 
-    @Test
-    public void shouldFetchFirstMatchingPredicate() {
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldFailToFetchAllMatchingPredicateButDifferentPosition() {
         // given
-        final ContentProvider contentProvider = withFirstMatching(
-                (content) -> content.getBody().contains("a"),
+        final Tracer tracer = noOpTracer();
+        final ContentProvider contentProvider = withAllMatching(
+                (content) -> content.getBody().matches("Foo"),
                 of(
+                        (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
+                        (position, context, parameters) -> just(staticTextContent("", Y, "Foo"))
+                )
+        );
+        // when
+        contentProvider.getContent(X, tracer, emptyParameters()).toBlocking().single();
+    }
+
+    @Test
+    public void shouldFetchAllMatchingPredicate() {
+        // given
+        final ContentProvider contentProvider = withAllMatching(
+                (content) -> content.getBody().matches("Foo"),
+                of(
+                        (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
                         (position, context, parameters) -> just(staticTextContent("", X, "Foo")),
                         (position, context, parameters) -> just(staticTextContent("", X, "Bar"))
                 )
@@ -71,8 +118,9 @@ public class SelectingContentProviderTest {
         // when
         final Observable<Content> result =  contentProvider.getContent(X, noOpTracer(), emptyParameters());
         // then
-        final Content content = result.toBlocking().single();
-        assertThat(content.getBody(), is("Bar"));
+        final Iterator<Content> content = result.toBlocking().getIterator();
+        assertThat(content.next().getBody(), is("FooFoo"));
+        assertThat(content.hasNext(), is(false));
     }
 
     @Test

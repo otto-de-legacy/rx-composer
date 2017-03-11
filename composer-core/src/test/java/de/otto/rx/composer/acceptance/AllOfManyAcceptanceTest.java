@@ -60,9 +60,9 @@ public class AllOfManyAcceptanceTest {
 
         try (final ServiceClient serviceClient = noRetriesClient()) {
             final Page page = consistsOf(
-                    fragment(X, withAll(of(
+                    fragment(X, withAll(
                             contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_PLAIN),
-                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN))
+                            contentFrom(serviceClient, driver.getBaseUrl() + "/someOtherContent", TEXT_PLAIN)
                     )
             ));
 

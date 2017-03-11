@@ -63,4 +63,13 @@ public class StaticTextContent extends SingleContent {
     public long getCompletedTs() {
         return 0L;
     }
+
+    @Override
+    public String toString() {
+        return "StaticTextContent{" +
+                "source='" + source + '\'' +
+                ", text='" + text + '\'' +
+                ", position=" + position +
+                '}';
+    }
 }

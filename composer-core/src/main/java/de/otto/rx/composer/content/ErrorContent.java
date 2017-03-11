@@ -252,4 +252,17 @@ public final class ErrorContent extends SingleContent {
     public Optional<Throwable> getThrowable() {
         return Optional.ofNullable(e);
     }
+
+    @Override
+    public String toString() {
+        return "ErrorContent{" +
+                "source='" + source + '\'' +
+                ", errorSource=" + errorSource +
+                ", position=" + position +
+                ", e=" + e +
+                ", errorReason='" + errorReason + '\'' +
+                ", startedTs=" + startedTs +
+                ", completedTs=" + completedTs +
+                '}';
+    }
 }

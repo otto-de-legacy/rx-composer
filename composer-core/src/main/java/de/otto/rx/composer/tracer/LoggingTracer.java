@@ -50,7 +50,6 @@ public final class LoggingTracer implements Tracer {
         this.defaultLogLevel = defaultLogLevel;
         this.errorLogLevel = errorLogLevel;
         this.delegate = delegate;
-        trace("STARTED fetching page");
     }
 
     public void trace(final TraceEvent event) {
@@ -67,7 +66,7 @@ public final class LoggingTracer implements Tracer {
                 if (event.getSource().isEmpty()) {
                     error("ERROR fetching content for position: {}", event.getPosition().name());
                 } else {
-                    error("ERROR fetching content {} for position {}: {}", event.getSource(), event.getPosition().name(), event.getErrorMessage());
+                    error("ERROR fetching content for position {} from {}: {}", event.getPosition().name(), event.getSource(), event.getErrorMessage());
                 }
                 break;
             case STARTED:

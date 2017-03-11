@@ -264,6 +264,10 @@ public final class ContentProviders {
      * Fetch contents from all the given providers for a single position. The {@link Content} returned by this
      * provider is a composite Content, consisting of all single Contents from the providers in the same order as
      * specified.
+     * <p>
+     *     All ContentProviders must provide content for the same position, otherwise fetching the contents will
+     *     fail with an IllegalArgumentException!
+     * </p>
      *
      * @param contentProviders the providers used to generate the composite Content. The ordering of the content
      *                         providers is used to order the composite contents.
@@ -281,13 +285,18 @@ public final class ContentProviders {
      * Fetch all contents matching the given predicate from all the given providers for a single position.
      * The {@link Content} returned by this provider is a composite Content, consisting of all single Contents
      * from the providers in the same order as specified.
+     * <p>
+     *     All ContentProviders must provide content for the same position, otherwise fetching the contents will
+     *     fail with an IllegalArgumentException!
+     * </p>
      *
      * @param predicate the predicate used to match the contents
      * @param contentProviders the providers used to generate the composite Content. The ordering of the content
      *                         providers is used to order the composite contents.
      * @return ContentProvider
      */
-    public static ContentProvider withAllMatching(final Predicate<Content> predicate, final ImmutableList<ContentProvider> contentProviders) {
+    public static ContentProvider withAllMatching(final Predicate<Content> predicate,
+                                                  final ImmutableList<ContentProvider> contentProviders) {
         return new SelectingContentProvider(
                 contentProviders,
                 contentMatcher(predicate.and(Content::isAvailable), "No content available"),

@@ -23,16 +23,6 @@ public class Collectors {
         );
     }
 
-    public static <T> Collector<T, ?, ImmutableSet<T>> toImmutableSet() {
-        return of(
-                ImmutableSet::<T>builder,
-                ImmutableSet.Builder::add,
-                (builder1, builder2) -> builder1.addAll(builder2.build()),
-                ImmutableSet.Builder::build,
-                UNORDERED
-        );
-    }
-
     public static <T, K, V> Collector<T, ImmutableMap.Builder<K, V>, ImmutableMap<K, V>> toImmutableMap(
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -43,13 +33,4 @@ public class Collectors {
                 ImmutableMap.Builder::build);
     }
 
-    public static <T, K, V> Collector<T, LinkedHashMap<K, V>, LinkedHashMap<K, V>> toLinkedMap(
-            Function<? super T, ? extends K> keyMapper,
-            Function<? super T, ? extends V> valueMapper) {
-        return of(
-                LinkedHashMap<K, V>::new,
-                (map, t) -> {map.put(keyMapper.apply(t), valueMapper.apply(t));},
-                (map1, map2) -> {map1.putAll(map2); return map1;}
-        );
-    }
 }

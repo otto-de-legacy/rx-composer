@@ -93,4 +93,12 @@ public final class MissingContent extends SingleContent {
         return completedTs;
     }
 
+    @Override
+    public String toString() {
+        return "MissingContent{" +
+                "position=" + position +
+                ", startedTs=" + startedTs +
+                ", completedTs=" + completedTs +
+                '}';
+    }
 }

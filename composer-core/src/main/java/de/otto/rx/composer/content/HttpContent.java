@@ -150,25 +150,6 @@ public final class HttpContent extends SingleContent {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HttpContent that = (HttpContent) o;
-        return available == that.available &&
-                startedTs == that.startedTs &&
-                completedTs == that.completedTs &&
-                Objects.equals(source, that.source) &&
-                Objects.equals(position, that.position) &&
-                Objects.equals(body, that.body) &&
-                Objects.equals(headers, that.headers);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(source, position, body, headers, available, startedTs, completedTs);
-    }
-
-    @Override
     public String toString() {
         return "HttpContent{" +
                 "source='" + source + '\'' +
