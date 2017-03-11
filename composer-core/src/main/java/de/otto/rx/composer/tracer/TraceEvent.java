@@ -29,7 +29,8 @@ public final class TraceEvent {
         this.errorMessage = errorMessage;
     }
 
-    public static TraceEvent fragmentStarted(final Position position, final String source) {
+    public static TraceEvent fragmentStarted(final Position position,
+                                             final String source) {
         return new TraceEvent(STARTED, position, source, false, "");
     }
 
@@ -37,23 +38,32 @@ public final class TraceEvent {
         return new TraceEvent(FALLBACK_STARTED, position, "", false, "");
     }
 
-    public static TraceEvent fragmentCompleted(final Position position, final String source, final boolean available) {
+    public static TraceEvent fragmentCompleted(final Position position,
+                                               final String source,
+                                               final boolean available) {
         return new TraceEvent(COMPLETED, position, source, available, "");
     }
 
-    public static TraceEvent fallbackFragmentCompleted(final Position position, final String source, final boolean available) {
+    public static TraceEvent fallbackFragmentCompleted(final Position position,
+                                                       final String source,
+                                                       final boolean available) {
         return new TraceEvent(FALLBACK_COMPLETED, position, source, available, "");
     }
 
-    public static TraceEvent error(final Position position, final String source, final String reason) {
+    public static TraceEvent error(final Position position,
+                                   final String source,
+                                   final String reason) {
         return new TraceEvent(ERROR, position, source, false, reason);
     }
 
-    public static TraceEvent exception(final Position position, final Throwable t) {
+    public static TraceEvent exception(final Position position,
+                                       final Throwable t) {
         return new TraceEvent(ERROR, position, "", false, t.getMessage());
     }
 
-    public static TraceEvent exception(final Position position, final String source, final Throwable t) {
+    public static TraceEvent exception(final Position position,
+                                       final String source,
+                                       final Throwable t) {
         return new TraceEvent(ERROR, position, source, false, t.getMessage());
     }
 
