@@ -43,7 +43,7 @@ public class PageConfiguration {
     @PostConstruct
     public void init() {
         clients = serviceClients(
-                singleRetry(introService, 5000, 1000),
+                singleRetry(introService, 5000, 2000),
                 singleRetry(helloService, 5000, 500),
                 noResiliency(somethingElseService, 5000, 400),
                 singleRetry(serviceC, 5000, 1000),

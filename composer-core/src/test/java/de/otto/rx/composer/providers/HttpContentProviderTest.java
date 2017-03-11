@@ -17,7 +17,9 @@ import static com.google.common.collect.ImmutableMap.of;
 import static de.otto.rx.composer.content.AbcPosition.X;
 import static de.otto.rx.composer.content.Parameters.emptyParameters;
 import static de.otto.rx.composer.content.Parameters.parameters;
+import static de.otto.rx.composer.content.StaticTextContent.staticTextContent;
 import static de.otto.rx.composer.providers.ContentProviders.contentFrom;
+import static de.otto.rx.composer.providers.ContentProviders.fallbackTo;
 import static de.otto.rx.composer.tracer.NoOpTracer.noOpTracer;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
@@ -86,6 +88,24 @@ public class HttpContentProviderTest {
     }
 
     @Test
+    public void shouldExecuteFallbackOnServerError() {
+        // given
+        final Response response = someResponse(500, "Very Bad");
+        final ServiceClient mockClient = someResilientHttpClient(response, "/test");
+        // when
+        final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN,
+                fallbackTo(staticTextContent("test", X, "Some Alternative Facts"))
+        );
+        final BlockingObservable<Content> content = contentProvider
+                .getContent(X, noOpTracer(), emptyParameters())
+                .toBlocking();
+        // then
+        verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
+        assertThat(content.first().getBody(), is("Some Alternative Facts"));
+    }
+
+
+    @Test
     public void shouldReturnEmptyContentOnHttpClientError() {
         // given
         final Response response = someResponse(404, "Not Found");
@@ -96,6 +116,23 @@ public class HttpContentProviderTest {
         // then
         verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
         assertThat(content.getIterator().hasNext(), is(false));
+    }
+
+    @Test
+    public void shouldExecuteFallbackOnClientError() {
+        // given
+        final Response response = someResponse(404, "Not Found");
+        final ServiceClient mockClient = someResilientHttpClient(response, "/test");
+        // when
+        final ContentProvider contentProvider = contentFrom(mockClient, "/test", TEXT_PLAIN,
+                fallbackTo(staticTextContent("test", X, "Some Fallback"))
+        );
+        final BlockingObservable<Content> content = contentProvider
+                .getContent(X, noOpTracer(), emptyParameters())
+                .toBlocking();
+        // then
+        verify(mockClient).get("/test", TEXT_PLAIN_TYPE);
+        assertThat(content.first().getBody(), is("Some Fallback"));
     }
 
     @Test(expected = RuntimeException.class)
@@ -130,6 +167,13 @@ public class HttpContentProviderTest {
         when(response.getStatus()).thenReturn(status);
         when(response.getStatusInfo()).thenReturn(Statuses.from(status));
         return response;
+    }
+
+    private ServiceClient someResilientHttpClient(final Response response, final String uri) {
+        final HttpServiceClient mockClient = mock(HttpServiceClient.class);
+        when(mockClient.get(uri, TEXT_PLAIN_TYPE)).thenReturn(just(response));
+        when(mockClient.getClientConfig()).thenReturn(ClientConfig.noRetries());
+        return mockClient;
     }
 
     private ServiceClient someHttpClient(final Response response, final String uri) {

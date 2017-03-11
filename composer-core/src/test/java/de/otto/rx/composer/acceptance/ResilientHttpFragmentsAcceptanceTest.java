@@ -3,7 +3,9 @@ package de.otto.rx.composer.acceptance;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import de.otto.rx.composer.client.ServiceClient;
 import de.otto.rx.composer.client.ServiceClients;
-import de.otto.rx.composer.content.*;
+import de.otto.rx.composer.content.Content;
+import de.otto.rx.composer.content.Contents;
+import de.otto.rx.composer.content.Position;
 import de.otto.rx.composer.page.Page;
 import org.junit.Before;
 import org.junit.Rule;
@@ -191,7 +193,35 @@ public class ResilientHttpFragmentsAcceptanceTest {
     }
 
     @Test
-    public void shouldFallbackOnHttpError() throws Exception {
+    public void shouldFallbackOnHttpClientError() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someErrorContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain").withStatus(400));
+        driver.addExpectation(
+                onRequestTo("/someFallbackContent").withMethod(GET),
+                giveResponse("Fallback Content", "text/plain").withStatus(200));
+
+        try (final ServiceClients clients = defaultClients()) {
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(clients.getBy(singleRetry), driver.getBaseUrl() + "/someErrorContent", TEXT_PLAIN,
+                                            fallbackTo(contentFrom(clients.getBy(noRetries), driver.getBaseUrl() + "/someFallbackContent", TEXT_PLAIN))
+                                    )
+                            )
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).isAvailable(), is(true));
+            assertThat(result.get(X).getBody(), is("Fallback Content"));
+        }
+    }
+
+    @Test
+    public void shouldFallbackOnHttpServerError() throws Exception {
         // given
         driver.addExpectation(
                 onRequestTo("/someErrorContent").withMethod(GET),
@@ -269,6 +299,55 @@ public class ResilientHttpFragmentsAcceptanceTest {
             assertThat(result.getAll(), hasSize(1));
             assertThat(result.get(X).isAvailable(), is(true));
             assertThat(result.get(X).getBody(), is("Some Content"));
+        }
+    }
+
+    @Test
+    public void shouldRetryOnServerError() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Server Error", "text/plain").withStatus(500));
+
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Some Content", "text/plain").withStatus(200));
+
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someFlakyContent", TEXT_PLAIN)
+                            )
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
+            assertThat(result.getAll(), hasSize(1));
+            assertThat(result.get(X).isAvailable(), is(true));
+            assertThat(result.get(X).getBody(), is("Some Content"));
+        }
+    }
+
+    @Test
+    public void shouldNotRetryOnClientError() throws Exception {
+        // given
+        driver.addExpectation(
+                onRequestTo("/someFlakyContent").withMethod(GET),
+                giveResponse("Client Error", "text/plain").withStatus(400));
+
+        try (final ServiceClient serviceClient = singleRetryClient()) {
+            final Page page = consistsOf(
+                    fragment(X,
+                            withSingle(
+                                    contentFrom(serviceClient, driver.getBaseUrl() + "/someFlakyContent", TEXT_PLAIN)
+                            )
+                    )
+            );
+
+            final Contents result = page.fetchWith(emptyParameters(), loggingStatisticsTracer());
+            assertThat(result.getAll(), hasSize(0));
+            assertThat(result.get(X).isAvailable(), is(false));
         }
     }
 

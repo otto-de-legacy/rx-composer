@@ -88,30 +88,54 @@ final class HttpContentProvider implements ContentProvider {
                 .get(url, accept)
                 .subscribeOn(Schedulers.io())
                 .doOnNext(response -> {
-
                     if (response.getStatusInfo().getFamily() == SERVER_ERROR) {
                         /*
                         Throw Exception so the circuit breaker is able to open the circuit,
                         retry execution or return the fallback value.
                         Don't do this for CLIENT_ERRORS as this is unlikely to be helpful in
-                        most situations.
-                         */
+                        most situations:
+                            1. a non-existing ressource will most likely also be unavailable in the second try
+                            2. throwing an exception might forse the circuit breaker to open. This will have
+                             a bad effect not only on the requested resource, but also on all other resource served
+                             by the service!
+                        */
                         tracer.trace(error(position, url, "HTTP Server Error: " + response.getStatusInfo().toString()));
                         throw new ServerErrorException(response);
                     }
                 })
                 .map(response -> {
                     final Content content = httpContent(url, position, response, traceEvent.getTimestamp());
-                    tracer.trace(fragmentCompleted(position, url, content.isAvailable()));
+                    if (content.isErrorContent()) {
+                        tracer.trace(error(position, url, content.asErrorContent().getErrorReason()));
+                    } else {
+                        tracer.trace(fragmentCompleted(position, url, content.isAvailable()));
+                    }
                     return content;
+                })
+                .flatMap(content -> {
+                    if (content.isErrorContent()) {
+                        if (fallback != null) {
+                            // TODO: make it configurable whether or not to call the fallback on client errors...
+                            // It has a performance impact to call the fallback; sometimes it would be better to
+                            // use ContentProviders.withFirst() instead of a fallback.
+                            return fallback.getContent(position, tracer, parameters);
+                        }
+                    }
+                    return Observable.just(content);
                 });
+
 
         final ClientConfig clientConfig = serviceClient.getClientConfig();
 
         if (clientConfig.isResilient()) {
             final Observable<Content> observable;
                 observable = HystrixObservableContent.from(
-                        contentObservable.retry(clientConfig.getRetries()),
+                        contentObservable.retry(
+                                (retryCount, throwable) -> {
+                                    final boolean retry = retryCount <= clientConfig.getRetries() && throwable instanceof ServerErrorException;
+                                    LOG.warn("Retrying to fetch content for {} from {}", position, url);
+                                    return retry;
+                                }),
                         getFallbackObservable(position, tracer, parameters),
                         clientConfig.getRef(), clientConfig.getReadTimeout());
             return observable
