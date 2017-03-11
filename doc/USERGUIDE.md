@@ -247,7 +247,7 @@ delayed until some client is subscribing to the result later: in our case, when 
 The `rx-composer` library is already containing a number of providers. The `ContentProviders` factory contains a
 number of factory methods, to build these providers:
 
-**HttpContentProvider**
+#### HttpContentProvider
 
 This is the most important provider. It is accessing remote services using HTTP to GET content using a service-client.
 It can be created using the following factory methods.
@@ -315,55 +315,17 @@ following is equivalent to the above example:
     );
 ```
 
-**Fallbacks**
+> In addition to these methods, the `ContentProviders` class also provides a number of methods that do accept a
+> *fallback provider* in addition to the primary `ContentProvider`. Please have a look at
+> section [Resiliency](#resiliency) for more information.
 
-The fallbacks expected by the above methods can be all kind of ContentProviders: not only providers accessing other
-microservices, but also others, that simply return static content or some cached entries from the last successful
-request. Again, we have some semantic sugar to improve readability:
+#### SelectingContentProvider
 
-```java
-    final ServiceClient cli = singleRetryClient();
+*TODO*
 
-    final Page page = consistsOf(
-         fragment(
-                X,
-                withSingle(
-                    contentFrom(cli, "http://example.com/someContent", "*/*",
-                    fallbackTo(
-                        contentFrom(cli, "http://example.com/someOtherContent", "*/*")
-                    )
-                ))),
-         fragment(Y,
-                ...
-    );
-```
+#### QuickestWinsContentProvider
 
-Instead of using a ContentProvider as a fallback, you can also fall back to an `Observable<Content>` or directly
-to a `Content` instance:
-
-```java
-    ...
-        fallbackTo(
-            fetchFromMemcached("some-fallback-key")
-        )
-    ...
-
-    public Observable<Content> fetchFromMemcached(final String cacheKey) {
-        ...
-    )
-```
-
-or using some existing Content instance:
-
-```java
-        fallbackTo(
-            staticTextContent(              // class StaticTextContent implements Content
-                "static error message",
-                position,
-                "<strong>Sorry, something went wrong...</strong>"
-            )
-        )
-```
+*TODO*
 
 ### Content
 
@@ -413,9 +375,90 @@ defaults like this:
 
 *TODO*
 
-### Fallbacks
+### Timeouts
 
 *TODO*
+
+### Retries
+
+*TODO*
+
+### Fallbacks
+
+A fallback is an alternative `ContentProvider` that is used, if some service is responding with an HTTP server or
+client error, or if an exception is thrown by the `ContentProvider`.
+
+> **Caution:** Please note, that a fallback is executed *after* some error occured. This will lead to longer response
+  times for your page, especially if combined with retries, of if the fallback is using retries and/or fallbacks
+  itself!
+
+#### ContentProviders with Fallbacks
+
+The fallbacks expected by the above methods can be all kind of ContentProviders: not only providers accessing other
+microservices, but also others, that simply return static content or some cached entries from the last successful
+request. Again, we have some semantic sugar to improve readability:
+
+```java
+    final ServiceClient cli = singleRetryClient();
+
+    final Page page = consistsOf(
+         fragment(
+                X,
+                withSingle(
+                    contentFrom(cli, "http://example.com/someContent", "*/*",
+                    fallbackTo(
+                        contentFrom(cli, "http://example.com/someOtherContent", "*/*")
+                    )
+                ))),
+         fragment(Y,
+                ...
+    );
+```
+
+Instead of using a ContentProvider as a fallback, you can also fall back to an `Observable<Content>` or directly
+to a `Content` instance:
+
+```java
+    ...
+        fallbackTo(
+            fetchFromMemcached("some-fallback-key")
+        )
+    ...
+
+    public Observable<Content> fetchFromMemcached(final String cacheKey) {
+        ...
+    )
+```
+
+or using some existing Content instance:
+
+```java
+        fallbackTo(
+            staticTextContent(              // class StaticTextContent implements Content
+                "static error message",
+                position,
+                "<strong>Sorry, something went wrong...</strong>"
+            )
+        )
+```
+
+#### Using SelectingContentProvider for Fallbacks
+
+*TODO*
+ContentProviders.withFirst() is selecting the first non-empty `Content`. Basically, this is a different way to
+use fallbacks... But: while fallbacks are executed sequentially, the SelectingContentProvider is fetching content in
+parallel. The advantage is obviously better response time in case of a fallback - but the downsides are a more complex
+Page configuration and much more load for the microservices. Advice: use fallbacks, if things should go ok most of the
+time; use SelectingContentProvider if the primary service is regularly unable to provide the requested content.
+*/TODO*
+
+### CircuitBreaker
+
+*TODO*
+Fail-Fast
+Fail-Fast only for exceptions and server errors (HTTP 5xx). No Circuit-Breaking for HTTP 400! Prefer
+Contents.withFirst() over fallbacks
+*/TODO*
 
 ## Example Use-Cases
 
