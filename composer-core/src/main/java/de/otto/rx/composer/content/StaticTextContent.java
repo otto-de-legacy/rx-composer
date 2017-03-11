@@ -10,19 +10,17 @@ public class StaticTextContent extends SingleContent {
     private final String text;
     private final Position position;
 
-    public StaticTextContent(final Position position,
-                             final String text) {
-        this.source = "Static Text";
-        this.position = position;
-        this.text = text;
-    }
-
     private StaticTextContent(final String source,
                               final Position position,
                               final String text) {
         this.source = source;
         this.position = position;
         this.text = text;
+    }
+
+    public static StaticTextContent staticTextContent(final Position position,
+                                                      final String text) {
+        return new StaticTextContent("Static Text", position, text);
     }
 
     public static StaticTextContent staticTextContent(final String source,

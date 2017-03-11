@@ -119,7 +119,7 @@ service, using a differently configured ServiceClient:
                             )
                     )
             );
-            
+
 ## Features
 
 _TODO_
@@ -128,7 +128,7 @@ _TODO_
 
 _TODO_
 
-### Asynchronous composition of Pages
+### Asynchronous Execution
 
 _TODO_
 
@@ -139,3 +139,23 @@ _TODO_
 ### Tracing and Debugging
 
 _TODO_
+
+## Documentation
+
+The `docs` folder contains some documentation about the project:
+
+1. **Change Log:** Information about the lasted changes, release notes, and so on can be found in the
+[change log](CHANGELOG.md).
+
+2. **Getting Started:** The [Getting Started](./docs/GETTINGSTARTED.md) guide contains information about how to include
+rx-composer into your project, about build it, and so on.
+
+3. **Examples:** A working example is also contained in this project. It consists of two Spring Boot server modules and
+is described [here](./docs/EXAMPLES.md).
+
+4. **User Guide:** If you are looking for some deeper insights, the [User Guide](./docs/USERGUIDE.md) might be the
+right place to look.
+
+5. **Contributing:** You would like to contribute? Great! Please have a look [here](./docs/CONTRIBUTING.md) for
+information about how to do it.
+

@@ -48,7 +48,7 @@ Example (with a way too long subject line):
 
 ### Maintain the CHANGELOG.md
 
-Add all noticeable changes to the [CHANGELOG.md](CHANGELOG.md).
+Add all noticeable changes to the [CHANGELOG.md](../CHANGELOG.md).
 To ensure a unified view to the changes please format it as [in this example](https://github.com/skywinder/github-changelog-generator/blob/master/CHANGELOG.md). 
 
 
