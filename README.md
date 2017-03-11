@@ -14,6 +14,11 @@ A DSL for reactive composition of content from different microservices using RxJ
 
 _**Work in Progress**_
 
+* Ready to be tested
+* Not yet performance- and/or load-tested
+* Not yet in production at otto.de
+* Partly documented
+
 ## About
 
 Microservice architectures for web applications are currently at the top of the hype cycle. One of the most
