@@ -19,6 +19,20 @@ _**Work in Progress**_
 * Not yet in production at otto.de
 * Partly documented
 
+## Current Versions
+
+Release: 1.0.0.M1
+>```
+de.otto.rx-composer:composer-core:1.0.0.M1
+de.otto.rx-composer:composer-thymeleaf:1.0.0.M1
+```
+
+Snapshot: 1.0.0.M2-SNAPSHOT
+>```
+de.otto.rx-composer:composer-core:1.0.0.M2-SNAPSHOT
+de.otto.rx-composer:composer-thymeleaf:1.0.0.M2-SNAPSHOT
+```
+
 ## About
 
 Microservice architectures for web applications are currently at the top of the hype cycle. One of the most
