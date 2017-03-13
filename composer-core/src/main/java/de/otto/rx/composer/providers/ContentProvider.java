@@ -28,4 +28,5 @@ public interface ContentProvider {
      * @return Observable emitting nothing, or a single Content item.
      */
     Observable<Content> getContent(final Position position, final Tracer tracer, final Parameters parameters);
+
 }

@@ -3,10 +3,7 @@ package de.otto.rx.composer.providers;
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.collect.ImmutableList;
 import de.otto.rx.composer.client.ServiceClient;
-import de.otto.rx.composer.content.Content;
-import de.otto.rx.composer.content.IndexedContent;
-import de.otto.rx.composer.content.Parameters;
-import de.otto.rx.composer.content.Position;
+import de.otto.rx.composer.content.*;
 import de.otto.rx.composer.tracer.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,6 +185,17 @@ public final class ContentProviders {
      */
     public static ContentProvider withSingle(final ContentProvider contentProvider) {
         return contentProvider;
+    }
+
+    /**
+     * Returns a ContentProvider that is extracting the &lt;body&gt; from a HTML page instead of returning the full
+     * body of the page.
+     *
+     * @param contentProvider the wrapped ContentProvider
+     * @return ContentProvider enriched with HTML body extraction.
+     */
+    public static ContentProvider htmlBodyOf(final ContentProvider contentProvider) {
+        return (position, tracer, parameters) -> contentProvider.getContent(position, tracer, parameters).map(ContentMappers::htmlBody);
     }
 
     /**

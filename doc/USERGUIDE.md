@@ -371,6 +371,41 @@ following is equivalent to the above example:
 
 (non-blocking would be a good idea;)
 
+### 3.4 Extracting Contents
+
+>
+> Available with 1.0.0.M2-SNAPSHOT
+>
+
+By default, the ContentProviders simply return the contents received from the microservices. This will only work, if
+the called services only return HTML fragments, without any <html> or <body> elements.
+
+In many situations, it will be necessary to extract only parts of the returned HTML: for example, only the <body> part
+of a page returned by a microservice.
+
+In order to extract the html body, you can simply wrap a `ContentProvider` by a content mapper:
+
+```java
+    fragment(X, withSingle(
+            htmlBodyOf(
+                    contentFrom(serviceClient, driver.getBaseUrl() + "/someContent", TEXT_HTML)
+            )
+    ))
+```
+
+The static utility function `htmlBodyOf` is implemented by `ContentMappers`. Implementing your own mapper is easy: just
+implement some static method like this:
+
+```java
+    public static ContentProvider myContentMapper(final ContentProvider contentProvider) {
+        return (position, tracer, parameters) -> {
+            return contentProvider
+                    .getContent(position, tracer, parameters)
+                    .map((Content content) -> ... );
+        };
+    }
+```
+
 ## 4. Fetching Contents
 
 ### 4.1 Content
