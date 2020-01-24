@@ -22,13 +22,13 @@ _**Work in Progress**_
 ## Current Versions
 
 Release: 1.0.0.M1
->```
+```
 de.otto.rx-composer:composer-core:1.0.0.M1
 de.otto.rx-composer:composer-thymeleaf:1.0.0.M1
 ```
 
 Snapshot: 1.0.0.M2-SNAPSHOT
->```
+```
 de.otto.rx-composer:composer-core:1.0.0.M2-SNAPSHOT
 de.otto.rx-composer:composer-thymeleaf:1.0.0.M2-SNAPSHOT
 ```
